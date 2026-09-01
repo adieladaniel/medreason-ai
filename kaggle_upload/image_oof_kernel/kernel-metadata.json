@@ -1,0 +1,14 @@
+{
+  "id": "adieladaniel42/medreason-ai-image-oof-val-predictions",
+  "title": "MedReason-AI Image OOF + Val Predictions",
+  "code_file": "image_oof.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["nikeshreddypatlolla/mimic-cxr-dataset", "adieladaniel42/medreason-ai-processed"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

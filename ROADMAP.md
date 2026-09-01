@@ -32,13 +32,29 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ **Text baseline**: `scripts/train_text_baseline.py` — frozen Bio_ClinicalBERT (mean-pooled) + logistic-regression head. Two settings because the labels are partly report-derived (Pneumonia 65% / Cancer 54% / Normal 100% depend on report text): **(A) INDICATION section only** (referring clinician's reason-for-exam, never used in labeling — the honest number) → macro F1 **0.51** (Normal 0.53, Pneumonia 0.69, **Cancer 0.32**); **(B) full report** → macro F1 0.68 but leakage-inflated (not a capability estimate). Leakage analysis: on the ICD-only val subset (report can't leak) A and B are ~equal (0.30 vs 0.33), so B's lead is entirely the report-derived subset. **Text is the best unimodal for the Cancer class** (0.32 vs image 0.17 / blood 0.20). Artifacts + both settings' val probabilities in `experiments/text_baseline/`.
 - **Phase 2 takeaway**: image 0.50 / blood 0.46 / text 0.51 — all similar overall but with different per-class strengths (image→Pneumonia, text→Cancer), i.e. genuinely complementary. Fusion (Phase 3) has an empirical case.
 - ⬜ Consider the cascade approach (Normal vs Abnormal, then Pneumonia vs Cancer) as an alternative framing to help the Cancer class.
-- ⬜ Optional: revisit the still-weak Cancer class (focal loss / oversampling / threshold tuning) — but fusion may address it, so decide after Phase 3's first result.
+- ✅ Cancer-class decision (post-fusion): fusion lifted Cancer F1 0.32 → 0.43 without any
+  special handling. Further gains (focal loss / cascade / threshold tuning) are deferred —
+  not worth the added complexity right now given the improvement; revisit only if final
+  test-set numbers demand it.
 
 ## Phase 3 — Multimodal Fusion
-⬜ Not started
-- Combine image + blood + text embeddings into a single fusion model.
-- Compare fused performance against each unimodal baseline — fusion should be justified empirically, not assumed.
-- Decide fusion strategy (early/late/attention-based) based on what the unimodal results suggest.
+✅ Done (late fusion) — fused val macro F1 **0.61** vs best single modality 0.51 (+0.10)
+- **Late (decision-level) fusion**: stack the three Phase 2 baselines' 3-class probability
+  vectors (9 features) → final label. `scripts/train_fusion.py`.
+- OOF plumbing: `scripts/generate_oof_predictions.py` (blood + text, 5-fold subject-grouped
+  StratifiedGroupKFold) and Kaggle kernel `medreason-ai-image-oof-val-predictions`
+  (image, same folds) produce out-of-fold train predictions so the meta-model isn't fit
+  on the base models' own training rows. Val predictions saved per modality too.
+- Result (val): **logpool (geometric mean) 0.613**, mean-prob 0.600, unweighted logreg
+  stack 0.585, balanced logreg 0.562, hgb stack 0.561. **Parameter-free pooling beats the
+  trained stackers** (only 9 inputs, well-calibrated base probs → trained meta-models
+  overfit / over-correct). Per class: Normal 0.53→0.62, Pneumonia 0.69→0.80,
+  **Cancer 0.32→0.43** (biggest relative lift — the weak class benefits most).
+- Ablation (mean rule): all-three (0.60) > best pair blood+text (0.576) > image+text
+  (0.557) > image+blood (0.493). Text contributes most, image least.
+- Leakage guard: text inputs are Setting A (INDICATION section only), never full-report.
+- Artifacts in `experiments/fusion/`. **Embedding-level / attention fusion not needed** —
+  late fusion already clears the bar comfortably.
 
 ## Phase 4 — Explainability
 ⬜ Not started

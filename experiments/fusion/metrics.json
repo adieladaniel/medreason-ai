@@ -1,0 +1,169 @@
+{
+  "n_train": 11039,
+  "n_val": 2315,
+  "seed": 42,
+  "text_setting": "indication (Setting A, leakage-controlled)",
+  "single_modality_val": {
+    "image": {
+      "macro_f1": 0.4807,
+      "f1_per_class": {
+        "Normal": 0.5609,
+        "Pneumonia": 0.732,
+        "Lung Cancer": 0.1491
+      }
+    },
+    "blood": {
+      "macro_f1": 0.4609,
+      "f1_per_class": {
+        "Normal": 0.453,
+        "Pneumonia": 0.7296,
+        "Lung Cancer": 0.2
+      }
+    },
+    "text": {
+      "macro_f1": 0.5094,
+      "f1_per_class": {
+        "Normal": 0.5251,
+        "Pneumonia": 0.6868,
+        "Lung Cancer": 0.3163
+      }
+    }
+  },
+  "fusion_val": {
+    "fusion / mean_probability": {
+      "macro_f1": 0.5996,
+      "f1_per_class": {
+        "Normal": 0.6098,
+        "Pneumonia": 0.7863,
+        "Lung Cancer": 0.4026
+      },
+      "confusion_matrix": [
+        [
+          436,
+          199,
+          29
+        ],
+        [
+          299,
+          1139,
+          96
+        ],
+        [
+          31,
+          25,
+          61
+        ]
+      ]
+    },
+    "fusion / logpool": {
+      "macro_f1": 0.6133,
+      "f1_per_class": {
+        "Normal": 0.6175,
+        "Pneumonia": 0.7974,
+        "Lung Cancer": 0.4249
+      },
+      "confusion_matrix": [
+        [
+          440,
+          198,
+          26
+        ],
+        [
+          293,
+          1169,
+          72
+        ],
+        [
+          28,
+          31,
+          58
+        ]
+      ]
+    },
+    "fusion / logreg_stack_balanced": {
+      "macro_f1": 0.5623,
+      "f1_per_class": {
+        "Normal": 0.6162,
+        "Pneumonia": 0.7291,
+        "Lung Cancer": 0.3415
+      },
+      "confusion_matrix": [
+        [
+          456,
+          143,
+          65
+        ],
+        [
+          339,
+          969,
+          226
+        ],
+        [
+          21,
+          12,
+          84
+        ]
+      ]
+    },
+    "fusion / logreg_stack": {
+      "macro_f1": 0.5848,
+      "f1_per_class": {
+        "Normal": 0.5692,
+        "Pneumonia": 0.8328,
+        "Lung Cancer": 0.3523
+      },
+      "confusion_matrix": [
+        [
+          325,
+          326,
+          13
+        ],
+        [
+          133,
+          1372,
+          29
+        ],
+        [
+          20,
+          63,
+          34
+        ]
+      ]
+    },
+    "fusion / hgb_stack": {
+      "macro_f1": 0.5605,
+      "f1_per_class": {
+        "Normal": 0.6121,
+        "Pneumonia": 0.7382,
+        "Lung Cancer": 0.3311
+      },
+      "confusion_matrix": [
+        [
+          445,
+          165,
+          54
+        ],
+        [
+          322,
+          1005,
+          207
+        ],
+        [
+          23,
+          19,
+          75
+        ]
+      ]
+    }
+  },
+  "ablation_val_macro_f1": {
+    "image": 0.4807,
+    "blood": 0.4609,
+    "text": 0.5094,
+    "image+blood": 0.4925,
+    "image+text": 0.557,
+    "blood+text": 0.5762,
+    "image+blood+text": 0.5996
+  },
+  "verdict": "0.6133 vs best single 0.5094 (text) -> fusion HELPS"
+}

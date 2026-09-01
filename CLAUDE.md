@@ -45,15 +45,15 @@ complexity.** If it doesn't, cut it.
 
 ---
 
-## 2. Current status (2026-08-29)
+## 2. Current status (2026-09-01)
 
 | Phase | State | Notes |
 |-------|-------|-------|
 | 0 — Vision & scope | ✅ done | 3-class scope finalised empirically (TB/COVID dropped) |
 | 1 — Data foundation | ✅ done | 15,453-sample joined dataset built + split |
 | 2 — Unimodal baselines | ✅ done | image 0.50 / blood 0.46 / text 0.51 (val macro F1); complementary per-class |
-| 3 — Multimodal fusion | ⬜ | **next** |
-| 4 — Explainability | ⬜ | follows fusion |
+| 3 — Multimodal fusion | ✅ done | late fusion, val macro F1 **0.61** (+0.10 over best single) |
+| 4 — Explainability | ⬜ | **next** |
 | 5 — Agentic layer | ⬜ | |
 | 6 — RAG evidence retrieval | ⬜ | |
 | 7 — Backend & API | ⬜ | |
@@ -99,10 +99,29 @@ Image 0.50 / blood 0.46 / text 0.51 — similar overall, **different per-class s
 genuinely complementary, so **Phase 3 fusion is empirically justified.** Each baseline
 saved its val predicted probabilities keyed by `study_id` for fusion.
 
-**Open problem:** the Lung Cancer class is weak in every modality (image F1 0.17, blood
-0.20, text 0.32 — text is best). Fusion may lift it; if not, try focal loss / oversampling
-/ threshold tuning / a Normal-vs-Abnormal → Pneumonia-vs-Cancer cascade. Decide after
-Phase 3's first fusion result.
+### Phase 3 — late multimodal fusion (val set) — done 2026-09-01
+Stack the three baselines' 3-class probability vectors (9 features) → final label.
+- **OOF plumbing:** `scripts/generate_oof_predictions.py` (blood + text, 5-fold
+  subject-grouped `StratifiedGroupKFold`, seed 42) and Kaggle kernel
+  `medreason-ai-image-oof-val-predictions` (image, code in
+  `kaggle_upload/image_oof_kernel/`, same folds) produce out-of-fold train predictions so
+  the meta-model isn't fit on the base models' own training rows. Per-modality val
+  predictions saved too. Image kernel trick: extract the frozen backbone's 18-dim
+  features once, then all fold training is on cached `[N,18]` matrices (~10 min total).
+- **Fusion** (`scripts/train_fusion.py`, local): **logpool (geometric mean of the
+  probability vectors) → val macro F1 0.613**, mean-prob 0.600, unweighted logreg stack
+  0.585, class-balanced logreg 0.562, HGB stack 0.561. **Parameter-free pooling beats the
+  trained stackers** — 9 inputs + calibrated base probs means a trained meta-model just
+  overfits / over-corrects. Per class: Normal 0.53→0.62, Pneumonia 0.69→0.80,
+  **Cancer 0.32→0.43**.
+- Ablation (mean rule): all-three 0.60 > blood+text 0.576 > image+text 0.557 >
+  image+blood 0.493. Text contributes most, image least.
+- **Leakage guard:** text inputs are Setting A (INDICATION only), never full-report.
+- Artifacts in `experiments/fusion/`. Embedding-level / attention fusion not pursued —
+  late fusion already clears the bar.
+
+**Cancer class:** fusion lifted it 0.32 → 0.43 with no special handling. Focal loss /
+cascade / threshold tuning deferred — revisit only if the final test numbers require it.
 
 **The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.**
@@ -174,7 +193,11 @@ never used for training.
 - `adieladaniel42/medreason-ai-processed` — the train/val/test/final CSVs
 - `adieladaniel42/densenet121-imagenet-weights` — pretrained weights (uploaded manually)
 - kernel `adieladaniel42/medreason-ai-baseline-image-classifier`, code in
-  `kaggle_upload/baseline_kernel/`
+  `kaggle_upload/baseline_kernel/` (Phase 2 image baseline v3)
+- kernel `adieladaniel42/medreason-ai-image-oof-val-predictions`, code in
+  `kaggle_upload/image_oof_kernel/` (Phase 3 image OOF + val predictions). NOTE: the
+  Kaggle slug is derived from the *title*, so `id` in kernel-metadata.json must slugify to
+  the same string — mismatched title/id creates a differently-named kernel.
 
 **Infra gotchas already solved — reuse, don't rediscover:**
 1. `kaggle` CLI ≥ 2.2.3 needs the token also at `~/.kaggle/access_token` (plain string)
@@ -194,32 +217,33 @@ never used for training.
 generic ones (e.g. ClinicalBERT/BioBERT for text, not vanilla BERT) — that was the lever
 that worked for images.
 
+7. Windows local quirk: importing `sklearn` before `torch` in the same process can break
+   torch's DLL init (`WinError 1114`). In any local script that uses both, `import torch`
+   first. (Kaggle/Linux unaffected.)
+
 ---
 
 ## 5. What to do next
 
-**Phase 2 is done** (image 0.50 / blood 0.46 / text 0.51 val macro F1; §2 has the details).
-The modalities are complementary, so fusion is justified. Next:
+**Phases 2 and 3 are done** (§2). Fusion (logpool of the 3 modalities' probabilities)
+reaches val macro F1 0.61. Next:
 
-1. **Phase 3 — multimodal fusion.** Start with **late fusion** (combine the three
-   baselines' class-probability vectors — already saved as `experiments/*/val_predictions.csv`
-   keyed by `study_id` — via a small meta-classifier / learned weights). It's cheap, runs
-   locally, and directly tests "does combining help." Only move to intermediate/attention
-   fusion of the *embeddings* if late fusion underwhelms.
-   - **Leakage rule for the text input:** fusion must use the **Setting A (indication)**
-     text model, not the full-report one, or the fused number inherits the label leak.
-   - Need matching *train*-set predictions to fit the fusion head — generate them
-     out-of-fold (K-fold on train) to avoid the base models overfitting their own training
-     rows. This is the main new piece of work.
-   - Blood + text already saved val probabilities (`experiments/*/val_predictions.csv`,
-     aligned on `study_id`). **The image v3 model only saved its checkpoint on Kaggle** —
-     a Kaggle inference run is still needed to dump its per-study val + OOF-train
-     probabilities before fusion.
-   - Compare fused val macro F1 against the best single modality (0.51). Fusion has to beat
-     it to be worth keeping.
-2. **If Cancer is still weak after fusion** — focal loss / oversampling / decision-threshold
-   tuning, or a Normal-vs-Abnormal → Pneumonia-vs-Cancer cascade.
-3. **Then Phase 4** (explainability) attaches to whatever models exist post-fusion.
+1. **Phase 4 — explainability.** Attach per-modality explanations to the models that
+   exist now:
+   - **Image:** Grad-CAM on the torchxrayvision backbone. Subtlety — the Phase 2/3 head
+     consumes the backbone's 18 pathology *probabilities*, not conv features, so Grad-CAM
+     targets the backbone's own conv layers w.r.t. the relevant pathology logit(s) rather
+     than "our" 3-class head. Decide: explain the pathology channels that drive our
+     prediction, or add a thin conv-feature head to CAM against.
+   - **Blood:** SHAP on the `HistGradientBoostingClassifier` (`shap.TreeExplainer`).
+   - **Text:** attention / token-attribution over the INDICATION text — either
+     attention rollout on Bio_ClinicalBERT or a model-agnostic method (e.g. LIME /
+     integrated gradients) on the frozen-embedding + logreg pipeline.
+   - Keep it a **separate `explain/` module** that loads the saved models — don't
+     entangle it with training code.
+2. **Then Phase 5** (agentic layer) orchestrates these + the fusion output.
+3. Cancer-class polish (focal loss / cascade / thresholds) stays deferred — only if the
+   sealed test set demands it at the end.
 
 **Repo (done 2026-09-01):** private GitHub repo `adieladaniel/medreason-ai`, `main`
 branch, `origin` remote. `.gitignore` excludes all of `data/`, model binaries
