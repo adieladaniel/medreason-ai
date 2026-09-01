@@ -1,0 +1,17 @@
+=== Study <-> Admission linking ===
+Studies dropped due to malformed StudyDate/StudyTime: 2 / 52434
+Total CXR studies (distinct study_id): 53475
+Total CXR subjects (distinct subject_id): 15000
+Studies with >=1 matching admission: 25502 (47.7%)
+Subjects with >=1 matching admission: 6095 (40.6%)
+Distinct hadm_id resolved: 9282
+Studies matching MORE than one admission (ambiguous): 931
+
+=== Diagnosis coverage (diagnoses_icd.csv) ===
+Linked hadm_ids with >=1 diagnosis row: 9279 / 9282 (100.0%)
+
+=== Blood-lab coverage (labevents.csv) ===
+Linked hadm_ids with >=1 lab row: 8860 / 9282 (95.5%)
+
+Saved matched links to data/interim/cxr_admission_links.csv
+EXIT_CODE=0

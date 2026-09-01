@@ -1,0 +1,26 @@
+# MedReason-AI — local environment (data pipeline + blood/text baselines).
+# Python 3.11. Everything here runs on CPU; no GPU needed locally.
+# Image-model training runs on Kaggle and pins its own torch build inside
+# kaggle_upload/baseline_kernel/train_baseline.py — not covered here.
+
+# data pipeline (scripts/, scripts/exploration/)
+duckdb==1.5.4
+pandas==2.2.2
+numpy==1.26.4
+spacy==3.8.14
+negspacy==1.1.0
+# plus the spaCy English model:  python -m spacy download en_core_web_sm
+
+# blood/tabular baseline (scripts/train_blood_baseline.py)
+scikit-learn==1.5.0
+joblib==1.4.2
+
+# text baseline (scripts/train_text_baseline.py) — frozen Bio_ClinicalBERT embeddings
+torch==2.11.0
+transformers==5.14.1
+tokenizers==0.22.2
+huggingface-hub==1.25.1
+pillow==12.2.0
+
+# Kaggle CLI (remote image-model training: kernels push/status/output)
+kaggle==2.2.3

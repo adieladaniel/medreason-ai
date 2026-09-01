@@ -1,0 +1,12 @@
+Samples to assemble: 15453
+Relevant lab rows pulled: 779983
+Samples missing a primary image: 0
+
+=== Final dataset label distribution ===
+   final_label  count_star()
+0    Pneumonia         10165
+1       Normal          4277
+2  Lung Cancer          1011
+
+Saved to data/processed/final_dataset.csv
+EXIT_CODE=0

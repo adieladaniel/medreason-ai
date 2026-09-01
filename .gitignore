@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  MIMIC-CXR / MIMIC-IV credentialed data — DO NOT COMMIT (even to a private repo)
+#  PhysioNet Credentialed Health Data License prohibits redistribution of the
+#  data or of derivatives that carry the identifiers / clinical values.
+#  Anyone reproducing this work must obtain their own PhysioNet credentials.
+# ─────────────────────────────────────────────────────────────────────────────
+/data/
+kaggle_upload/processed_dataset/*.csv
+experiments/**/val_predictions.csv
+experiments/**/*.npy
+
+# ── Model weights & other large binaries (regenerable, not for git) ──
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.joblib
+*.bin
+*.onnx
+*.h5
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# ── Caches ──
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+huggingface/
+
+# ── OS / editors ──
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

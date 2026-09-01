@@ -1,0 +1,79 @@
+[{"stream_name":"stdout","time":13.24302641,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 798.9/798.9 MB 2.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":15.985039308,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 98.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":16.772179589,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 23.7/23.7 MB 90.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.458528012,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 823.6/823.6 kB 46.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.159619746,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.1/14.1 MB 113.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":25.082223219,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 664.8/664.8 MB 2.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":33.131042722,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 410.6/410.6 MB 3.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":36.315567474,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 121.6/121.6 MB 10.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":38.063413735,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.5/56.5 MB 17.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":40.138883856,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 124.2/124.2 MB 15.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":43.634633278,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 196.0/196.0 MB 5.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":46.493077088,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 176.2/176.2 MB 10.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":48.807796396,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 99.1/99.1 kB 73.0 kB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":51.80695462,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 209.5/209.5 MB 9.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":147.897364368,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":147.897409671,"data":"torchaudio 2.10.0+cu128 requires torch==2.10.0, but you have torch 2.4.1+cu121 which is incompatible.\n"}
+,{"stream_name":"stdout","time":153.027183869,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 29.0/29.0 MB 8.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":164.075359261,"data":"=== /kaggle/input contents ===\n"}
+,{"stream_name":"stdout","time":164.075398373,"data":"/kaggle/input -\u003e dirs: ['datasets', 'densenet121-imagenet-weights'] files: []\n"}
+,{"stream_name":"stdout","time":164.076930627,"data":"/kaggle/input/datasets -\u003e dirs: ['adieladaniel42', 'nikeshreddypatlolla'] files: []\n"}
+,{"stream_name":"stdout","time":164.07704579,"data":"/kaggle/input/datasets/adieladaniel42 -\u003e dirs: ['medreason-ai-processed'] files: []\n"}
+,{"stream_name":"stdout","time":164.081788329,"data":"/kaggle/input/datasets/nikeshreddypatlolla -\u003e dirs: ['mimic-cxr-dataset'] files: []\n"}
+,{"stream_name":"stdout","time":466.882810766,"data":"/kaggle/input/densenet121-imagenet-weights -\u003e dirs: [] files: ['densenet121_imagenet.pth']\n"}
+,{"stream_name":"stdout","time":466.882877052,"data":"torch version: 2.4.1+cu121\n"}
+,{"stream_name":"stdout","time":467.140573332,"data":"CUDA available: True\n"}
+,{"stream_name":"stdout","time":467.169792163,"data":"CUDA device count: 2\n"}
+,{"stream_name":"stdout","time":467.177215291,"data":"CUDA device name: Tesla T4\n"}
+,{"stream_name":"stdout","time":467.177232673,"data":"Device: cuda\n"}
+,{"stream_name":"stdout","time":467.40678994,"data":"GPU compute capability sm_75 confirmed working.\n"}
+,{"stream_name":"stdout","time":574.918181834,"data":"train.csv matches: ['/kaggle/input/datasets/adieladaniel42/medreason-ai-processed/train.csv']\n"}
+,{"stream_name":"stdout","time":575.033254557,"data":"Train: 11039, Val: 2315\n"}
+,{"stream_name":"stdout","time":679.658219203,"data":"metadata.csv matches: ['/kaggle/input/datasets/nikeshreddypatlolla/mimic-cxr-dataset/mimic-cxr-dataset/metadata.csv']\n"}
+,{"stream_name":"stdout","time":679.658262411,"data":"CXR dataset root resolved to: /kaggle/input/datasets/nikeshreddypatlolla/mimic-cxr-dataset/mimic-cxr-dataset\n"}
+,{"stream_name":"stdout","time":679.693936008,"data":"Class weights: {'Normal': np.float64(0.5748115121395398), 'Pneumonia': np.float64(0.23214146544694486), 'Lung Cancer': np.float64(2.1930470224135155)}\n"}
+,{"stream_name":"stdout","time":679.835116556,"data":"Downloading weights...\n"}
+,{"stream_name":"stdout","time":679.835142408,"data":"If this fails you can run `wget https://github.com/mlmed/torchxrayvision/releases/download/v1/mimic_ch-densenet121-d121-tw-lr001-rot45-tr15-sc15-seed0-best.pt -O /root/.torchxrayvision/models_data/mimic_ch-densenet121-d121-tw-lr001-rot45-tr15-sc15-seed0-best.pt`\n"}
+,{"stream_name":"stdout","time":681.980388964,"data":"\r[█.................................................]\r[███...............................................]\r[█████.............................................]\r[███████...........................................]\r[█████████.........................................]\r[███████████.......................................]\r[████████████......................................]\r[██████████████....................................]\r[████████████████..................................]\r[██████████████████................................]\r[████████████████████..............................]\r[██████████████████████............................]\r[████████████████████████..........................]\r[█████████████████████████.........................]\r[███████████████████████████.......................]\r[█████████████████████████████.....................]\r[███████████████████████████████...................]\r[█████████████████████████████████.................]\r[███████████████████████████████████...............]\r[████████████████████████████████████..............]\r[██████████████████████████████████████............]\r[████████████████████████████████████████..........]\r[██████████████████████████████████████████........]\r[████████████████████████████████████████████......]\r[██████████████████████████████████████████████....]\r[████████████████████████████████████████████████..]\r[█████████████████████████████████████████████████.]\r[██████████████████████████████████████████████████]\n"}
+,{"stream_name":"stdout","time":682.138053001,"data":"Backbone pathologies (18): ['Atelectasis', 'Consolidation', '', 'Pneumothorax', 'Edema', '', '', 'Effusion', 'Pneumonia', '', 'Cardiomegaly', '', '', '', 'Lung Lesion', 'Fracture', 'Lung Opacity', 'Enlarged Cardiomediastinum']\n"}
+,{"stream_name":"stdout","time":683.815284337,"data":"Sanity batch image tensor shape: torch.Size([32, 1, 224, 224]), dtype: torch.float32\n"}
+,{"stream_name":"stdout","time":684.303973597,"data":"Backbone output shape: torch.Size([32, 18]) (expected [batch, 18])\n"}
+,{"stream_name":"stdout","time":684.304015591,"data":"Backbone output range: min=0.0012, max=0.9805\n"}
+,{"stream_name":"stdout","time":813.547465515,"data":"Epoch 1/15 - train_loss: 1.0412 - val_macro_f1: 0.4477 - lr: [0.0009890738003669028]\n"}
+,{"stream_name":"stdout","time":813.548623493,"data":"  -\u003e saved new best head (f1=0.4477)\n"}
+,{"stream_name":"stdout","time":918.635586857,"data":"Epoch 2/15 - train_loss: 1.0111 - val_macro_f1: 0.4838 - lr: [0.0009567727288213003]\n"}
+,{"stream_name":"stdout","time":918.636802182,"data":"  -\u003e saved new best head (f1=0.4838)\n"}
+,{"stream_name":"stdout","time":1024.019831551,"data":"Epoch 3/15 - train_loss: 1.0083 - val_macro_f1: 0.4521 - lr: [0.0009045084971874737]\n"}
+,{"stream_name":"stdout","time":1130.219452663,"data":"Epoch 4/15 - train_loss: 1.0121 - val_macro_f1: 0.4923 - lr: [0.0008345653031794292]\n"}
+,{"stream_name":"stdout","time":1130.220678702,"data":"  -\u003e saved new best head (f1=0.4923)\n"}
+,{"stream_name":"stdout","time":1237.537508293,"data":"Epoch 5/15 - train_loss: 1.0097 - val_macro_f1: 0.4892 - lr: [0.00075]\n"}
+,{"stream_name":"stdout","time":1343.84424358,"data":"Epoch 6/15 - train_loss: 1.0028 - val_macro_f1: 0.4785 - lr: [0.0006545084971874737]\n"}
+,{"stream_name":"stdout","time":1449.604188794,"data":"Epoch 7/15 - train_loss: 1.0003 - val_macro_f1: 0.5001 - lr: [0.0005522642316338268]\n"}
+,{"stream_name":"stdout","time":1449.605350269,"data":"  -\u003e saved new best head (f1=0.5001)\n"}
+,{"stream_name":"stdout","time":1556.506100102,"data":"Epoch 8/15 - train_loss: 0.9973 - val_macro_f1: 0.4566 - lr: [0.0004477357683661734]\n"}
+,{"stream_name":"stdout","time":1661.464217705,"data":"Epoch 9/15 - train_loss: 1.0002 - val_macro_f1: 0.4892 - lr: [0.0003454915028125264]\n"}
+,{"stream_name":"stdout","time":1765.99730125,"data":"Epoch 10/15 - train_loss: 0.9982 - val_macro_f1: 0.4867 - lr: [0.0002500000000000001]\n"}
+,{"stream_name":"stdout","time":1868.822091068,"data":"Epoch 11/15 - train_loss: 0.9932 - val_macro_f1: 0.4908 - lr: [0.00016543469682057103]\n"}
+,{"stream_name":"stdout","time":1972.233849582,"data":"Epoch 12/15 - train_loss: 0.9917 - val_macro_f1: 0.4874 - lr: [9.549150281252631e-05]\n"}
+,{"stream_name":"stdout","time":2077.953956231,"data":"Epoch 13/15 - train_loss: 0.9951 - val_macro_f1: 0.4786 - lr: [4.322727117869951e-05]\n"}
+,{"stream_name":"stdout","time":2181.672417135,"data":"Epoch 14/15 - train_loss: 0.9957 - val_macro_f1: 0.4816 - lr: [1.0926199633097156e-05]\n"}
+,{"stream_name":"stdout","time":2287.215781366,"data":"Epoch 15/15 - train_loss: 0.9916 - val_macro_f1: 0.4828 - lr: [0.0]\n"}
+,{"stream_name":"stdout","time":2287.21582336,"data":"\n"}
+,{"stream_name":"stdout","time":2287.21582758,"data":"=== Final classification report (best checkpoint) ===\n"}
+,{"stream_name":"stdout","time":2302.615383306,"data":"              precision    recall  f1-score   support\n"}
+,{"stream_name":"stdout","time":2302.615426949,"data":"\n"}
+,{"stream_name":"stdout","time":2302.615434036,"data":"      Normal       0.56      0.56      0.56       664\n"}
+,{"stream_name":"stdout","time":2302.615439442,"data":"   Pneumonia       0.79      0.76      0.77      1534\n"}
+,{"stream_name":"stdout","time":2302.615444286,"data":" Lung Cancer       0.14      0.21      0.17       117\n"}
+,{"stream_name":"stdout","time":2302.615449017,"data":"\n"}
+,{"stream_name":"stdout","time":2302.615453148,"data":"    accuracy                           0.67      2315\n"}
+,{"stream_name":"stdout","time":2302.615457488,"data":"   macro avg       0.50      0.51      0.50      2315\n"}
+,{"stream_name":"stdout","time":2302.615461735,"data":"weighted avg       0.69      0.67      0.68      2315\n"}
+,{"stream_name":"stdout","time":2302.615470725,"data":"\n"}
+,{"stream_name":"stderr","time":2305.679920986,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":2305.679950574,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":2305.912391099,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":2305.912418622,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":2306.617519503,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":2307.78838607,"data":"[NbConvertApp] Writing 317254 bytes to __results__.html\n"}
+]

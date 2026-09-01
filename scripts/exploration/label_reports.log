@@ -1,0 +1,9 @@
+Labeling reports for 25502 studies...
+Missing report files: 0 / 25502
+
+No Finding: 5003
+Pneumonia mentioned: 6658
+Cancer mentioned: 957
+
+Saved to data/interim/report_labels.csv
+EXIT_CODE=0

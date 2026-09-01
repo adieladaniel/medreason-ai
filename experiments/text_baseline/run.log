@@ -1,0 +1,116 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+train n=11039  val n=2315
+loading frozen encoder: emilyalsentzer/Bio_ClinicalBERT
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 40484.38it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: emilyalsentzer/Bio_ClinicalBERT
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+
+================ setting: indication ================
+
+----- indication / logreg (val) -----
+              precision    recall  f1-score   support
+
+      Normal      0.473     0.590     0.525       664
+   Pneumonia      0.800     0.602     0.687      1534
+ Lung Cancer      0.214     0.607     0.316       117
+
+    accuracy                          0.599      2315
+   macro avg      0.496     0.600     0.509      2315
+weighted avg      0.676     0.599     0.622      2315
+
+confusion matrix (rows=true, cols=pred) Normal/Pneumonia/Cancer:
+ [[392 209  63]
+ [413 923 198]
+ [ 24  22  71]]
+
+----- indication / mlp (val) -----
+              precision    recall  f1-score   support
+
+      Normal      0.525     0.401     0.454       664
+   Pneumonia      0.733     0.844     0.785      1534
+ Lung Cancer      0.561     0.197     0.291       117
+
+    accuracy                          0.684      2315
+   macro avg      0.606     0.480     0.510      2315
+weighted avg      0.664     0.684     0.665      2315
+
+confusion matrix (rows=true, cols=pred) Normal/Pneumonia/Cancer:
+ [[ 266  397    1]
+ [ 222 1295   17]
+ [  19   75   23]]
+
+  [indication] logreg macro F1 by label provenance: {'report': {'n': 1758, 'macro_f1': 0.5497}, 'icd_only': {'n': 557, 'macro_f1': 0.3002}}
+
+================ setting: full_report ================
+  computing full_report/train embeddings (11039 texts)...
+    embedded 32/11039
+    embedded 672/11039
+    embedded 1312/11039
+    embedded 1952/11039
+    embedded 2592/11039
+    embedded 3232/11039
+    embedded 3872/11039
+    embedded 4512/11039
+    embedded 5152/11039
+    embedded 5792/11039
+    embedded 6432/11039
+    embedded 7072/11039
+    embedded 7712/11039
+    embedded 8352/11039
+    embedded 8992/11039
+    embedded 9632/11039
+    embedded 10272/11039
+    embedded 10912/11039
+  computing full_report/val embeddings (2315 texts)...
+    embedded 32/2315
+    embedded 672/2315
+    embedded 1312/2315
+    embedded 1952/2315
+
+----- full_report / logreg (val) -----
+              precision    recall  f1-score   support
+
+      Normal      0.710     0.851     0.774       664
+   Pneumonia      0.936     0.752     0.834      1534
+ Lung Cancer      0.294     0.718     0.417       117
+
+    accuracy                          0.779      2315
+   macro avg      0.646     0.774     0.675      2315
+weighted avg      0.839     0.779     0.796      2315
+
+confusion matrix (rows=true, cols=pred) Normal/Pneumonia/Cancer:
+ [[ 565   65   34]
+ [ 212 1154  168]
+ [  19   14   84]]
+
+----- full_report / mlp (val) -----
+              precision    recall  f1-score   support
+
+      Normal      0.742     0.761     0.751       664
+   Pneumonia      0.857     0.887     0.872      1534
+ Lung Cancer      0.522     0.205     0.294       117
+
+    accuracy                          0.816      2315
+   macro avg      0.707     0.618     0.639      2315
+weighted avg      0.807     0.816     0.808      2315
+
+confusion matrix (rows=true, cols=pred) Normal/Pneumonia/Cancer:
+ [[ 505  156    3]
+ [ 154 1361   19]
+ [  22   71   24]]
+
+  [full_report] logreg macro F1 by label provenance: {'report': {'n': 1758, 'macro_f1': 0.7457}, 'icd_only': {'n': 557, 'macro_f1': 0.3347}}
+
+Saved everything to experiments\text_baseline/

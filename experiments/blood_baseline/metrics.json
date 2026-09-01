@@ -1,0 +1,118 @@
+{
+  "dataset": {
+    "train_n": 11039,
+    "val_n": 2315,
+    "train_label_counts": {
+      "Pneumonia": 7312,
+      "Normal": 2953,
+      "Lung Cancer": 774
+    },
+    "val_label_counts": {
+      "Pneumonia": 1534,
+      "Normal": 664,
+      "Lung Cancer": 117
+    }
+  },
+  "features": [
+    "wbc",
+    "rbc",
+    "hemoglobin",
+    "hematocrit",
+    "platelets",
+    "neutrophils",
+    "lymphocytes",
+    "monocytes",
+    "crp",
+    "esr",
+    "albumin",
+    "ldh",
+    "sodium",
+    "potassium",
+    "glucose",
+    "creatinine",
+    "urea",
+    "nlr",
+    "plr"
+  ],
+  "seed": 42,
+  "dummy_most_frequent": {
+    "macro_f1": 0.2657,
+    "balanced_accuracy": 0.3333,
+    "f1_per_class": {
+      "Normal": 0.0,
+      "Pneumonia": 0.7971,
+      "Lung Cancer": 0.0
+    },
+    "confusion_matrix": [
+      [
+        0,
+        664,
+        0
+      ],
+      [
+        0,
+        1534,
+        0
+      ],
+      [
+        0,
+        117,
+        0
+      ]
+    ]
+  },
+  "logreg": {
+    "macro_f1": 0.4002,
+    "balanced_accuracy": 0.4971,
+    "f1_per_class": {
+      "Normal": 0.3852,
+      "Pneumonia": 0.6249,
+      "Lung Cancer": 0.1906
+    },
+    "confusion_matrix": [
+      [
+        265,
+        204,
+        195
+      ],
+      [
+        413,
+        797,
+        324
+      ],
+      [
+        34,
+        16,
+        67
+      ]
+    ]
+  },
+  "hist_gradient_boosting": {
+    "macro_f1": 0.4609,
+    "balanced_accuracy": 0.4688,
+    "f1_per_class": {
+      "Normal": 0.453,
+      "Pneumonia": 0.7296,
+      "Lung Cancer": 0.2
+    },
+    "confusion_matrix": [
+      [
+        318,
+        307,
+        39
+      ],
+      [
+        374,
+        1082,
+        78
+      ],
+      [
+        48,
+        43,
+        26
+      ]
+    ],
+    "macro_f1_rows_with_core_lab": 0.4558,
+    "val_rows_with_core_lab": 2248
+  }
+}

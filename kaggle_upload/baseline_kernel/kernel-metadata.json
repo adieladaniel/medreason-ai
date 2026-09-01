@@ -1,0 +1,14 @@
+{
+  "id": "adieladaniel42/medreason-ai-baseline-image-classifier",
+  "title": "MedReason-AI Baseline Image Classifier",
+  "code_file": "train_baseline.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["nikeshreddypatlolla/mimic-cxr-dataset", "adieladaniel42/medreason-ai-processed", "adieladaniel42/densenet121-imagenet-weights"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

@@ -1,0 +1,144 @@
+{
+  "encoder": "emilyalsentzer/Bio_ClinicalBERT",
+  "seed": 42,
+  "dataset": {
+    "train_n": 11039,
+    "val_n": 2315,
+    "val_label_counts": {
+      "Pneumonia": 1534,
+      "Normal": 664,
+      "Lung Cancer": 117
+    },
+    "val_provenance_counts": {
+      "report": 1758,
+      "icd_only": 557
+    }
+  },
+  "settings": {
+    "indication": {
+      "indication / logreg": {
+        "macro_f1": 0.5094,
+        "f1_per_class": {
+          "Normal": 0.5251,
+          "Pneumonia": 0.6868,
+          "Lung Cancer": 0.3163
+        },
+        "confusion_matrix": [
+          [
+            392,
+            209,
+            63
+          ],
+          [
+            413,
+            923,
+            198
+          ],
+          [
+            24,
+            22,
+            71
+          ]
+        ]
+      },
+      "indication / mlp": {
+        "macro_f1": 0.51,
+        "f1_per_class": {
+          "Normal": 0.4543,
+          "Pneumonia": 0.7846,
+          "Lung Cancer": 0.2911
+        },
+        "confusion_matrix": [
+          [
+            266,
+            397,
+            1
+          ],
+          [
+            222,
+            1295,
+            17
+          ],
+          [
+            19,
+            75,
+            23
+          ]
+        ]
+      },
+      "logreg_macro_f1_by_label_provenance": {
+        "report": {
+          "n": 1758,
+          "macro_f1": 0.5497
+        },
+        "icd_only": {
+          "n": 557,
+          "macro_f1": 0.3002
+        }
+      }
+    },
+    "full_report": {
+      "full_report / logreg": {
+        "macro_f1": 0.675,
+        "f1_per_class": {
+          "Normal": 0.774,
+          "Pneumonia": 0.8341,
+          "Lung Cancer": 0.4169
+        },
+        "confusion_matrix": [
+          [
+            565,
+            65,
+            34
+          ],
+          [
+            212,
+            1154,
+            168
+          ],
+          [
+            19,
+            14,
+            84
+          ]
+        ]
+      },
+      "full_report / mlp": {
+        "macro_f1": 0.6391,
+        "f1_per_class": {
+          "Normal": 0.7509,
+          "Pneumonia": 0.8719,
+          "Lung Cancer": 0.2945
+        },
+        "confusion_matrix": [
+          [
+            505,
+            156,
+            3
+          ],
+          [
+            154,
+            1361,
+            19
+          ],
+          [
+            22,
+            71,
+            24
+          ]
+        ]
+      },
+      "logreg_macro_f1_by_label_provenance": {
+        "report": {
+          "n": 1758,
+          "macro_f1": 0.7457
+        },
+        "icd_only": {
+          "n": 557,
+          "macro_f1": 0.3347
+        }
+      }
+    }
+  },
+  "note": "Setting A (indication) is the honest text-modality estimate. Setting B (full_report) is leakage-inflated: labels were partly derived from the report text. Cite A, not B."
+}

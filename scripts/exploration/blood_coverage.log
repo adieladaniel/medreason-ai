@@ -1,0 +1,21 @@
+Linked admissions: 9282
+
+Test         itemid   covered    coverage %
+WBC          51301    8704       93.8%
+RBC          51279    8699       93.7%
+Hemoglobin   51222    8699       93.7%
+Hematocrit   51221    8730       94.1%
+Platelets    51265    8717       93.9%
+Neutrophils  51256    4696       50.6%
+Lymphocytes  51244    4696       50.6%
+Monocytes    51254    4696       50.6%
+CRP          50889    696        7.5%
+ESR          51288    343        3.7%
+Albumin      50862    4242       45.7%
+LDH          50954    3744       40.3%
+Sodium       50983    8733       94.1%
+Potassium    50971    8734       94.1%
+Glucose      50931    8702       93.8%
+Creatinine   50912    8734       94.1%
+Urea         51006    8734       94.1%
+EXIT_CODE=0
