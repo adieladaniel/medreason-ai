@@ -221,12 +221,13 @@ The modalities are complementary, so fusion is justified. Next:
    tuning, or a Normal-vs-Abnormal → Pneumonia-vs-Cancer cascade.
 3. **Then Phase 4** (explainability) attaches to whatever models exist post-fusion.
 
-**Also worth doing now** (Phase 2 is where the codebase stops being throwaway scripts):
-initialise the repo properly — `git init`, the agreed folder structure
-(`app/{api,agent,pipelines,services,database,config,models,utils}`, `data/{raw,interim,
-processed}`, `docs/`, `experiments/`, `tests/`, `docker/`, `scripts/`), a `requirements.txt`
-/ `pyproject.toml`, and a `.gitignore` that excludes `data/raw/` and `data/processed/`
-(large + PHI-adjacent). This is itself production-practice learning, which is the point.
+**Repo (done 2026-09-01):** private GitHub repo `adieladaniel/medreason-ai`, `main`
+branch, `origin` remote. `.gitignore` excludes all of `data/`, model binaries
+(`*.pth/*.joblib/*.npy`), and per-study prediction CSVs — **MIMIC is PhysioNet
+credentialed data, never commit it, not even to a private repo.** `requirements.txt` +
+`README.md` exist. Commit/push only when the user asks; branch off `main` for changes.
+Still to do: the agreed `app/{api,agent,pipelines,services,database,config,models,utils}`
+structure (create when Phase 7 backend work starts), `docs/`, `tests/`, `docker/`.
 
 Work the iterative loop per component: **Design → Implement → Review → Test → Improve →
 Proceed.** One component at a time, not big upfront builds.
