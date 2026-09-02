@@ -68,7 +68,7 @@ def explain_case(case: dict, only: set[str] | None = None, save_dir: Path | None
 def _print(out: dict) -> None:
     print(f"\nstudy {out['study_id']}   true label: {out['true_label']}")
     for m, r in out["modalities"].items():
-        print(f"\n=== {m.upper()} — predicts {r['predicted_class']}  {r['probabilities']}")
+        print(f"\n=== {m.upper()} predicts {r['predicted_class']}  {r['probabilities']}")
         print(f"    {r['summary']}")
         for it in r["attributions"]["items"][:6]:
             v = "" if it.get("value") in (None, "") else f" ({it['value']})"

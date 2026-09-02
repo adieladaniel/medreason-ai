@@ -1,53 +1,55 @@
 # MedReason-AI
 
-**Agentic Multi-Modal Medical Diagnostic Assistant with Explainable AI and Evidence
-Retrieval** — a final-year capstone.
+An agentic multi-modal medical diagnostic assistant with explainable AI and evidence
+retrieval. Final-year capstone project.
 
-Given a chest X-ray + the linked admission's blood labs + the radiology report, the system
-predicts one of **3 classes — Normal / Pneumonia / Lung Cancer** — then (planned) an agent
-layer reasons over the prediction: tracks a belief state, checks cross-modality
-consistency, decides whether more information is needed, and retrieves supporting
-literature (RAG) to *explain* the result — never to diagnose.
+The system takes a chest X-ray, the linked admission's blood labs, and the clinical
+indication for the exam, and predicts one of three classes: Normal, Pneumonia, or Lung
+Cancer. A planned agent layer then reasons over the prediction. It tracks a belief state,
+checks whether the modalities agree, decides whether more information is needed, and
+retrieves supporting literature (RAG) to explain the result rather than to diagnose.
 
-The goal of the project is learning to design a **production-grade AI system**, not
-chasing benchmark accuracy. See [CLAUDE.md](CLAUDE.md) for the full project brief and
+The aim of the project is to learn how to build a production-grade AI system. Benchmark
+accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
 [ROADMAP.md](ROADMAP.md) for phase-by-phase status.
 
 ## Status
 
 | Phase | State |
 |-------|-------|
-| 0 — Vision & scope | ✅ done |
-| 1 — Data foundation | ✅ done — 15,453-sample joined dataset |
-| 2 — Unimodal baselines | ✅ done — image 0.50 / blood 0.46 / text 0.51 (val macro F1) |
-| 3 — Multimodal fusion | ⬜ next |
-| 4 — Explainability | ⬜ |
-| 5 — Agentic layer | ⬜ |
-| 6 — RAG evidence retrieval | ⬜ |
-| 7 — Backend & API (FastAPI + PostgreSQL + Qdrant + Docker) | ⬜ |
-| 8 — Integration / testing / writeup | ⬜ |
+| 0. Vision and scope | done |
+| 1. Data foundation | done, 15,453-sample joined dataset |
+| 2. Unimodal baselines | done, image 0.50 / blood 0.46 / text 0.51 (val macro F1) |
+| 3. Multimodal fusion | done, val macro F1 0.61 |
+| 4. Explainability | core done (SHAP + Grad-CAM per modality) |
+| 5. Agentic layer | not started |
+| 6. RAG evidence retrieval | not started |
+| 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | not started |
+| 8. Integration, testing, writeup | not started |
 
-## Data — not included in this repo
+## Data is not included in this repo
 
-The dataset is built from **MIMIC-CXR** and **MIMIC-IV v3.1** (PhysioNet credentialed
-data). Its license prohibits redistributing the data or identifier-carrying derivatives,
-so **`data/`, the processed CSVs, embeddings, and per-study prediction files are
-git-ignored.** To reproduce, obtain your own PhysioNet credentials, download the sources,
-and run the pipeline below.
+The dataset is built from MIMIC-CXR and MIMIC-IV v3.1 (PhysioNet credentialed data). The
+license does not permit redistributing the data or identifier-carrying derivatives, so
+`data/`, the processed CSVs, cached embeddings, and per-study prediction files are all
+git-ignored. To reproduce the work, obtain your own PhysioNet credentials, download the
+sources, and run the pipeline below.
 
-How the dataset is constructed (linking algorithm, label rule, blood-feature tiers) is
-documented in [CLAUDE.md §3](CLAUDE.md).
+How the dataset is built (the linking algorithm, the label rule, the blood-feature tiers)
+is documented in [CLAUDE.md](CLAUDE.md) section 3.
 
 ## Layout
 
 ```
-scripts/               data pipeline (run from repo root, local, no GPU)
+scripts/               data pipeline, run from repo root, local, no GPU
   exploration/          feasibility probes, disease mapping, report labeler, label builder
   build_final_dataset.py / split_dataset.py
   train_blood_baseline.py    blood/tabular baseline (sklearn, local CPU)
   train_text_baseline.py     text baseline (frozen Bio_ClinicalBERT + logreg, local CPU)
-kaggle_upload/         image-model training (runs on Kaggle free GPU, not locally)
-experiments/           baseline results — RESULTS.md / metrics.json (weights & preds git-ignored)
+  generate_oof_predictions.py / train_fusion.py    Phase 3 fusion
+explain/               Phase 4 per-modality explainers (SHAP, Grad-CAM)
+kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
+experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored
 data/                  git-ignored (see above)
 ```
 
@@ -59,7 +61,7 @@ pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
-## Pipeline (after placing MIMIC sources under `data/raw/`)
+## Pipeline (after placing the MIMIC sources under `data/raw/`)
 
 ```bash
 python scripts/exploration/check_linking_feasibility.py
@@ -69,10 +71,12 @@ python scripts/exploration/label_reports.py
 python scripts/exploration/build_final_labels.py
 python scripts/build_final_dataset.py
 python scripts/split_dataset.py
-# baselines
+
 python scripts/train_blood_baseline.py
 python scripts/train_text_baseline.py
+python scripts/generate_oof_predictions.py
+python scripts/train_fusion.py                       # needs image OOF preds from Kaggle
 ```
 
-Image-model training is driven via the `kaggle` CLI against
-`kaggle_upload/baseline_kernel/` — see [CLAUDE.md §4](CLAUDE.md).
+Image-model training is driven through the `kaggle` CLI against
+`kaggle_upload/baseline_kernel/`. See [CLAUDE.md](CLAUDE.md) section 4.
