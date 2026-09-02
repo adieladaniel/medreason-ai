@@ -123,6 +123,26 @@ Stack the three baselines' 3-class probability vectors (9 features) → final la
 **Cancer class:** fusion lifted it 0.32 → 0.43 with no special handling. Focal loss /
 cascade / threshold tuning deferred — revisit only if the final test numbers require it.
 
+### Phase 4 — explainability (in progress, 2026-09-02)
+`explain/` package, one module per modality, each loads a saved model and returns a common
+contract `{predicted_class, probabilities, attributions:[{feature,value,effect,direction}],
+summary}` + a matplotlib figure. `explain/run.py` runs all three for a `study_id` and
+saves PNGs + JSON — this is the interface the Phase 5 agent will call.
+- **`explain/blood.py`** — SHAP `TreeExplainer` (exact, tree_path_dependent) on the HGB
+  model; contributions in log-odds; horizontal bar figure.
+- **`explain/text.py`** — SHAP with a word-level (`\W+`) Text masker over the whole
+  embed→logreg pipeline; per-word effect on P(predicted class). ~60–90 s/case on CPU
+  (`max_evals=300`) — fine for pre-computed demo cases, too slow for live UI (cache them).
+- **`explain/image.py`** — Grad-CAM: image→backbone→18 pathology probs→our 3-class logit
+  kept differentiable, hook the backbone's last conv map, backprop the predicted logit
+  (**input must `requires_grad_(True)`** — backbone is frozen). Plus pathology-channel
+  attribution `d(logit)/d(prob)·prob` naming which of the 18 xrv channels drove it.
+  torchxrayvision weights pre-downloaded to `~/.torchxrayvision/models_data/` (its own
+  download printer crashes on Windows cp1252 — fetch the `.pt` with curl).
+- Runs local, CPU. `import torch` must precede sklearn/shap (gotcha 7).
+- Rendered explanations of real cases go to `experiments/explain_samples/` — **gitignored**
+  (X-ray images + indication text).
+
 **The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.**
 

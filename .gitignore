@@ -9,6 +9,10 @@ kaggle_upload/processed_dataset/*.csv
 experiments/**/val_predictions.csv
 experiments/**/oof_train_predictions.csv
 experiments/**/*.npy
+# rendered explanations of real cases (X-ray images, indication text)
+experiments/explain_samples/
+# curated demo cases (MIMIC images)
+demo/cases/
 
 # ── Model weights & other large binaries (regenerable, not for git) ──
 *.pth

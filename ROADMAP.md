@@ -57,11 +57,23 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   late fusion already clears the bar comfortably.
 
 ## Phase 4 — Explainability
-⬜ Not started
-- Grad-CAM for the image model (localizes what the CNN attended to).
-- SHAP for the blood/tabular model (feature attribution).
-- Attention visualization for the text model.
-- These attach to whichever models exist after Phase 3, so this phase follows fusion, not before.
+🔄 In progress — `explain/` package, one module per modality, each loads a saved model
+and returns a common contract (predicted class, probabilities, ranked signed
+attributions, one-line summary) + a matplotlib figure.
+- **Blood** (`explain/blood.py`) — ✅ SHAP `TreeExplainer` (tree_path_dependent, exact) on
+  the saved `HistGradientBoostingClassifier`. Attributions in log-odds; horizontal bar plot.
+- **Text** (`explain/text.py`) — ✅ SHAP with a word-level (`\W+`) Text masker over the
+  full embed→logreg pipeline; per-word effect on P(predicted). ~60–90 s/case on CPU
+  (`max_evals=300`). Renders the indication with words shaded by effect.
+- **Image** (`explain/image.py`) — ✅ Grad-CAM: keep image→backbone→18 pathology probs→our
+  3-class logit differentiable, hook the backbone's last conv map, backprop the predicted
+  logit (input needs `requires_grad` since the backbone is frozen). Plus pathology-channel
+  attribution (`d(logit)/d(prob) · prob`) — names *which* of the 18 xrv channels drove it.
+- `explain/run.py` — unified entrypoint: all three for one `study_id`, prints + saves
+  PNGs + JSON. This is what the Phase 5 agent will call.
+- Decoupled from training code (feature/preprocessing logic duplicated by hand, in sync).
+- Local quirk fixed: `import torch` before sklearn/shap or torch's DLL init fails on Windows.
+- ⬜ left: polish figures, run over the curated demo shortlist, a combined one-page view.
 
 ## Phase 5 — Agentic Layer
 ⬜ Not started
@@ -89,6 +101,49 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - End-to-end testing across the full pipeline.
 - Write up methodology and empirical findings (dataset linking rate, label validation approach, class imbalance handling, per-modality results) — this doubles as thesis material.
 - Final polish pass.
+
+### Two kinds of evaluation
+- **Quantitative (thesis number):** one batch run of the full pipeline over all 2,099
+  rows of `data/processed/test.csv` — the file already has `image_path`, `report_path`,
+  the 17 blood cols, `final_label`. Script resolves the image, extracts the INDICATION
+  section from the report (same `extract_indication` as training — leakage rule holds),
+  runs image+blood+text+fusion+agent, compares to `final_label`. Report macro F1 /
+  per-class / confusion / calibration **plus** agent-layer stats (how often the
+  consistency checker fires, how often it escalates / requests more data). `test.csv`
+  stays sealed until this run; develop Phases 4–7 against `val.csv`.
+- **Interactive demo (viva):** the UI, one case at a time.
+
+### Phase 8b — Demo preparation (for the final-year defense)
+- **Case-curation script** — scan `val.csv` (never `test.csv`) for cases matching each
+  edge-case profile, produce a vetted shortlist of ~15 study IDs with notes; freeze
+  ~8–12 for the presentation into `demo/cases/` (gitignored — MIMIC images).
+  Profiles to hit: clean Normal / Pneumonia / Cancer; **cross-modality conflict**
+  (modalities disagree + consistency checker fires); **low confidence** (fused max prob
+  ~0.4–0.55, triggers missing-info planner); **no blood labs provided** (graceful
+  degradation); **model wrong but flags it** (low confidence / fired conflict — this is
+  a strength to show, not hide); **non-CXR / garbage image** (needs a lightweight OOD
+  input guard — build one).
+- **UI:** "load example case" dropdown populating the form from `demo/cases/`.
+- **Inputs a user provides:** (1) frontal chest X-ray PNG/JPG; (2) clinical indication /
+  reason-for-exam as short free text — NOT a radiology report (leakage-safe + realistic:
+  pre-read you have the film, labs, referral reason); (3) up to 17 blood labs, all
+  optional, "no bloods" checkbox; (4) age/sex optional.
+- **Framing for modest accuracy (fusion ≈ 0.61 macro F1):** this is a systems-engineering
+  project (agentic pipeline, explainability, belief state, consistency checking, RAG,
+  real backend), not a benchmark-accuracy project. Demo the *reasoning and explanations
+  working*. A case the model gets wrong but the consistency checker catches → highlight.
+- **De-risk before the defense:**
+  - offline-first — all model weights vendored locally, zero runtime downloads
+  - Ollama latency on 4 GB VRAM: small quantized model (Qwen2.5-3B / Phi-3), pre-warm,
+    stream the RAG text after showing prediction+explainability, pre-cache explanations
+    for the frozen demo cases
+  - serving-path preprocessing must match torchxrayvision training exactly (grayscale,
+    normalize ~[-1024,1024], center-crop, resize 224) — verify against known cases
+  - rehearse Docker cold start (Postgres + Qdrant + Ollama + API); reset script to clear
+    the case table between runs
+  - record a full screen-capture of the demo end-to-end as a projector/laptop-failure backup
+- **Data provenance:** get PhysioNet credentials before the defense (free, ~1–2 weeks,
+  supervisor as reference) — closes the "is your data use authorized?" question.
 
 ---
 
