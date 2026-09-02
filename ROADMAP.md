@@ -73,7 +73,10 @@ attributions, one-line summary) + a matplotlib figure.
   PNGs + JSON. This is what the Phase 5 agent will call.
 - Decoupled from training code (feature/preprocessing logic duplicated by hand, in sync).
 - Local quirk fixed: `import torch` before sklearn/shap or torch's DLL init fails on Windows.
-- ⬜ left: polish figures, run over the curated demo shortlist, a combined one-page view.
+- Verified on one confident-correct case per class + two cross-modality-conflict cases
+  (text/blood right, image wrong on Cancer) — explanations are clinically coherent.
+- ⬜ deferred to UI/demo phases: a combined one-page per-case view; figure polish.
+Core explainability capability is complete; the agent (Phase 5) can consume `explain/run.py`.
 
 ## Phase 5 — Agentic Layer
 ⬜ Not started
