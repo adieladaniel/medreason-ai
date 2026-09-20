@@ -134,8 +134,20 @@ Stack the three baselines' 3-class probability vectors (9 features) into a final
 - Ablation (mean rule): all three (0.60) beat blood+text (0.576), which beats image+text
   (0.557), which beats image+blood (0.493). Text contributes most, image least.
 - Leakage guard: text inputs are Setting A (INDICATION only), never full-report.
-- Artifacts in `experiments/fusion/`. Embedding-level and attention fusion were not
-  pursued, since late fusion already clears the bar.
+- Artifacts in `experiments/fusion/`.
+
+Feature-level fusion was tried as a documented ablation, done 2026-09-20
+(`scripts/train_fusion_mlp.py`): concatenate the frozen per-modality features (image's 18
+pathology probabilities, blood's 19 features imputed with missingness flags, text's
+768-dim embedding reduced to 32 by PCA chosen on a dev split) and train one MLP, instead
+of stacking predicted probabilities. No OOF needed, since these are frozen encoder
+outputs, not model predictions fit on our labels. Train is split fit/dev 85/15
+(subject-grouped, stratified), dev used only for early stopping and the PCA size, val
+touched once. Result: val macro F1 0.586, below late fusion's 0.613, and the same
+architecture scored 0.655 on dev, so the gap is overfitting (88 features, only 774 cancer
+rows in train). Same modality pattern as late fusion (all three beats every pair, text
+most, image least). Late fusion remains the one used downstream. Artifacts in
+`experiments/fusion_mlp/`.
 
 Cancer class: fusion lifted it from 0.32 to 0.43 with no special handling. Focal loss,
 cascade, and threshold tuning are deferred. Revisit only if the final test numbers
@@ -164,6 +176,29 @@ saves PNGs plus JSON. That is the interface the Phase 5 agent will call.
 - Runs local, CPU. `import torch` must come before sklearn or shap (gotcha 7).
 - Rendered explanations of real cases go to `experiments/explain_samples/`, which is
   git-ignored (X-ray images and indication text).
+
+### Progress dashboard (2026-09-19)
+
+`app/` is the first slice of the Phase 7 backend: a FastAPI app plus a static single-page
+UI (Chart.js vendored under `app/static/vendor/`, no Node, no CDN) showing everything done
+so far. Pages: overview and phase tracker, data pipeline stats, model results and the
+Kaggle training curve, fusion (method comparison, ablation, confusion matrices, ROC,
+precision-recall, calibration, modality agreement), explainer gallery, roadmap. Run
+`python -m uvicorn app.main:app --port 8000` from the repo root and open
+http://localhost:8000.
+
+- `app/dashboard_data.py` builds `app/data/dashboard.json` from the real result files
+  (`experiments/*/metrics.json`, the val prediction CSVs, the Kaggle training log, the
+  pipeline logs in `scripts/`, and phase status parsed from `ROADMAP.md`). `app.main`
+  rebuilds it on startup when a source is newer, so new experiments appear without
+  editing the UI. When a phase adds results, add a section to the builder and a page or
+  card in `app/static/app.js`.
+- The JSON holds aggregates only (no study, subject, or admission IDs) and is committed.
+  The gallery reads `experiments/explain_samples/`, which is git-ignored.
+- The only hand-entered numbers are image baselines v1 and v2 (`IMAGE_VERSIONS` in the
+  builder), because those runs kept no logs.
+- Verified by driving headless Edge: all six pages render with no console errors and the
+  class tabs and confusion-matrix selector work.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -295,9 +330,11 @@ Repo (done 2026-09-01): private GitHub repo `adieladaniel/medreason-ai`, `main` 
 (`*.pth`, `*.joblib`, `*.npy`), per-study prediction CSVs, and `experiments/explain_samples/`.
 MIMIC is PhysioNet credentialed data, so never commit it, not even to a private repo.
 `requirements.txt` and `README.md` exist. Commit and push only when the user asks, and
-branch off `main` for changes. Still to do: the agreed
-`app/{api,agent,pipelines,services,database,config,models,utils}` structure (create it
-when Phase 7 backend work starts), plus `docs/`, `tests/`, `docker/`.
+branch off `main` for changes. `app/` now exists with the dashboard (`main.py`,
+`dashboard_data.py`, `static/`, `data/`). Still to do: the agreed subfolders
+`app/{api,agent,pipelines,services,database,config,models,utils}` as Phases 5 to 7 land,
+plus `docs/`, `tests/`, `docker/`. The Analyze page (upload a case, agent steps,
+evidence) is planned as an addition to this same app.
 
 Work the iterative loop per component: design, implement, review, test, improve, proceed.
 One component at a time, not big upfront builds.

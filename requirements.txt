@@ -22,5 +22,9 @@ tokenizers==0.22.2
 huggingface-hub==1.25.1
 pillow==12.2.0
 
+# progress dashboard and future backend (app/)
+fastapi==0.141.1
+uvicorn==0.53.0
+
 # Kaggle CLI (remote image-model training: kernels push/status/output)
 kaggle==2.2.3

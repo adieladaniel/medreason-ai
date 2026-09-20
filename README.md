@@ -27,6 +27,22 @@ accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
 | 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | not started |
 | 8. Integration, testing, writeup | not started |
 
+## Progress dashboard
+
+A local web UI that shows everything done so far: phase tracker, data pipeline
+statistics, per-model results and training curves, fusion comparisons (ROC, precision
+recall, calibration, confusion matrices), and the explainability gallery.
+
+```bash
+python -m uvicorn app.main:app --port 8000
+# then open http://localhost:8000
+```
+
+It reads the real result files under `experiments/` and rebuilds its data file
+(`app/data/dashboard.json`) on startup when a source is newer, so new results show up
+without editing the UI. The gallery needs `experiments/explain_samples/`, which is
+git-ignored.
+
 ## Data is not included in this repo
 
 The dataset is built from MIMIC-CXR and MIMIC-IV v3.1 (PhysioNet credentialed data). The
@@ -48,6 +64,7 @@ scripts/               data pipeline, run from repo root, local, no GPU
   train_text_baseline.py     text baseline (frozen Bio_ClinicalBERT + logreg, local CPU)
   generate_oof_predictions.py / train_fusion.py    Phase 3 fusion
 explain/               Phase 4 per-modality explainers (SHAP, Grad-CAM)
+app/                   FastAPI app and progress dashboard (first slice of the Phase 7 backend)
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored
 data/                  git-ignored (see above)

@@ -99,8 +99,20 @@ Status: done (late fusion). Fused val macro F1 0.61 vs best single modality 0.51
   beats image+text (0.557), which beats image+blood (0.493). Text contributes most, image
   least.
 - Leakage guard: text inputs are Setting A (INDICATION section only), never full-report.
-- Artifacts in `experiments/fusion/`. Embedding-level and attention fusion are not needed,
-  since late fusion already clears the bar comfortably.
+- Artifacts in `experiments/fusion/`.
+
+Feature-level fusion was tried as a documented ablation
+(`scripts/train_fusion_mlp.py`, done 2026-09-20): concatenate the three modalities'
+frozen representations (image's 18 pathology probabilities, blood's 19 features
+imputed, text's 768-dim embedding reduced to 32 by PCA) and train one MLP on the
+result, instead of stacking predicted probabilities. No out-of-fold step is needed,
+since these are frozen encoder outputs that never saw the labels. Result: val macro F1
+0.586, below late fusion's 0.613. The dev set used for early stopping scored 0.655 on
+the same model, so the gap is overfitting: 88 features and only 774 cancer training
+rows is enough for a trained model to fit patterns that do not generalize. The same
+modality ablation held here too (all three beats every pair, text contributes most,
+image least). Late fusion stays the one used going forward. Artifacts in
+`experiments/fusion_mlp/`.
 
 ## Phase 4, explainability
 
@@ -157,7 +169,10 @@ Status: not started.
 
 ## Phase 7, backend and API
 
-Status: not started.
+Status: not started. A first slice exists: the progress dashboard (`app/`), a FastAPI app
+with a static single-page UI that shows all results so far and rebuilds its data from
+`experiments/` automatically. The pipeline endpoints and the Analyze page will be added
+to it.
 
 - FastAPI service wrapping the full pipeline: upload, prediction, belief state, consistency
   check, explanation, evidence.

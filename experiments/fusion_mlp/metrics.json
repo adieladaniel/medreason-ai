@@ -1,0 +1,58 @@
+{
+  "seed": 42,
+  "text_pca_dim": 32,
+  "pca_scan_dev_macro_f1": {
+    "16": 0.6241,
+    "32": 0.6597,
+    "64": 0.6562
+  },
+  "n_fit": 9310,
+  "n_dev": 1729,
+  "n_val": 2315,
+  "late_fusion_bar": 0.613,
+  "ablation_val_macro_f1": {
+    "image": 0.4432,
+    "blood": 0.4171,
+    "text": 0.5286,
+    "image+blood": 0.4895,
+    "image+text": 0.5578,
+    "blood+text": 0.5691,
+    "image+blood+text": 0.5864
+  },
+  "ablation_dev_macro_f1": {
+    "image": 0.5125,
+    "blood": 0.4575,
+    "text": 0.5957,
+    "image+blood": 0.5315,
+    "image+text": 0.6456,
+    "blood+text": 0.6261,
+    "image+blood+text": 0.6554
+  },
+  "final": {
+    "macro_f1": 0.5864,
+    "f1_per_class": {
+      "Normal": 0.6206,
+      "Pneumonia": 0.7591,
+      "Lung Cancer": 0.3794
+    },
+    "confusion_matrix": [
+      [
+        454,
+        151,
+        59
+      ],
+      [
+        324,
+        1040,
+        170
+      ],
+      [
+        21,
+        15,
+        81
+      ]
+    ],
+    "n_features": 88
+  },
+  "verdict": "0.5864 vs late fusion (logpool) 0.613 -> late fusion still wins"
+}
