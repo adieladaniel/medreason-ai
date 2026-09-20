@@ -64,7 +64,8 @@ scripts/               data pipeline, run from repo root, local, no GPU
   train_text_baseline.py     text baseline (frozen Bio_ClinicalBERT + logreg, local CPU)
   generate_oof_predictions.py / train_fusion.py    Phase 3 fusion
 explain/               Phase 4 per-modality explainers (SHAP, Grad-CAM)
-app/                   FastAPI app and progress dashboard (first slice of the Phase 7 backend)
+app/                   FastAPI app, progress dashboard, and the Phase 5 agent
+  agent/                orchestrator, belief state, consistency checker, planner
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored
 data/                  git-ignored (see above)

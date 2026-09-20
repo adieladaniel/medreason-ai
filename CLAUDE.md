@@ -51,7 +51,7 @@ not, cut it.
 
 ---
 
-## 2. Current status (2026-09-02)
+## 2. Current status (2026-09-20)
 
 | Phase | State | Notes |
 |-------|-------|-------|
@@ -60,8 +60,8 @@ not, cut it.
 | 2. Unimodal baselines | done | image 0.50 / blood 0.46 / text 0.51 (val macro F1), complementary per class |
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
-| 5. Agentic layer | not started | next |
-| 6. RAG evidence retrieval | not started | |
+| 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
+| 6. RAG evidence retrieval | not started | next |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -199,6 +199,37 @@ http://localhost:8000.
   builder), because those runs kept no logs.
 - Verified by driving headless Edge: all six pages render with no console errors and the
   class tabs and confusion-matrix selector work.
+- The fusion page also shows the feature-fusion MLP ablation (`_fusion_mlp()` in the
+  builder), added 2026-09-20 alongside that experiment.
+
+### Phase 5, agentic layer (core done, 2026-09-20)
+
+`app/agent/` package: `tools.py`, `belief.py`, `consistency.py`, `planner.py`,
+`orchestrator.py`. Design rule enforced throughout: the orchestrator calls tools and
+reasons about their outputs, it never produces a class prediction of its own.
+
+- Tools are thin wrappers around `explain.image/blood/text`, which already return
+  `{predicted_class, probabilities, attributions, summary}`. No new prediction logic.
+- Belief state pools whichever modalities have run with the exact Phase 3 rule (geometric
+  mean, `scripts/train_fusion.py` logpool). Recomputed from the full evidence set on every
+  update, not folded in as a running product, so the belief after any subset of tools
+  matches that subset's row in the Phase 3 ablation table exactly.
+- Consistency checker's confidence language ("cases like this are correct N% of the
+  time") reads real numbers from `app/data/dashboard.json` (`predictions.agreement`),
+  falling back to the same numbers as constants if that file is missing.
+- Missing-information planner's confidence thresholds (0.85 high, 0.55 low) are a design
+  choice; which modality it recommends next is read from the real Phase 3 ablation
+  ranking (text contributes most, then blood, then image), via
+  `tools.MODALITY_PRIORITY`.
+- CLI mirrors `explain/run.py`: `python -m app.agent.orchestrator --study-id ID
+  [--drop image|blood|text]`. `--drop` simulates a missing modality, which is also how
+  the Phase 8b demo cases (missing labs, cross-modality conflict) get produced.
+- Verified against real validation cases: full agreement, a missing modality, a genuine
+  conflict (text and blood correctly call Lung Cancer, image confidently calls Normal;
+  the checker flags it and the pooled belief still lands on Cancer), and a
+  single-modality low-confidence case that correctly recommends text next.
+- Not yet wired to an API or the UI. The dashboard's "Analyze a case" link is still a
+  placeholder pointing at this; that wiring is Phase 7 work.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -309,19 +340,24 @@ that worked for images.
 
 ## 5. What to do next
 
-Phases 2, 3, and 4 core are done (section 2). Fusion (logpool of the 3 modalities'
-probabilities) reaches val macro F1 0.61. The three explainers work and are verified.
+Phases 2, 3, 4, and 5 core are done (section 2). Fusion (logpool of the 3 modalities'
+probabilities) reaches val macro F1 0.61. The three explainers and the agent core
+(`app/agent/`) both work and are verified against real validation cases.
 
 Next:
 
-1. Phase 5, agentic layer. An orchestrator that calls the model tools plus
-   `explain/run.py`, maintains a belief state (probability distribution over the 3
-   classes, updated per tool call), runs a consistency checker (flags cross-modality
-   conflicts, for example image says Cancer but blood and text say Normal), and a
-   missing-information planner (decides whether more input is worth requesting given
-   current confidence). Keep the design rule: the agent orchestrates and reasons, the
-   models diagnose.
-2. Then Phase 6 (RAG evidence retrieval) and Phase 7 (backend and API).
+1. Phase 6, RAG evidence retrieval. A small corpus of papers and guidelines for the 3
+   diseases, a Qdrant collection, an evidence planner that builds a query from the
+   prediction plus the top attributions plus the belief state (not the raw label alone),
+   and a local LLM through Ollama to write the final cited explanation. Keep the design
+   rule: RAG explains, it never diagnoses, and it must not be able to change the
+   predicted label.
+2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
+   endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
+   storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
+   the dashboard's placeholder "Analyze a case" page against that endpoint. Watch out for
+   the text explainer's 60 to 90 second SHAP run; either move it off the request path or
+   show the prediction and image and blood explanations first, then stream text after.
 3. Cancer-class polish (focal loss, cascade, thresholds) stays deferred. Only if the
    sealed test set demands it at the end.
 

@@ -145,17 +145,36 @@ Core explainability capability is complete. The agent (Phase 5) can consume
 
 ## Phase 5, agentic layer
 
-Status: not started.
+Status: core done, 2026-09-20. `app/agent/` package.
 
-- Agent orchestrator: a tool-calling shell around the trained models (image, blood, text
-  tools plus fusion).
-- Belief state: probability distribution over the 3 classes, updated per tool call.
-- Consistency checker: cross-modality conflict detection (for example image says Cancer,
-  blood and text say Normal).
-- Missing-information planner: decide whether more input is worth requesting given current
-  confidence.
-- Design rule to preserve: the agent orchestrates and reasons, the trained models
-  diagnose.
+- Tools (`tools.py`): thin wrappers giving `explain.image/blood/text` a single calling
+  convention. No new prediction logic; every probability still comes from the saved
+  Phase 2 models.
+- Belief state (`belief.py`): pools whichever modalities have run, using the exact rule
+  validated in Phase 3, the geometric mean (`scripts/train_fusion.py`, logpool, val macro
+  F1 0.613). Recomputed from scratch on every update rather than folded in as a running
+  product, so the belief after any subset of tools matches that subset's row in the Phase
+  3 ablation table exactly.
+- Consistency checker (`consistency.py`): flags disagreement between modalities. The
+  confidence language it uses ("cases like this are correct N% of the time") is read
+  from real validation statistics in `app/data/dashboard.json`, with the same numbers as
+  a fallback constant if that file is missing.
+- Missing-information planner (`planner.py`): decides whether another modality is worth
+  requesting. Confidence thresholds (0.85 high, 0.55 low) are a design choice, but which
+  modality it recommends comes from the real Phase 3 ablation ranking (text contributes
+  most, then blood, then image).
+- Orchestrator (`orchestrator.py`): runs the above for one case. CLI mirrors
+  `explain/run.py`: `python -m app.agent.orchestrator --study-id ID [--drop image|blood|text]`,
+  the `--drop` flags simulate a missing modality, which is also how the Phase 8b demo
+  cases (missing labs, cross-modality conflict) will be produced.
+- Verified against real validation cases: full agreement, a missing modality, a genuine
+  cross-modality conflict (text and blood correctly call Lung Cancer, image confidently
+  calls Normal, the checker flags it and the pooled belief still lands on Cancer), and a
+  single-modality low-confidence case that correctly recommends text next.
+- Design rule preserved: the orchestrator calls tools and reasons about their outputs, it
+  never produces a class prediction of its own.
+- Not yet wired to an API or the UI. The dashboard's "Analyze a case" is still a
+  placeholder; that wiring is Phase 7 work.
 
 ## Phase 6, evidence retrieval (RAG)
 
