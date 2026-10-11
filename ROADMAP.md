@@ -178,10 +178,17 @@ Status: core done, 2026-09-20. `app/agent/` package.
 
 ## Phase 6, evidence retrieval (RAG)
 
-Status: not started.
+Status: in progress. Corpus step done 2026-10-11.
 
-- Build a small corpus of relevant papers and guidelines for the 3 target diseases.
-- Qdrant vector DB for retrieval.
+- Corpus (done): 14 open-access papers, about 40,800 words, listed in
+  `app/rag/corpus_sources.json` and downloaded by `python -m app.rag.build_corpus` from
+  Europe PMC as structured XML into `data/corpus/` (git-ignored). Topics: pneumonia
+  imaging and diagnosis (6), lung cancer imaging (3), lung cancer lab markers (4),
+  pneumonia-versus-cancer differential (1). Every license was checked against Europe PMC
+  and is CC BY, CC BY-NC, or CC BY-NC-SA (CC BY-NC-ND was excluded because chunking is a
+  derivative use). Only the manifest and the script are committed; each chunk will carry
+  its citation so the explanation can cite it.
+- Qdrant vector DB for retrieval (next: chunk, embed, embedded Qdrant, retrieval test).
 - Evidence planner: build a query from the prediction, the explainability output, and the
   belief state, not just the raw label.
 - Local LLM via Ollama for the final explanation text. RAG explains, it does not diagnose.

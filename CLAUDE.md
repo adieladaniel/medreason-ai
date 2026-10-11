@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | not started | next |
+| 6. RAG evidence retrieval | in progress | corpus built (14 open-access papers), retrieval next |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -230,6 +230,28 @@ reasons about their outputs, it never produces a class prediction of its own.
   single-modality low-confidence case that correctly recommends text next.
 - Not yet wired to an API or the UI. The dashboard's "Analyze a case" link is still a
   placeholder pointing at this; that wiring is Phase 7 work.
+
+### Phase 6, RAG evidence retrieval (in progress, 2026-10-11)
+
+`app/rag/` package. Corpus step done: `app/rag/corpus_sources.json` lists 14 open-access
+PubMed Central papers (pneumonia imaging and diagnosis, lung cancer imaging, lung cancer
+lab markers, the pneumonia versus cancer differential). `python -m app.rag.build_corpus`
+downloads each as JATS XML from Europe PMC, drops citation markers and boilerplate
+sections, and writes `data/corpus/<PMCID>.json` with the text split by section plus
+citation metadata (authors, journal, year, DOI, license). About 40,800 words in total.
+
+- Licenses were checked per paper through Europe PMC's `license` field. Allowed: CC BY,
+  CC BY-NC, CC BY-NC-SA, CC0. CC BY-NC-ND is excluded, since chunking is a derivative use.
+- `data/` is git-ignored, so the corpus text is rebuilt from the manifest, not committed.
+- Web access works from this environment: `curl` and the WebSearch and WebFetch tools
+  both reach the internet. Earlier notes saying otherwise were wrong.
+- Ollama CLI is installed (0.34.2) but no server is running and no models are confirmed
+  pulled. Docker, `qdrant_client`, and a Postgres driver are not installed. Plan: embedded
+  Qdrant against a local folder for now, a server container only in Phase 7.
+- Next: chunk by section with the citation attached, embed with a small local model,
+  store in embedded Qdrant, and test that a query such as "upper lobe consolidation with
+  elevated WBC" returns sensible passages. Then the evidence planner, then the Ollama
+  explanation writer. RAG explains, it never changes the predicted label.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.

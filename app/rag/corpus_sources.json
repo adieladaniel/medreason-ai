@@ -1,0 +1,19 @@
+{
+  "_note": "Open-access sources for the Phase 6 evidence corpus. Every entry was checked against Europe PMC's license field: CC BY, CC BY-NC, or CC BY-NC-SA only (no CC BY-NC-ND, since chunking is a derivative use). The text itself is downloaded by app/rag/build_corpus.py into data/corpus/ (git-ignored); only this manifest is committed. Citation metadata (authors, journal, year, DOI, license) is read from Europe PMC at build time.",
+  "sources": [
+    {"pmcid": "PMC3898785", "topic": "pneumonia", "role": "Radiographic findings in community-acquired pneumonia (ICU cohort)"},
+    {"pmcid": "PMC10959314", "topic": "pneumonia", "role": "Chest X-ray follow-up in community-acquired pneumonia"},
+    {"pmcid": "PMC10253144", "topic": "pneumonia", "role": "Procalcitonin and other diagnostic tools in community-acquired pneumonia"},
+    {"pmcid": "PMC4608327", "topic": "pneumonia", "role": "CRP and procalcitonin diagnostic accuracy in suspected pneumonia"},
+    {"pmcid": "PMC1821031", "topic": "pneumonia", "role": "Clinical and laboratory parameters in community-acquired pneumonia"},
+    {"pmcid": "PMC12554325", "topic": "pneumonia", "role": "Neutrophil-lymphocyte ratio and pneumonia mortality (meta-analysis)"},
+    {"pmcid": "PMC8206195", "topic": "lung_cancer", "role": "Lung cancer and radiological imaging"},
+    {"pmcid": "PMC9431813", "topic": "lung_cancer", "role": "Lung cancers missed on chest radiograph"},
+    {"pmcid": "PMC6784443", "topic": "lung_cancer", "role": "Lung nodules, approach and management"},
+    {"pmcid": "PMC10313305", "topic": "lung_cancer_labs", "role": "NLR and PLR in non-small cell lung cancer"},
+    {"pmcid": "PMC4812293", "topic": "lung_cancer_labs", "role": "Platelet-lymphocyte ratio in non-small cell lung cancer"},
+    {"pmcid": "PMC5540491", "topic": "lung_cancer_labs", "role": "LDH and creatine kinase in lung cancer"},
+    {"pmcid": "PMC12688816", "topic": "lung_cancer_labs", "role": "LDH-to-albumin ratio in resectable NSCLC"},
+    {"pmcid": "PMC10035766", "topic": "differential", "role": "Adenocarcinoma mimicking pneumonia"}
+  ]
+}
