@@ -180,23 +180,24 @@ Status: core done, 2026-09-20. `app/agent/` package.
 
 Status: in progress. Corpus and retrieval core done 2026-10-11.
 
-- Corpus (done): 14 open-access papers, about 40,800 words, listed in
+- Corpus (done): 27 open-access papers, about 82,500 words, listed in
   `app/rag/corpus_sources.json` and downloaded by `python -m app.rag.build_corpus` from
-  Europe PMC as structured XML into `data/corpus/` (git-ignored). Topics: pneumonia
-  imaging and diagnosis (6), lung cancer imaging (3), lung cancer lab markers (4),
-  pneumonia-versus-cancer differential (1). Every license was checked against Europe PMC
-  and is CC BY, CC BY-NC, or CC BY-NC-SA (CC BY-NC-ND was excluded because chunking is a
-  derivative use). Only the manifest and the script are committed; each chunk will carry
-  its citation so the explanation can cite it.
-- Retrieval (done): sentence-packed passages of about 300 words with overlap, embedded with
-  `NeuML/pubmedbert-base-embeddings`, stored in embedded Qdrant (`app/rag/index.py`).
-  Model and chunking were chosen by measurement on 19 answerable and 8 off-corpus queries
-  (`experiments/rag_retrieval/`). All models found the right paper about equally often, so
-  the deciding factor was whether a similarity floor can separate answerable from
-  off-corpus queries, which only pubmedbert does with a wide margin. Semantic chunking did
-  not beat simple sentence packing. Known limit: near-topic queries the corpus cannot
-  answer still return weak passages, so the explanation writer must cite only what a
-  passage states.
+  Europe PMC into `data/corpus/` (git-ignored). The second batch of 13 was chosen from the
+  models' own top features and image channels. Every license was checked against Europe PMC
+  (CC BY, CC BY-NC, CC BY-NC-SA; CC BY-NC-ND excluded because chunking is a derivative use).
+  Only the manifest and the script are committed.
+- Retrieval (done, measured): hybrid search (embeddings plus BM25), then a biomedical
+  cross-encoder reranks the top 5, then a score threshold lets the system say "no supporting
+  evidence" (`app/rag/retrieve.py`). Evaluated on 54 queries split into dev and test plus 16
+  off-corpus queries (`experiments/rag_retrieval/PIPELINE.md`). Right passage at rank 1 went
+  from 0.73 / 0.57 (dev / test) for the semantic-only start to 1.00 / 0.86, and the threshold
+  refused all 16 off-corpus queries. Keyword search alone (0.81 / 0.79) beat the semantic
+  model, query expansion did not help and was dropped, and a hand audit of 18 results
+  (`AUDIT.md`) shows the keyword-based relevance proxy is roughly right but approximate.
+  Retrieval takes about 1 to 8 seconds per query on CPU.
+- Known limits: a reranker can rank a near-miss first with a high score, and a high score
+  means on-topic rather than supportive, so the explanation writer must check what a passage
+  actually states.
 - Evidence planner: build a query from the prediction, the explainability output, and the
   belief state, not just the raw label.
 - Local LLM via Ollama for the final explanation text. RAG explains, it does not diagnose.

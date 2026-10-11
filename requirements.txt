@@ -33,6 +33,7 @@ torchvision==0.26.0
 # RAG evidence retrieval (app/rag/): embedded Qdrant plus sentence embeddings
 qdrant-client==1.19.1
 sentence-transformers==5.6.1
+nltk==3.10.0   # Porter stemmer for BM25 keyword search
 
 # progress dashboard and future backend (app/)
 fastapi==0.141.1

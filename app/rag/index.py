@@ -78,7 +78,7 @@ def build_index(model_name: str = DEFAULT_MODEL, chunks: list[Chunk] | None = No
     client.create_collection(COLLECTION, vectors_config=VectorParams(size=vectors.shape[1], distance=Distance.COSINE))
     client.upsert(COLLECTION, points=[
         PointStruct(id=c.chunk_id, vector=v.tolist(), payload={
-            "pmcid": c.pmcid, "topic": c.topic, "heading": c.heading, "text": c.text,
+            "chunk_id": c.chunk_id, "pmcid": c.pmcid, "topic": c.topic, "heading": c.heading, "text": c.text,
             "citation": c.citation, "title": c.title, "url": c.url, "license": c.license,
         }) for c, v in zip(chunks, vectors)
     ])

@@ -48,3 +48,6 @@ huggingface/
 Thumbs.db
 .idea/
 *.swp
+
+# scratch logs from evaluation reruns
+experiments/**/*_rerun*.log

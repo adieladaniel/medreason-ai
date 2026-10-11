@@ -1,4 +1,7 @@
 """
+STAGE 1 record (14-paper corpus, 19 queries). Superseded by eval_pipeline.py; rerunning against the
+27-paper corpus gives different numbers. Kept because the first model and chunking choices rest on it.
+
 Compares chunking strategies (and, jointly, embedding models) on retrieval quality, so the
 default in app/rag/chunker.py and app/rag/index.py is chosen by measurement.
 

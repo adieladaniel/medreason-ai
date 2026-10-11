@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | in progress | corpus and retrieval core done, evidence planner and explanation writer next |
+| 6. RAG evidence retrieval | in progress | corpus (27 papers) and retrieval pipeline done and measured, evidence planner and explanation writer next |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -248,41 +248,62 @@ citation metadata (authors, journal, year, DOI, license). About 40,800 words in 
 - Ollama CLI is installed (0.34.2) but no server is running and no models are confirmed
   pulled. Docker and a Postgres driver are not installed.
 
-Retrieval core done 2026-10-11 (`chunker.py`, `index.py`, `eval_retrieval.py`,
-`eval_chunking.py`; results in `experiments/rag_retrieval/`):
+Retrieval core, stage 1 (2026-10-11, 14 papers, `chunker.py`, `index.py`, `eval_retrieval.py`,
+`eval_chunking.py`, results `RESULTS.md` and `CHUNKING.md` in `experiments/rag_retrieval/`):
+embedded Qdrant (a folder under `data/qdrant/`, one line to swap for a server in Phase 7),
+sentence-packed passages of about 300 words with about 15 percent overlap embedded as "title.
+heading. passage", and a comparison of five chunking strategies and four embedding models.
+Semantic chunking did not beat plain sentence packing. Stage 1 used 19 queries, so it could
+not separate good from great, and its eval scripts now give different numbers against the
+larger corpus. Treat them as the record of how the first choices were made.
 
-- Qdrant runs embedded, as a folder under `data/qdrant/` (git-ignored). Moving to a
-  server container in Phase 7 means changing one line in `index._client`.
-- Chunking: sections come from the papers' own XML headings, then sentence packing into
-  passages of about 300 words (roughly 400 tokens) with about 15 percent overlap, embedded
-  as "title. heading. passage" so a passage keeps its context. 238 passages.
-- Embedding model: `NeuML/pubmedbert-base-embeddings`. It was chosen on one property, not
-  accuracy: all four candidate models retrieve the right paper at rank 1 for 84 to 89
-  percent of 19 queries (a difference of one query, which is noise). What separated them
-  is whether a similarity floor can tell answerable queries from off-corpus ones. bge-small
-  and multi-qa-distilbert cannot (their lowest answerable score is below their highest
-  off-corpus score); pubmedbert can, with the widest margin (lowest answerable 0.409,
-  highest off-corpus 0.276). `index.MIN_SCORE = 0.34` is the midpoint.
-- `index.retrieve()` applies the floor and returns an empty list when nothing clears it,
-  so the explanation can say "no supporting evidence" instead of citing weak matches.
-- Chunking strategies compared (`experiments/rag_retrieval/CHUNKING.md`): 100-word,
-  170-word, 300-word with overlap, whole-section, and semantic chunking, each with two
-  models. Semantic chunking did not beat plain sentence packing and costs an extra
-  embedding pass, so it was not adopted. Larger chunks do not retrieve noticeably better
-  but put much more text in front of the explanation LLM (top-3 context: about 280 words
-  at 100-word chunks, about 640 at 300-word chunks, about 790 for whole sections).
-- Known limit: the floor catches off-topic queries, not near-topic ones the corpus cannot
-  answer. "Upper lobe consolidation with elevated white blood cell count" still returns
-  three passages above the floor, none of which really answers it. The explanation writer
-  must cite only what a passage states and say when no passage addresses a point.
-- Evaluation caveats: 19 answerable queries (one is worth 5 points), expected papers and
-  must-contain patterns written by the author, query 19 added after it failed, and
-  passage relevance is a keyword proxy. This justifies a model choice, it is not a
-  benchmark. Parent-child retrieval (retrieve small, show the whole section) is not scored
-  because it changes what the explanation writer sees, not what is retrieved. Try it once
-  the writer exists, with a context cap for the 4 GB GPU.
+Retrieval improvements, stage 2 (2026-10-12): driven by a bigger evaluation, because stage 1
+could not show improvements.
+
+- Corpus: 27 open-access papers, 82,500 words, 474 passages. The 13 added papers were chosen
+  from the models' own top features (hemoglobin, albumin, LDH, WBC, urea, platelets, sodium,
+  lymphocytes) and image channels (edema, effusion, atelectasis), so coverage follows what the
+  models actually use. All licenses checked, CC BY-NC-ND still excluded.
+- Evaluation (`eval_queries.py`, `eval_pipeline.py`, `audit_proxy.py`): 54 queries (questions
+  and the terse keyword form the evidence planner will emit) split into dev and test by topic
+  group, plus 16 off-corpus queries (several deliberately near the corpus: tuberculosis, COPD,
+  pulmonary embolism, pneumothorax). A passage is relevant if its topic is allowed and it
+  contains the question's key terms. Variants are chosen on dev and confirmed on test.
+  Random ranking scores p@1 0.05. `AUDIT.md` records a hand reading of 18 top results: the
+  proxy never called an irrelevant passage relevant but passes weak ones, and it undercounts
+  about half of the passages it rejects. Read levels as approximate, comparisons as sturdier.
+- Result (`PIPELINE.md`), right passage at rank 1, dev / test: semantic only 0.73 / 0.57,
+  keyword BM25 only 0.81 / 0.79, hybrid 0.96 / 0.75, hybrid plus MedCPT reranker 1.00 / 0.86.
+  Keyword search beat the semantic model that stage 1 chose, partly because the queries share
+  vocabulary with the papers, so this favors keyword search more than a real user would.
+- Adopted pipeline (`retrieve.py`): hybrid search (dense plus BM25 merged by reciprocal rank
+  fusion), then `ncbi/MedCPT-Cross-Encoder` reranks the top 5, then passages scoring below
+  `MIN_RERANK_SCORE = 4.0` are dropped. An empty result means "no supporting evidence".
+- Why MedCPT and not the smaller MiniLM reranker: both rank about equally (differences of one
+  or two queries), but MedCPT's score abstains far better, with ROC AUC 0.997 against 0.953
+  for telling answerable from off-corpus queries. With a threshold chosen on dev, it refused
+  8 of 8 off-corpus test queries and kept 26 of 28 answerable ones (the two refused: a
+  white-blood-cell query the corpus cannot answer, and a pulmonary-edema query at 3.94).
+- Not adopted: query expansion (`hybrid.expand_query`). It did not help dense search, hybrid
+  search, or reranking on dev or test. My expectation that it would fix the "elevated WBC"
+  failure was wrong.
+- Scoring detail that mattered: reranker scores must be raw logits. Sigmoid probabilities
+  saturate at exactly 1.0, create ties that the sort breaks arbitrarily (it inflated the first
+  MedCPT numbers), and make any threshold hair-thin.
+- Latency: the cross-encoder is essentially all of it. Reranking 5 passages takes about 1 to
+  1.5 s per query now; earlier measurements on the same machine were 3 to 6 times slower, so
+  expect 1 to 8 s. Depth 5, 10, and 20 gave the same quality. Fewer passages clear the
+  threshold at depth 5 (often 1 to 3), which is the trade-off.
+- Known limits: the reranker can rank a near-miss first with a high score (for "platelet to
+  lymphocyte ratio in pneumonia" it put an NLR passage ahead of the paper on exactly that),
+  and a high score means on-topic, not that the passage supports a claim. The explanation
+  writer must quote what a passage states and say when none addresses a point. Provisional
+  numbers: 16 off-corpus queries and 54 answerable ones, written by the author with the
+  assistant.
 - Next: the evidence planner (turns prediction, top attributions, and belief state into a
-  query), then the Ollama explanation writer. RAG explains, it never changes the label.
+  query), then the Ollama explanation writer with a faithfulness check (does each cited claim
+  appear in its passage). Try parent-child expansion (show the whole section around a hit)
+  once the writer exists, with a context cap for the 4 GB GPU. RAG explains, never labels.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
