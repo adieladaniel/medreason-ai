@@ -1,0 +1,886 @@
+{
+ "sentence-transformers/multi-qa-distilbert-cos-v1": {
+  "all": {
+   "n": 19,
+   "hit@1": 0.895,
+   "hit@3": 0.895,
+   "hit@5": 0.947,
+   "mrr": 0.908
+  },
+  "question": {
+   "n": 8,
+   "hit@1": 1.0,
+   "hit@3": 1.0,
+   "hit@5": 1.0,
+   "mrr": 1.0
+  },
+  "case": {
+   "n": 11,
+   "hit@1": 0.818,
+   "hit@3": 0.818,
+   "hit@5": 0.909,
+   "mrr": 0.841
+  },
+  "rows": [
+   {
+    "kind": "question",
+    "query": "What chest X-ray findings are typical of community-acquired pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC1821031"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a consolidation that persists after pneumonia treatment suggest lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How accurate is C-reactive protein for diagnosing pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC4608327",
+     "PMC4608327",
+     "PMC4608327"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a high neutrophil-to-lymphocyte ratio predict death in pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "What is the prognostic value of the neutrophil to lymphocyte ratio in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Is elevated lactate dehydrogenase associated with worse survival in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Why are lung cancers missed on chest radiographs?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung cancer with elevated LDH and low albumin",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "pneumonia with leukocytosis and elevated CRP",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC4608327",
+     "PMC1821031"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC4812293",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation not resolving after antibiotics, possible malignancy",
+    "first_hit_rank": 4,
+    "top3": [
+     "PMC12688816",
+     "PMC10253144",
+     "PMC1821031"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung mass on chest radiograph with hilar enlargement",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation with air bronchograms on chest X-ray, pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated neutrophil-lymphocyte ratio and mortality in pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "spiculated pulmonary nodule, lung cancer risk",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "adenocarcinoma presenting as pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated procalcitonin, suspected bacterial pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC10253144",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "upper lobe consolidation with elevated white blood cell count",
+    "first_hit_rank": null,
+    "top3": [
+     "PMC12688816",
+     "PMC12688816",
+     "PMC5540491"
+    ]
+   }
+  ],
+  "threshold": {
+   "answerable_min": 0.39,
+   "off_corpus_max": 0.532,
+   "gap": -0.142,
+   "separable": false
+  }
+ },
+ "BAAI/bge-small-en-v1.5": {
+  "all": {
+   "n": 19,
+   "hit@1": 0.895,
+   "hit@3": 0.947,
+   "hit@5": 0.947,
+   "mrr": 0.921
+  },
+  "question": {
+   "n": 8,
+   "hit@1": 0.875,
+   "hit@3": 1.0,
+   "hit@5": 1.0,
+   "mrr": 0.938
+  },
+  "case": {
+   "n": 11,
+   "hit@1": 0.909,
+   "hit@3": 0.909,
+   "hit@5": 0.909,
+   "mrr": 0.909
+  },
+  "rows": [
+   {
+    "kind": "question",
+    "query": "What chest X-ray findings are typical of community-acquired pneumonia?",
+    "first_hit_rank": 2,
+    "top3": [
+     "PMC1821031",
+     "PMC3898785",
+     "PMC4608327"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a consolidation that persists after pneumonia treatment suggest lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How accurate is C-reactive protein for diagnosing pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC4608327",
+     "PMC4608327",
+     "PMC4608327"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a high neutrophil-to-lymphocyte ratio predict death in pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "What is the prognostic value of the neutrophil to lymphocyte ratio in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Is elevated lactate dehydrogenase associated with worse survival in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Why are lung cancers missed on chest radiographs?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung cancer with elevated LDH and low albumin",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "pneumonia with leukocytosis and elevated CRP",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC4812293",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation not resolving after antibiotics, possible malignancy",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung mass on chest radiograph with hilar enlargement",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation with air bronchograms on chest X-ray, pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC3898785",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated neutrophil-lymphocyte ratio and mortality in pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "spiculated pulmonary nodule, lung cancer risk",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "adenocarcinoma presenting as pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated procalcitonin, suspected bacterial pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC10253144",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "upper lobe consolidation with elevated white blood cell count",
+    "first_hit_rank": null,
+    "top3": [
+     "PMC4812293",
+     "PMC12688816",
+     "PMC4812293"
+    ]
+   }
+  ],
+  "threshold": {
+   "answerable_min": 0.694,
+   "off_corpus_max": 0.698,
+   "gap": -0.004,
+   "separable": false
+  }
+ },
+ "pritamdeka/S-PubMedBert-MS-MARCO": {
+  "all": {
+   "n": 19,
+   "hit@1": 0.842,
+   "hit@3": 0.842,
+   "hit@5": 0.947,
+   "mrr": 0.873
+  },
+  "question": {
+   "n": 8,
+   "hit@1": 0.875,
+   "hit@3": 0.875,
+   "hit@5": 1.0,
+   "mrr": 0.9
+  },
+  "case": {
+   "n": 11,
+   "hit@1": 0.818,
+   "hit@3": 0.818,
+   "hit@5": 0.909,
+   "mrr": 0.854
+  },
+  "rows": [
+   {
+    "kind": "question",
+    "query": "What chest X-ray findings are typical of community-acquired pneumonia?",
+    "first_hit_rank": 5,
+    "top3": [
+     "PMC10253144",
+     "PMC10253144",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a consolidation that persists after pneumonia treatment suggest lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How accurate is C-reactive protein for diagnosing pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC4608327",
+     "PMC4608327"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a high neutrophil-to-lymphocyte ratio predict death in pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "What is the prognostic value of the neutrophil to lymphocyte ratio in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Is elevated lactate dehydrogenase associated with worse survival in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Why are lung cancers missed on chest radiographs?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung cancer with elevated LDH and low albumin",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC5540491",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "pneumonia with leukocytosis and elevated CRP",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC10253144",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation not resolving after antibiotics, possible malignancy",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung mass on chest radiograph with hilar enlargement",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation with air bronchograms on chest X-ray, pneumonia",
+    "first_hit_rank": 7,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated neutrophil-lymphocyte ratio and mortality in pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "spiculated pulmonary nodule, lung cancer risk",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "adenocarcinoma presenting as pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated procalcitonin, suspected bacterial pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC10253144",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "upper lobe consolidation with elevated white blood cell count",
+    "first_hit_rank": 4,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC12554325"
+    ]
+   }
+  ],
+  "threshold": {
+   "answerable_min": 0.92,
+   "off_corpus_max": 0.896,
+   "gap": 0.024,
+   "separable": true
+  }
+ },
+ "NeuML/pubmedbert-base-embeddings": {
+  "all": {
+   "n": 19,
+   "hit@1": 0.895,
+   "hit@3": 0.947,
+   "hit@5": 0.947,
+   "mrr": 0.912
+  },
+  "question": {
+   "n": 8,
+   "hit@1": 1.0,
+   "hit@3": 1.0,
+   "hit@5": 1.0,
+   "mrr": 1.0
+  },
+  "case": {
+   "n": 11,
+   "hit@1": 0.818,
+   "hit@3": 0.909,
+   "hit@5": 0.909,
+   "mrr": 0.848
+  },
+  "rows": [
+   {
+    "kind": "question",
+    "query": "What chest X-ray findings are typical of community-acquired pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a consolidation that persists after pneumonia treatment suggest lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How accurate is C-reactive protein for diagnosing pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC4608327",
+     "PMC4608327",
+     "PMC1821031"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Does a high neutrophil-to-lymphocyte ratio predict death in pneumonia?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC10313305",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "What is the prognostic value of the neutrophil to lymphocyte ratio in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Is elevated lactate dehydrogenase associated with worse survival in lung cancer?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12688816",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "Why are lung cancers missed on chest radiographs?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "question",
+    "query": "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung cancer with elevated LDH and low albumin",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12688816",
+     "PMC5540491",
+     "PMC5540491"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "pneumonia with leukocytosis and elevated CRP",
+    "first_hit_rank": 3,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10313305"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation not resolving after antibiotics, possible malignancy",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "lung mass on chest radiograph with hilar enlargement",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC9431813",
+     "PMC9431813",
+     "PMC9431813"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "consolidation with air bronchograms on chest X-ray, pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10959314",
+     "PMC10959314",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated neutrophil-lymphocyte ratio and mortality in pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC12554325",
+     "PMC12554325",
+     "PMC12554325"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "spiculated pulmonary nodule, lung cancer risk",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC6784443",
+     "PMC6784443",
+     "PMC6784443"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "adenocarcinoma presenting as pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10035766",
+     "PMC10035766",
+     "PMC10035766"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "elevated procalcitonin, suspected bacterial pneumonia",
+    "first_hit_rank": 1,
+    "top3": [
+     "PMC10253144",
+     "PMC1821031",
+     "PMC10253144"
+    ]
+   },
+   {
+    "kind": "case",
+    "query": "upper lobe consolidation with elevated white blood cell count",
+    "first_hit_rank": null,
+    "top3": [
+     "PMC10313305",
+     "PMC10313305",
+     "PMC10035766"
+    ]
+   }
+  ],
+  "threshold": {
+   "answerable_min": 0.409,
+   "off_corpus_max": 0.276,
+   "gap": 0.133,
+   "separable": true
+  }
+ }
+}

@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | in progress | corpus built (14 open-access papers), retrieval next |
+| 6. RAG evidence retrieval | in progress | corpus and retrieval core done, evidence planner and explanation writer next |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -246,12 +246,43 @@ citation metadata (authors, journal, year, DOI, license). About 40,800 words in 
 - Web access works from this environment: `curl` and the WebSearch and WebFetch tools
   both reach the internet. Earlier notes saying otherwise were wrong.
 - Ollama CLI is installed (0.34.2) but no server is running and no models are confirmed
-  pulled. Docker, `qdrant_client`, and a Postgres driver are not installed. Plan: embedded
-  Qdrant against a local folder for now, a server container only in Phase 7.
-- Next: chunk by section with the citation attached, embed with a small local model,
-  store in embedded Qdrant, and test that a query such as "upper lobe consolidation with
-  elevated WBC" returns sensible passages. Then the evidence planner, then the Ollama
-  explanation writer. RAG explains, it never changes the predicted label.
+  pulled. Docker and a Postgres driver are not installed.
+
+Retrieval core done 2026-10-11 (`chunker.py`, `index.py`, `eval_retrieval.py`,
+`eval_chunking.py`; results in `experiments/rag_retrieval/`):
+
+- Qdrant runs embedded, as a folder under `data/qdrant/` (git-ignored). Moving to a
+  server container in Phase 7 means changing one line in `index._client`.
+- Chunking: sections come from the papers' own XML headings, then sentence packing into
+  passages of about 300 words (roughly 400 tokens) with about 15 percent overlap, embedded
+  as "title. heading. passage" so a passage keeps its context. 238 passages.
+- Embedding model: `NeuML/pubmedbert-base-embeddings`. It was chosen on one property, not
+  accuracy: all four candidate models retrieve the right paper at rank 1 for 84 to 89
+  percent of 19 queries (a difference of one query, which is noise). What separated them
+  is whether a similarity floor can tell answerable queries from off-corpus ones. bge-small
+  and multi-qa-distilbert cannot (their lowest answerable score is below their highest
+  off-corpus score); pubmedbert can, with the widest margin (lowest answerable 0.409,
+  highest off-corpus 0.276). `index.MIN_SCORE = 0.34` is the midpoint.
+- `index.retrieve()` applies the floor and returns an empty list when nothing clears it,
+  so the explanation can say "no supporting evidence" instead of citing weak matches.
+- Chunking strategies compared (`experiments/rag_retrieval/CHUNKING.md`): 100-word,
+  170-word, 300-word with overlap, whole-section, and semantic chunking, each with two
+  models. Semantic chunking did not beat plain sentence packing and costs an extra
+  embedding pass, so it was not adopted. Larger chunks do not retrieve noticeably better
+  but put much more text in front of the explanation LLM (top-3 context: about 280 words
+  at 100-word chunks, about 640 at 300-word chunks, about 790 for whole sections).
+- Known limit: the floor catches off-topic queries, not near-topic ones the corpus cannot
+  answer. "Upper lobe consolidation with elevated white blood cell count" still returns
+  three passages above the floor, none of which really answers it. The explanation writer
+  must cite only what a passage states and say when no passage addresses a point.
+- Evaluation caveats: 19 answerable queries (one is worth 5 points), expected papers and
+  must-contain patterns written by the author, query 19 added after it failed, and
+  passage relevance is a keyword proxy. This justifies a model choice, it is not a
+  benchmark. Parent-child retrieval (retrieve small, show the whole section) is not scored
+  because it changes what the explanation writer sees, not what is retrieved. Try it once
+  the writer exists, with a context cap for the 4 GB GPU.
+- Next: the evidence planner (turns prediction, top attributions, and belief state into a
+  query), then the Ollama explanation writer. RAG explains, it never changes the label.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.

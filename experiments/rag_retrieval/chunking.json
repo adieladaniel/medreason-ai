@@ -1,0 +1,164 @@
+{
+ "BAAI/bge-small-en-v1.5": {
+  "sentence 100w": {
+   "chunks": 592,
+   "median_words": 91,
+   "paper_hit@1": 0.895,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.789,
+   "passage_hit@3": 0.895,
+   "passage_hit@5": 0.895,
+   "passage_mrr": 0.851,
+   "top3_context_words": 279,
+   "threshold_gap": -0.019,
+   "missed_passage_queries": [
+    "elevated procalcitonin, suspected bacterial pneumonia",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "sentence 170w, 1-sentence overlap": {
+   "chunks": 352,
+   "median_words": 146,
+   "paper_hit@1": 0.842,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.737,
+   "passage_hit@3": 0.947,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.833,
+   "top3_context_words": 400,
+   "threshold_gap": -0.008,
+   "missed_passage_queries": [
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "sentence 300w + ~15% overlap": {
+   "chunks": 238,
+   "median_words": 187,
+   "paper_hit@1": 0.895,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.737,
+   "passage_hit@3": 0.947,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.833,
+   "top3_context_words": 602,
+   "threshold_gap": -0.004,
+   "missed_passage_queries": [
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "whole section (truncated by model)": {
+   "chunks": 177,
+   "median_words": 167,
+   "paper_hit@1": 0.895,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.789,
+   "passage_hit@3": 0.947,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.86,
+   "top3_context_words": 765,
+   "threshold_gap": -0.019,
+   "missed_passage_queries": [
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "semantic": {
+   "chunks": 326,
+   "median_words": 105,
+   "paper_hit@1": 0.895,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.737,
+   "passage_hit@3": 0.895,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.826,
+   "top3_context_words": 361,
+   "threshold_gap": -0.006,
+   "missed_passage_queries": [
+    "elevated procalcitonin, suspected bacterial pneumonia",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  }
+ },
+ "NeuML/pubmedbert-base-embeddings": {
+  "sentence 100w": {
+   "chunks": 592,
+   "median_words": 91,
+   "paper_hit@1": 0.842,
+   "paper_hit@3": 0.895,
+   "passage_hit@1": 0.632,
+   "passage_hit@3": 0.842,
+   "passage_hit@5": 0.895,
+   "passage_mrr": 0.747,
+   "top3_context_words": 277,
+   "threshold_gap": 0.193,
+   "missed_passage_queries": [
+    "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "pneumonia with leukocytosis and elevated CRP",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "sentence 170w, 1-sentence overlap": {
+   "chunks": 352,
+   "median_words": 146,
+   "paper_hit@1": 0.842,
+   "paper_hit@3": 0.895,
+   "passage_hit@1": 0.579,
+   "passage_hit@3": 0.842,
+   "passage_hit@5": 0.895,
+   "passage_mrr": 0.712,
+   "top3_context_words": 422,
+   "threshold_gap": 0.122,
+   "missed_passage_queries": [
+    "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "pneumonia with leukocytosis and elevated CRP",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "sentence 300w + ~15% overlap": {
+   "chunks": 238,
+   "median_words": 187,
+   "paper_hit@1": 0.895,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.737,
+   "passage_hit@3": 0.895,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.818,
+   "top3_context_words": 641,
+   "threshold_gap": 0.143,
+   "missed_passage_queries": [
+    "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "whole section (truncated by model)": {
+   "chunks": 177,
+   "median_words": 167,
+   "paper_hit@1": 0.842,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.737,
+   "passage_hit@3": 0.947,
+   "passage_hit@5": 0.947,
+   "passage_mrr": 0.833,
+   "top3_context_words": 794,
+   "threshold_gap": 0.149,
+   "missed_passage_queries": [
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  },
+  "semantic": {
+   "chunks": 323,
+   "median_words": 102,
+   "paper_hit@1": 0.842,
+   "paper_hit@3": 0.947,
+   "passage_hit@1": 0.632,
+   "passage_hit@3": 0.895,
+   "passage_hit@5": 0.895,
+   "passage_mrr": 0.762,
+   "top3_context_words": 405,
+   "threshold_gap": 0.132,
+   "missed_passage_queries": [
+    "How are pulmonary nodules larger than 3 cm classified and managed?",
+    "upper lobe consolidation with elevated white blood cell count"
+   ]
+  }
+ }
+}

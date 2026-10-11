@@ -30,6 +30,10 @@ shap==0.45.1
 matplotlib==3.9.0
 torchvision==0.26.0
 
+# RAG evidence retrieval (app/rag/): embedded Qdrant plus sentence embeddings
+qdrant-client==1.19.1
+sentence-transformers==5.6.1
+
 # progress dashboard and future backend (app/)
 fastapi==0.141.1
 uvicorn==0.53.0
