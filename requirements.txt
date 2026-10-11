@@ -22,6 +22,14 @@ tokenizers==0.22.2
 huggingface-hub==1.25.1
 pillow==12.2.0
 
+# explainability (explain/*.py): SHAP for blood/text, Grad-CAM needs torchvision's
+# transforms; the image explainer also needs torchxrayvision (see kaggle_upload/, same
+# package the Kaggle training kernel installs, not pinned here since it is not on PyPI
+# with a stable version the way the rest of this file is)
+shap==0.45.1
+matplotlib==3.9.0
+torchvision==0.26.0
+
 # progress dashboard and future backend (app/)
 fastapi==0.141.1
 uvicorn==0.53.0
