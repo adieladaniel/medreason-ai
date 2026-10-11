@@ -1,0 +1,340 @@
+[
+ {
+  "key": "lymph",
+  "sentence": "Patients with pneumonia who have a lymphocyte count of 1-2 x 10^9 cells/L are at a significantly increased risk of mortality.",
+  "faithful": true,
+  "kind": "real writer output",
+  "entailment": 0.822,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "lymph",
+  "sentence": "Low lymphocyte counts are associated with higher short- and long-term mortality in pneumonia.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.991,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "lymph",
+  "sentence": "Even lymphocyte counts within the normal range were associated with increased mortality in a primary care pneumonia cohort.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.99,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "lymph",
+  "sentence": "High lymphocyte counts are associated with increased mortality in pneumonia.",
+  "faithful": false,
+  "kind": "reversed direction",
+  "entailment": 0.005,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "lymph",
+  "sentence": "Lymphocyte counts of 5-8 x 10^9 cells/L carried significantly increased mortality in pneumonia.",
+  "faithful": false,
+  "kind": "changed number",
+  "entailment": 0.173,
+  "bad_numbers": [
+   "5",
+   "8"
+  ],
+  "banned": []
+ },
+ {
+  "key": "lymph",
+  "sentence": "Low lymphocyte count causes death in pneumonia.",
+  "faithful": false,
+  "kind": "overreach",
+  "entailment": 0.047,
+  "bad_numbers": [],
+  "banned": [
+   "causes"
+  ]
+ },
+ {
+  "key": "lymph",
+  "sentence": "Patients with a low lymphocyte count should be given antibiotics early.",
+  "faithful": false,
+  "kind": "advice",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": [
+   "should"
+  ]
+ },
+ {
+  "key": "lymph",
+  "sentence": "Elevated C-reactive protein is the strongest predictor of mortality in pneumonia.",
+  "faithful": false,
+  "kind": "unsupported claim",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Low albumin levels have been associated with adverse clinical outcomes in patients with pneumonia.",
+  "faithful": true,
+  "kind": "real writer output",
+  "entailment": 0.601,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Serum albumin falls during systemic inflammation and infection.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.995,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Low albumin has been linked to prolonged hospital stays, organ failure and increased mortality.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.992,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Elevated fibrinogen has been associated with poor outcomes in stroke-associated pneumonia and some malignancies.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.994,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "High albumin levels have been linked to increased mortality.",
+  "faithful": false,
+  "kind": "reversed direction",
+  "entailment": 0.006,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Low albumin was linked to organ failure in 95% of patients.",
+  "faithful": false,
+  "kind": "changed number",
+  "entailment": 0.001,
+  "bad_numbers": [
+   "95"
+  ],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Albumin is a better predictor of mortality than fibrinogen.",
+  "faithful": false,
+  "kind": "unsupported claim",
+  "entailment": 0.005,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "CURB-65 uses albumin as one of its five factors.",
+  "faithful": false,
+  "kind": "wrong claim for passage",
+  "entailment": 0.034,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "albumin",
+  "sentence": "Doctors should measure albumin and treat low levels with supplements.",
+  "faithful": false,
+  "kind": "advice",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": [
+   "should",
+   "treat"
+  ]
+ },
+ {
+  "key": "predictors",
+  "sentence": "Lymphocyte count, serum albumin and procalcitonin were significant predictors of in-hospital mortality in community-acquired pneumonia.",
+  "faithful": true,
+  "kind": "real writer output",
+  "entailment": 0.999,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "predictors",
+  "sentence": "Lymphocyte count and albumin had the highest predictive accuracy among the markers studied.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.999,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "predictors",
+  "sentence": "The neutrophil-lymphocyte ratio was a significant predictor of prolonged hospital stay in community-acquired pneumonia.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.994,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "predictors",
+  "sentence": "Procalcitonin had the highest predictive accuracy of all markers.",
+  "faithful": false,
+  "kind": "wrong claim for passage",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "predictors",
+  "sentence": "Albumin predicted mortality in 80% of cases of community-acquired pneumonia.",
+  "faithful": false,
+  "kind": "changed number",
+  "entailment": 0.0,
+  "bad_numbers": [
+   "80"
+  ],
+  "banned": []
+ },
+ {
+  "key": "predictors",
+  "sentence": "These markers prove that every patient with low albumin will die.",
+  "faithful": false,
+  "kind": "overreach",
+  "entailment": 0.0,
+  "bad_numbers": [],
+  "banned": [
+   "prove"
+  ]
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "Elevated neutrophil-to-lymphocyte ratio (NLR) is associated with increased mortality risk in community-acquired pneumonia, with in-hospital mortality rates ranging from 5% to 17% in general populations and up to 32-49% in patients with severe CAP.",
+  "faithful": false,
+  "kind": "real writer output: figures belong to pneumonia, not to NLR",
+  "entailment": 0.192,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "In community-acquired pneumonia, in-hospital mortality ranges from 5% to 17% in general populations and up to 32-49% in severe cases.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.996,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "The neutrophil-to-lymphocyte ratio has emerged as a promising prognostic biomarker in infectious diseases.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.996,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "Neutrophil counts typically rise and lymphocyte counts fall under pathological stress, raising the NLR.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.998,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "C-reactive protein and procalcitonin are always reliable and inexpensive markers.",
+  "faithful": false,
+  "kind": "reversed claim",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "nlr_intro",
+  "sentence": "A high NLR means the patient has lung cancer.",
+  "faithful": false,
+  "kind": "unsupported claim",
+  "entailment": 0.001,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "adeno",
+  "sentence": "Invasive mucinous adenocarcinoma can present on chest X-ray as an air-space filling pattern with focal or lobar consolidation.",
+  "faithful": true,
+  "kind": "real writer output",
+  "entailment": 0.476,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "adeno",
+  "sentence": "Air bronchograms are commonly seen in the air-space filling pattern of mucinous adenocarcinoma.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.933,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "adeno",
+  "sentence": "A central mass or irregular bronchial narrowing can help distinguish lung cancer from pneumonia.",
+  "faithful": true,
+  "kind": "paraphrase",
+  "entailment": 0.993,
+  "bad_numbers": [],
+  "banned": []
+ },
+ {
+  "key": "adeno",
+  "sentence": "Lung cancer lacking a response to antibiotics should be treated with chemotherapy.",
+  "faithful": false,
+  "kind": "advice",
+  "entailment": 0.0,
+  "bad_numbers": [],
+  "banned": [
+   "should",
+   "treated"
+  ]
+ },
+ {
+  "key": "adeno",
+  "sentence": "Mucinous adenocarcinoma never causes consolidation on chest X-ray.",
+  "faithful": false,
+  "kind": "reversed direction",
+  "entailment": 0.005,
+  "bad_numbers": [],
+  "banned": [
+   "causes"
+  ]
+ },
+ {
+  "key": "adeno",
+  "sentence": "Smoking is the main cause of invasive mucinous adenocarcinoma.",
+  "faithful": false,
+  "kind": "unsupported claim",
+  "entailment": 0.0,
+  "bad_numbers": [],
+  "banned": [
+   "cause"
+  ]
+ }
+]

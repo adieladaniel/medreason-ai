@@ -198,9 +198,19 @@ Status: in progress. Corpus and retrieval core done 2026-10-11.
 - Known limits: a reranker can rank a near-miss first with a high score, and a high score
   means on-topic rather than supportive, so the explanation writer must check what a passage
   actually states.
-- Evidence planner: build a query from the prediction, the explainability output, and the
-  belief state, not just the raw label.
-- Local LLM via Ollama for the final explanation text. RAG explains, it does not diagnose.
+- Evidence planner (done, `app/rag/planner.py`): one keyword query per real driver (labs outside
+  their reference range, strong image channels, meaningful indication words, and a
+  differential query when modalities disagree), not one query from the label. A Normal
+  prediction requests nothing.
+- Explanation writer (done, `app/rag/writer.py`): a local model through Ollama. Sentences about
+  the case are built by code, and the model only summarises one retrieved passage at a time.
+  A first version that gave the model the whole case invented citations, which is why.
+- Faithfulness check (done, `app/rag/faithfulness.py`): a sentence is shown only if an NLI
+  model finds it entailed by its passage, its numbers appear in the passage, and it contains no
+  advice wording. Checked on 35 hand-made sentences (`eval_faithfulness.py`); small, so it is a
+  sanity check. RAG explains, it does not diagnose, and none of this can change the label.
+- Left in this phase: parent-child expansion, a writer model comparison, corpus coverage for
+  image findings (edema and opacity found no passage), and a dashboard page.
 
 ## Phase 7, backend and API
 

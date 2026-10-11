@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | in progress | corpus (27 papers) and retrieval pipeline done and measured, evidence planner and explanation writer next |
+| 6. RAG evidence retrieval | in progress | corpus, retrieval, planner, constrained writer and faithfulness check built and run on real cases, polish and dashboard page left |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -300,10 +300,49 @@ could not show improvements.
   writer must quote what a passage states and say when none addresses a point. Provisional
   numbers: 16 off-corpus queries and 54 answerable ones, written by the author with the
   assistant.
-- Next: the evidence planner (turns prediction, top attributions, and belief state into a
-  query), then the Ollama explanation writer with a faithfulness check (does each cited claim
-  appear in its passage). Try parent-child expansion (show the whole section around a hit)
-  once the writer exists, with a context cap for the 4 GB GPU. RAG explains, never labels.
+Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
+`faithfulness.py`, `explain_case.py`, check set in `eval_faithfulness.py`):
+
+- Planner: reads the agent result and writes up to 4 keyword queries, one per real driver. A
+  lab becomes a query only if SHAP says it supported the prediction and its value is outside an
+  approximate adult reference range ("pneumonia with low albumin"). Image channels at 0.5 or
+  higher, clinically meaningful words from the indication, and one differential query when
+  modalities disagree and one of them predicted the other disease. A modality whose own
+  prediction differs from the final one never seeds driver queries, because its attributions
+  explain a different class. A Normal prediction asks for nothing.
+- Evidence: retrieves 2 passages per query, at most 5 in total, numbers them, records which
+  query fetched each. A query with no passage above the threshold is reported as "no
+  passage", never dropped silently.
+- Writer: the first version gave llama3.2 (3B) the whole case and a rulebook. It cited
+  passages that did not exist, wrote "associated with [2]" with nothing after it, and
+  misreported which modalities agreed. So the design changed: sentences about the case
+  (prediction, probabilities, agreement, drivers) are built by code from the agent's facts, and
+  the model only writes one background sentence per retrieved passage, from that passage alone.
+  With no passages the model is never called, so "no evidence" cannot turn into an invented
+  citation. The predicted class in the output is copied from the agent.
+- Faithfulness check, verify then show: each LLM sentence must pass an NLI entailment test
+  against the one passage it cites (DeBERTa-v3 MNLI/FEVER/ANLI, best 3-sentence window,
+  threshold 0.30), a test that every number appears in the passage, and a wording test (no
+  treatment or advice words, no "causes" or "proves"). Failed sentences are removed and counted.
+- Checker validation (`eval_faithfulness.py`, 35 hand-made sentences against 5 real passages):
+  every unfaithful sentence scored 0.19 or lower and every faithful one 0.48 or higher, so it
+  separated the set at thresholds from 0.3 to 0.95 (the higher the threshold the more faithful
+  sentences it wrongly drops). This includes the subtle case the numeric test cannot see: a
+  real writer sentence that attached pneumonia mortality figures to the neutrophil-lymphocyte
+  ratio, every number present in the passage, entailment 0.19. Limits: small set, written by
+  the author, so the error types are the ones the author thought of. It is a sanity check, not
+  a measured error rate on real output.
+- On the four saved real cases: 3 of 4 background sentences passed on the pneumonia case (the
+  NLR one was dropped), the cancer-versus-pneumonia conflict case got a correct passage on how
+  mucinous adenocarcinoma mimics pneumonia, and two cases found no passage and said so. Image
+  drivers (edema, opacity) found no passage in the library in both cases, a corpus gap.
+- Known limits: a passage retrieved for one driver can be about another (a WBC query returned
+  lymphocyte-count papers), so background sentences are shown as literature context, not as
+  proof of a specific finding. A warm run takes 4 to 21 s; the first run after start took
+  about 2.5 min (model loads), so Phase 7 must load models once and run this off the request path.
+- Next: parent-child expansion (show the section around a hit, with a context cap), a model
+  comparison with the checker as the judge (llama3.2 against a small Qwen), image-driver
+  coverage in the corpus, then Phase 7.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -420,11 +459,9 @@ probabilities) reaches val macro F1 0.61. The three explainers and the agent cor
 
 Next:
 
-1. Phase 6, RAG evidence retrieval. A small corpus of papers and guidelines for the 3
-   diseases, a Qdrant collection, an evidence planner that builds a query from the
-   prediction plus the top attributions plus the belief state (not the raw label alone),
-   and a local LLM through Ollama to write the final cited explanation. Keep the design
-   rule: RAG explains, it never diagnoses, and it must not be able to change the
+1. Phase 6 polish (the chain exists, see section 2): parent-child expansion, a writer
+   model comparison, corpus coverage for image findings, and a dashboard page. Keep the
+   design rule: RAG explains, it never diagnoses, and it must not be able to change the
    predicted label.
 2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
