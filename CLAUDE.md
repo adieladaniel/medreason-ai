@@ -72,10 +72,19 @@ not, cut it.
   0.14). Marginal gain. ImageNet features are the bottleneck, not undertraining.
 - v3 (current best): frozen `torchxrayvision` DenseNet121 pretrained on MIMIC-CXR
   (`densenet121-res224-mimic_ch`) as a feature extractor. Its 18 pathology-probability
-  outputs feed an MLP head (18 to 64 to 3), class-weighted loss, 15 epochs, cosine, best
+  outputs (only 11 are trained for these weights, see below) feed an MLP head (18 to 64 to 3), class-weighted loss, 15 epochs, cosine, best
   epoch 7. Macro F1 0.50 (Normal 0.56 / Pneumonia 0.77 / Cancer 0.17, precision 0.14).
   Code: [kaggle_upload/baseline_kernel/train_baseline.py](kaggle_upload/baseline_kernel/train_baseline.py).
   Lesson: which pretrained features you use mattered far more than how much fine-tuning.
+  The 11 trained outputs are Atelectasis, Consolidation, Pneumothorax, Edema, Effusion,
+  Pneumonia, Cardiomegaly, Lung Lesion, Fracture, Lung Opacity, Enlarged Cardiomediastinum. The
+  other 7 slots (Infiltration, Emphysema, Fibrosis, Pleural_Thickening, Nodule, Mass, Hernia)
+  have empty names and return a constant 0.5, which the library describes as untrained
+  targets, so the head effectively has 11 informative inputs plus a bias. Nodule and Mass, the
+  most cancer-relevant channels, are among the untrained ones; only Lung Lesion remains. Open
+  question, unverified: the backbone was trained on MIMIC-CXR and the library does not say
+  which split, so some val and test subjects may have been in its training images. Note it as a
+  limitation in the writeup. The `all` weights train every output but their training data is not stated.
 
 ### Blood/tabular baseline (val set), done 2026-08-29
 
@@ -529,6 +538,12 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
+- Tests: `python -m pytest` from the repo root (about 5 s, 45 tests). They use synthetic agent
+  results and stub the retriever, Ollama and the NLI model, so they need no models or services
+  and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
+  `tests` package in site-packages otherwise shadows the folder. Mark anything needing a model
+  or service with `@pytest.mark.slow`. Add a test with every behaviour change, and break the
+  code on purpose once to check the test fails.
 - Any new labeling or dataset change means rerunning the pipeline (section 3), not
   hand-editing CSVs.
 - Update [ROADMAP.md](ROADMAP.md) status markers and this file's section 2 when a phase

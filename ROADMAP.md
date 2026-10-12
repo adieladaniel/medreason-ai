@@ -48,7 +48,7 @@ complementary.
   Marginal gain only. Cancer precision stayed stuck, which points to a feature-quality
   bottleneck (generic ImageNet features), not an undertraining problem.
 - Image baseline v3: frozen `torchxrayvision` DenseNet121 pretrained directly on MIMIC-CXR
-  (`densenet121-res224-mimic_ch`), its 18 pathology-probability outputs feed a small MLP
+  (`densenet121-res224-mimic_ch`), its 18 pathology-probability outputs (11 trained, 7 constant) feed a small MLP
   head, 15 epochs. Macro F1 0.50 (Pneumonia 0.77, Normal 0.56, Cancer 0.17, precision
   0.14). Clear improvement across every class over v1 and v2. Current best baseline.
 - Blood/tabular baseline: `scripts/train_blood_baseline.py`. sklearn

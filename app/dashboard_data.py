@@ -58,7 +58,7 @@ IMAGE_VERSIONS = [
     },
     {
         "key": "v3", "label": "v3",
-        "desc": "Frozen MIMIC-CXR DenseNet121 (torchxrayvision), 18 pathology probabilities, MLP head, 15 epochs",
+        "desc": "Frozen MIMIC-CXR DenseNet121 (torchxrayvision), 18 pathology outputs (11 trained), MLP head, 15 epochs",
         "macro_f1": 0.50, "f1": {"Normal": 0.56, "Pneumonia": 0.77, "Lung Cancer": 0.17},
         "source": "Kaggle run log and ROADMAP.md, Phase 2",
     },

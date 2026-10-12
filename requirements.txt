@@ -41,3 +41,4 @@ uvicorn==0.53.0
 
 # Kaggle CLI (remote image-model training: kernels push/status/output)
 kaggle==2.2.3
+pytest==9.1.1
