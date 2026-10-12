@@ -376,6 +376,32 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
   6 s and gave the same scores on the 35-sentence set. The local torch is a CPU-only build
   (2.11.0+cpu), so the GPU is unused for this. A request needs a CUDA build or a smaller or
   quantised NLI model, which is Phase 7 work.
+- Checker comparison (2026-10-12, `eval_checker.py`, `minicheck.py`, `checker_eval.json`): the
+  current DeBERTa NLI checker against MiniCheck (EMNLP 2024) in its DeBERTa-v3-Large and
+  Flan-T5-Large variants, reimplemented from the reference code because the package would not
+  build here. Two labelled sets, each sentence against one passage: the 35 hand-made sentences,
+  and the 41 real llama3.2 sentences, hand-labelled by reading them against the passage before
+  any checker's score was looked at (36 faithful, 3 unfaithful, 2 borderline left out). Each
+  checker used its own default threshold (0.30 for the NLI, 0.5 for MiniCheck), untuned.
+  Faithful real sentences wrongly dropped: NLI 7 of 36, MiniCheck DeBERTa 3, MiniCheck Flan-T5 2.
+  Unfaithful real sentences caught: NLI 2 of 3, both MiniCheck variants 0 of 3. Hand-made
+  unfaithful caught: 19, 15 and 14 of 19 (the NLI threshold was tuned on that set, so its 19 is
+  optimistic). Seconds per sentence on CPU: 8.0, 4.6 and 2.3. The MiniCheck models are faster and
+  drop fewer good sentences but let all three subtle errors through, and the current checker
+  catches more at the cost of dropping about one faithful sentence in five. A false accept
+  misleads while a false reject only shortens the note, so the NLI checker stays.
+- What none of them catch: the three unfaithful real sentences each blend true facts into a false
+  statement (two findings fused into one, a group reversed, a general survival figure attached
+  to a subgroup). Raising any checker's threshold until it catches all three drops 12 to 16 of
+  the 36 faithful sentences, and Flan-T5 scored those three at 0.94, 0.94 and 0.82 against a
+  faithful median of 0.96. About 8 percent of this writer's sentences were that kind, so the
+  interface must present background as what a cited paper says, with the source one click
+  away, never as a verified fact about this patient. Limits: one rater, three real negatives,
+  so every rate on the unfaithful side rests on three sentences. A larger labelled set is the
+  way to settle it, not another threshold.
+- Download note: a 3 GB Hugging Face model stalled mid-download twice here. `curl -C -` resumed
+  it (verify the SHA-256, which is the blob name in the cache, because a retry restarts at the
+  original offset). `pip install` of the minicheck package failed to build, so do not rely on it.
 - Image findings: edema is a real corpus gap (every edema query scored below 2 on the reranker;
   PMC4408723 covers edema on imaging but not as a pneumonia feature). Adding weakly related
   papers would add near-miss retrievals and force a rerun of the 54-query evaluation, so the

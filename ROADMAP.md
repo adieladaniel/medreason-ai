@@ -216,6 +216,11 @@ Status: done. Corpus and retrieval core done 2026-10-11.
   share of sentences passing the check (73% against 63%, 41 items), and showing the writer the
   neighbouring passage did not help, so neither Qwen nor parent-child expansion is used.
 - Dashboard Evidence page (done).
+- Claim checker comparison (done, `eval_checker.py`): the current NLI checker against two MiniCheck
+  models on 74 labelled sentences. MiniCheck is faster and drops fewer faithful sentences but
+  caught none of the three subtle real errors, so the NLI checker stays. No checker catches
+  sentences that blend true facts into a false claim, so the interface must show background as
+  what a cited paper says.
 - Carried to Phase 7: a faster checker (it takes about 6 s per sentence on CPU) and more corpus
   coverage for image findings such as edema.
 

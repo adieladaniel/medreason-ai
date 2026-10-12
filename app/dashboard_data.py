@@ -474,6 +474,13 @@ def _rag():
         out["faithfulness"] = {"n_faithful": len(good), "n_unfaithful": len(bad),
                                "min_faithful": min(good), "max_unfaithful": max(bad),
                                "points": [{"entailment": r["entailment"], "faithful": r["faithful"]} for r in faith]}
+    checkers = _json("experiments/rag_retrieval/checker_eval.json")
+    if checkers:
+        label = {"deberta-nli": "DeBERTa NLI (current)", "deberta-v3-large": "MiniCheck DeBERTa-v3-Large", "flan-t5-large": "MiniCheck Flan-T5-Large"}
+        out["checkers"] = [{"name": label.get(k, k), "threshold": v["threshold"], "seconds": v["seconds"],
+                            "hand": {x: v["hand"][x] for x in ("auroc", "false_reject_n", "faithful", "caught_n", "unfaithful")},
+                            "real": {x: v["real"][x] for x in ("auroc", "false_reject_n", "faithful", "caught_n", "unfaithful")}}
+                           for k, v in checkers.items()]
     writer = _json("experiments/rag_retrieval/writer_eval.json")
     if writer:
         out["writer"] = [{k: w[k] for k in ("model", "expand", "n", "written", "pass", "entail", "words", "seconds")}

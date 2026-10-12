@@ -844,6 +844,15 @@
         { numCols: [2, 3, 4, 5, 6, 7] }), { note: 'A model can pass by writing vague, short sentences, so length is shown next to the pass rate.' });
     }
 
+    if (R.checkers && R.checkers.length) {
+      html += sectionHead('Which checker guards the written sentences', 'Three claim checkers scored on the same labelled sentences. Each uses its own default threshold, none tuned here.');
+      html += card('', table(['Checker', 'Seconds per sentence', 'Faithful sentences wrongly dropped (real)', 'Unfaithful caught (real)', 'Unfaithful caught (hand-made)', 'ROC AUC (real)'],
+        R.checkers.map((c) => [esc(c.name), c.seconds.toFixed(1), `${c.real.false_reject_n} of ${c.real.faithful}`, `${c.real.caught_n} of ${c.real.unfaithful}`, `${c.hand.caught_n} of ${c.hand.unfaithful}`, f2(c.real.auroc)]),
+        { numCols: [1, 2, 3, 4, 5] }), {
+        note: 'The real set is 39 sentences a local model wrote, labelled by hand: 36 faithful and only 3 unfaithful, so rates on the unfaithful side rest on three sentences. Those three each blend true facts into a false statement, and no threshold on any checker catches all three without dropping a third or more of the faithful ones. The current checker catches the most unfaithful sentences and drops the most faithful ones; the MiniCheck models are faster and drop fewer, but let all three through.',
+      });
+    }
+
     const after = () => {
       mk('c-ret', {
         type: 'bar',

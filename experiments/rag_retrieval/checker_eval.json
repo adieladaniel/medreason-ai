@@ -1,0 +1,104 @@
+{
+ "deberta-nli": {
+  "threshold": 0.3,
+  "seconds": 7.963043883040145,
+  "hand": {
+   "n": 35,
+   "faithful": 16,
+   "unfaithful": 19,
+   "auroc": 1.0,
+   "false_reject": 0.0,
+   "caught": 1.0,
+   "false_reject_n": 0,
+   "caught_n": 19
+  },
+  "real": {
+   "n": 39,
+   "faithful": 36,
+   "unfaithful": 3,
+   "auroc": 0.7870370370370371,
+   "false_reject": 0.19444444444444442,
+   "caught": 0.6666666666666666,
+   "false_reject_n": 7,
+   "caught_n": 2
+  },
+  "all": {
+   "n": 74,
+   "faithful": 52,
+   "unfaithful": 22,
+   "auroc": 0.9527972027972027,
+   "false_reject": 0.13461538461538458,
+   "caught": 0.9545454545454546,
+   "false_reject_n": 7,
+   "caught_n": 21
+  }
+ },
+ "deberta-v3-large": {
+  "threshold": 0.5,
+  "seconds": 4.551670316103342,
+  "hand": {
+   "n": 35,
+   "faithful": 16,
+   "unfaithful": 19,
+   "auroc": 0.8782894736842105,
+   "false_reject": 0.0625,
+   "caught": 0.7894736842105263,
+   "false_reject_n": 1,
+   "caught_n": 15
+  },
+  "real": {
+   "n": 39,
+   "faithful": 36,
+   "unfaithful": 3,
+   "auroc": 0.7685185185185185,
+   "false_reject": 0.08333333333333337,
+   "caught": 0.0,
+   "false_reject_n": 3,
+   "caught_n": 0
+  },
+  "all": {
+   "n": 74,
+   "faithful": 52,
+   "unfaithful": 22,
+   "auroc": 0.8417832167832169,
+   "false_reject": 0.07692307692307687,
+   "caught": 0.6818181818181818,
+   "false_reject_n": 4,
+   "caught_n": 15
+  }
+ },
+ "flan-t5-large": {
+  "threshold": 0.5,
+  "seconds": 2.2861375744278365,
+  "hand": {
+   "n": 35,
+   "faithful": 16,
+   "unfaithful": 19,
+   "auroc": 0.924342105263158,
+   "false_reject": 0.0625,
+   "caught": 0.7368421052631579,
+   "false_reject_n": 1,
+   "caught_n": 14
+  },
+  "real": {
+   "n": 39,
+   "faithful": 36,
+   "unfaithful": 3,
+   "auroc": 0.7407407407407407,
+   "false_reject": 0.05555555555555558,
+   "caught": 0.0,
+   "false_reject_n": 2,
+   "caught_n": 0
+  },
+  "all": {
+   "n": 74,
+   "faithful": 52,
+   "unfaithful": 22,
+   "auroc": 0.8671328671328671,
+   "false_reject": 0.05769230769230771,
+   "caught": 0.6363636363636364,
+   "false_reject_n": 3,
+   "caught_n": 14
+  }
+ }
+}
