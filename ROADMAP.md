@@ -178,7 +178,7 @@ Status: core done, 2026-09-20. `app/agent/` package.
 
 ## Phase 6, evidence retrieval (RAG)
 
-Status: in progress. Corpus and retrieval core done 2026-10-11.
+Status: done. Corpus and retrieval core done 2026-10-11.
 
 - Corpus (done): 27 open-access papers, about 82,500 words, listed in
   `app/rag/corpus_sources.json` and downloaded by `python -m app.rag.build_corpus` from
@@ -209,8 +209,15 @@ Status: in progress. Corpus and retrieval core done 2026-10-11.
   model finds it entailed by its passage, its numbers appear in the passage, and it contains no
   advice wording. Checked on 35 hand-made sentences (`eval_faithfulness.py`); small, so it is a
   sanity check. RAG explains, it does not diagnose, and none of this can change the label.
-- Left in this phase: parent-child expansion, a writer model comparison, corpus coverage for
-  image findings (edema and opacity found no passage), and a dashboard page.
+- Topic gate (done): a written sentence must mention the finding its query was about, because
+  the writer model never declined a passage on its own and a faithful sentence can still be
+  misleading context.
+- Writer comparison and expansion (done, `eval_writer.py`): llama3.2 3B beat Qwen2.5 3B on the
+  share of sentences passing the check (73% against 63%, 41 items), and showing the writer the
+  neighbouring passage did not help, so neither Qwen nor parent-child expansion is used.
+- Dashboard Evidence page (done).
+- Carried to Phase 7: a faster checker (it takes about 6 s per sentence on CPU) and more corpus
+  coverage for image findings such as edema.
 
 ## Phase 7, backend and API
 

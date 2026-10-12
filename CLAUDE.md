@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | in progress | corpus, retrieval, planner, constrained writer and faithfulness check built and run on real cases, polish and dashboard page left |
+| 6. RAG evidence retrieval | in progress | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -303,11 +303,14 @@ could not show improvements.
 Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
 `faithfulness.py`, `explain_case.py`, check set in `eval_faithfulness.py`):
 
-- Planner: reads the agent result and writes up to 4 keyword queries, one per real driver. A
+- Planner: reads the agent result and writes up to 5 keyword queries, one per real driver. A
   lab becomes a query only if SHAP says it supported the prediction and its value is outside an
   approximate adult reference range ("pneumonia with low albumin"). Image channels at 0.5 or
-  higher, clinically meaningful words from the indication, and one differential query when
-  modalities disagree and one of them predicted the other disease. A modality whose own
+  higher (one query per channel: a combined "edema and lung opacity" query scored 3.3 on the
+  reranker where "lung opacity" alone scored 10.8), clinically meaningful words from the
+  indication, and one differential query when modalities disagree and one of them predicted the
+  other disease (put first so the cap never cuts it). Each query also carries the terms a
+  sentence must mention to count as being about that finding. A modality whose own
   prediction differs from the final one never seeds driver queries, because its attributions
   explain a different class. A Normal prediction asks for nothing.
 - Evidence: retrieves 2 passages per query, at most 5 in total, numbers them, records which
@@ -319,7 +322,12 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
   (prediction, probabilities, agreement, drivers) are built by code from the agent's facts, and
   the model only writes one background sentence per retrieved passage, from that passage alone.
   With no passages the model is never called, so "no evidence" cannot turn into an invented
-  citation. The predicted class in the output is copied from the agent.
+  citation. The predicted class in the output is copied from the agent. Topic gate: the writer
+  model answered NOT_ADDRESSED in none of 164 tries, so relevance needed its own test. A
+  sentence must mention the finding its query was written for ("opacity", "albumin"), else the
+  passage is treated as off topic. This removed a faithful but misleading case report (persistent
+  consolidation later found to be cancer, retrieved for a pneumonia case) and a CT-timing note.
+  A driver with no kept sentence is listed as "no passage". The gate is conservative.
 - Faithfulness check, verify then show: each LLM sentence must pass an NLI entailment test
   against the one passage it cites (DeBERTa-v3 MNLI/FEVER/ANLI, best 3-sentence window,
   threshold 0.30), a test that every number appears in the passage, and a wording test (no
@@ -340,9 +348,34 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
   lymphocyte-count papers), so background sentences are shown as literature context, not as
   proof of a specific finding. A warm run takes 4 to 21 s; the first run after start took
   about 2.5 min (model loads), so Phase 7 must load models once and run this off the request path.
-- Next: parent-child expansion (show the section around a hit, with a context cap), a model
-  comparison with the checker as the judge (llama3.2 against a small Qwen), image-driver
-  coverage in the corpus, then Phase 7.
+- Writer model comparison (`eval_writer.py`, `writer_eval.json`, 41 passages retrieved for the 24
+  terse evaluation queries, checker as judge): llama3.2 3B passed 73% of its sentences, Qwen2.5
+  3B passed 63%. Qwen's lower entailment (0.56 against 0.69) is the gap. Both write about 28
+  words and take 3 to 4 s per item. llama3.2 stays. Limits: 41 items, so the gap is about four
+  sentences, and the judge is the checker, validated on 35 hand-made sentences, not on these.
+- Parent-child expansion tested and not adopted: showing the writer the next 150 words of the
+  same paper, while still checking against the cited passage, lowered the pass rate for both
+  models (llama3.2 73% to 66%, Qwen 63% to 60%). The differences are a few sentences, so the
+  result is "no evidence it helps", and the simpler setup stays.
+- Of the 41 sentences llama3.2 wrote, 11 failed the check. Most were entailment failures that
+  were real (a survival figure attached to the wrong marker, an anemia claim the passage did not
+  make). One was a checker bug: the wording test treated "all-cause mortality" as a causal claim
+  because a hyphen is a regex word boundary. Fixed. Treatment words inside a paper's own
+  description still drop a faithful sentence, by design.
+- Checker cost: scoring every 3-sentence window of a 300-word passage took about 10 s per
+  sentence on CPU; keeping the 5 windows that share the most words with the sentence takes about
+  6 s and gave the same scores on the 35-sentence set. The local torch is a CPU-only build
+  (2.11.0+cpu), so the GPU is unused for this. A request needs a CUDA build or a smaller or
+  quantised NLI model, which is Phase 7 work.
+- Image findings: edema is a real corpus gap (every edema query scored below 2 on the reranker;
+  PMC4408723 covers edema on imaging but not as a pneumonia feature). Adding weakly related
+  papers would add near-miss retrievals and force a rerun of the 54-query evaluation, so the
+  library says "no passage" instead. Lung opacity and consolidation queries do retrieve passages
+  (scores 9 to 14) but the gate keeps only sentences that mention the finding.
+- Dashboard: an Evidence page (`evidencePage()` in `app/static/app.js`, `_rag()` in the builder)
+  shows retrieval results, the checker's separation plot and the writer comparison.
+- Left in Phase 6: nothing blocking. Corpus growth for image findings and a faster checker are
+  tracked for Phase 7.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -459,10 +492,10 @@ probabilities) reaches val macro F1 0.61. The three explainers and the agent cor
 
 Next:
 
-1. Phase 6 polish (the chain exists, see section 2): parent-child expansion, a writer
-   model comparison, corpus coverage for image findings, and a dashboard page. Keep the
-   design rule: RAG explains, it never diagnoses, and it must not be able to change the
-   predicted label.
+1. Phase 6 is done (the chain, its measurements and the dashboard page are in section 2).
+   Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
+   the predicted label. Open items carried to Phase 7: a faster checker (GPU or a smaller
+   model) and more corpus coverage for image findings.
 2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build

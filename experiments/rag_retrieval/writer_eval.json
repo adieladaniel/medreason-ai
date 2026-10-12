@@ -1,0 +1,1837 @@
+[
+ {
+  "model": "llama3.2:latest",
+  "expand": false,
+  "n": 41,
+  "written": 1.0,
+  "pass": 0.732,
+  "entail": 0.689,
+  "words": 28.2,
+  "seconds": 4.0,
+  "rows": [
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "A follow-up chest X-ray 6 weeks after hospital discharge in a 49-year-old patient with pneumonia showed persistent consolidation, which was later diagnosed as lung adenocarcinoma.",
+    "entailment": 0.994,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "Up to 4% of patients undergoing a chest X-ray following a pneumonia episode will develop lung cancer, with 27% of these cases presenting within 90 days (i.e. 12 weeks) of hospital discharge.",
+    "entailment": 0.994,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "A multicentre retrospective study of 388 patients with community acquired pneumonia found that consolidation was the main radiographic finding on chest x-ray (89%) and computerized tomography (80%) examinations, with a high correlation between CT and CXR findings for interstitial involvement.",
+    "entailment": 0.044,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "Patients with community-acquired pneumonia (CAP) admitted to the ICU were included in the study if they had conclusive evidence of CAP confirmed by chest X-ray (CXR) and were aged \u226516 years.",
+    "entailment": 0.774,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "A CRP level above 40 mg/L has a sensitivity of 70% to 73% and a specificity of 90% to 65% in diagnosing bacterial pneumonia.",
+    "entailment": 0.808,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "Elevated CRP levels are associated with disease severity and mortality in community-acquired pneumonia.",
+    "entailment": 0.035,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "Elevated procalcitonin levels in patients suspected of having bacterial pneumonia are not sufficient to confirm or refute the diagnosis at the bedside.",
+    "entailment": 0.003,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "confirm"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3",
+     "banned wording: confirm"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "Median values of both biomarkers (C-reactive protein and procalcitonin) increased with level of certainty for CAP diagnosis, but a discriminant cutoff for procalcitonin (PCT) could not be established.",
+    "entailment": 0.818,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "An elevated neutrophil-to-lymphocyte ratio is associated with approximately double the death risk in community-acquired pneumonia patients.",
+    "entailment": 0.993,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "Elevated neutrophil-lymphocyte ratio (NLR) is significantly associated with increased all-cause mortality risk in community-acquired pneumonia (CAP) patients, with a relative risk of approximately 2.02.",
+    "entailment": 0.446,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Patients with pneumonia who have a lymphocyte count of 1\u20132 \u00d7 10^9 cells/L are at a significantly increased risk of mortality.",
+    "entailment": 0.824,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Patients with pneumonia who have a low lymphocyte count before developing pneumonia have an increased risk of 28-day and 1-year mortality, with the risk varying significantly depending on the level of lymphopenia.",
+    "entailment": 0.917,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "Elevated urea levels are one of the five factors included in the CURB-65 severity scoring system, which also incorporates altered mental status, systolic blood pressure, respiratory rate, and age.",
+    "entailment": 0.289,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.29 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "The CURB-65 score, which assigns one point each for confusion, urea >7 mM/L, respiration rate \u2265 30/min, systolic blood pressure < 90 mmHg, and/or diastolic blood pressure \u2264 60 mmHg, and age \u2265 65 yr, is associated with a higher mortality risk for patients scoring between 3 and 5.",
+    "entailment": 0.456,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Low albumin levels have been associated with adverse clinical outcomes in patients with pneumonia.",
+    "entailment": 0.601,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Lymphocyte count and serum albumin level were found to be significant predictors of in-hospital mortality and prolonged hospital stay in patients with community-acquired pneumonia.",
+    "entailment": 0.995,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "consolidation not resolving after antibiotics, possible malignancy",
+    "written": true,
+    "sentence": "Patients with radiographic consolidation after pneumonia may be at risk of developing lung cancer, with up to 4% of patients developing lung cancer after a chest X-ray following a pneumonia episode, and 27% of these cases presenting within 12 weeks of hospital discharge.",
+    "entailment": 0.997,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lobar atelectasis with consolidation, central tumor obstructing a bronchus",
+    "written": true,
+    "sentence": "Invasive mucinous adenocarcinoma can present as a lobar consolidation with air-space filling process on CXR, associated with air-bronchograms and a central tumor obstructing a bronchus.",
+    "entailment": 0.403,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pulmonary edema with cardiomegaly and pleural effusion",
+    "written": true,
+    "sentence": "Cardiogenic pulmonary edema is associated with elevated left atrial pressures, such as atrial outflow obstruction, left ventricular systolic dysfunction, and left ventricular diastolic dysfunction, and is characterized by mediastinal widening (>53 mm), pleural effusion, cardiomegaly, and opacities involving both the central and peripheral lungs.",
+    "entailment": 0.99,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Uncomplicated simple exudate (stage I) pleural effusion is typically a unilateral, small, free-flowing effusion with an associated area of consolidation.",
+    "entailment": 0.996,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Tuberculous pleural effusions are more common in HIV-positive patients, with a higher incidence of bilateral effusion and parenchymal infiltration, regardless of CD4 count.",
+    "entailment": 0.946,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "A 27-year-old male was initially diagnosed with pneumonia but was later found to have adenocarcinoma after a bronchoscopy and pathological examination.",
+    "entailment": 0.996,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "Adenocarcinoma presenting as pneumonia is often mistaken for infectious pneumonia due to its similar clinical manifestations, including cough, expectoration, and shortness of breath, and imaging features such as segmental, lobar, or pulmonary consolidation.",
+    "entailment": 0.992,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "A lung mass on chest radiograph may be associated with hilar enlargement, mediastinal invasion, or bronchial obstruction, and can also present with parenchymal consolidation or super-infection.",
+    "entailment": 0.964,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "A pulmonary hilar region is a common location of missed lung cancers, with 65% of missed cancers locating at the pulmonary hilum.",
+    "entailment": 0.989,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung lesion at the apex or behind the heart overlooked on a chest film",
+    "written": true,
+    "sentence": "The apical lung zones are associated with a 72% prevalence of overlooked pulmonary tumors, with 60% of missed lung cancers located in this area.",
+    "entailment": 0.991,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Spiculation of the nodule's anatomical margins is associated with an increased risk of lung cancer.",
+    "entailment": 0.998,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Perifissural nodules, defined as solid nodules in contact with a fissure or the pleural surface, are generally considered benign, associated with intrapulmonary lymph nodes, and are typically characterized by homogeneous, smooth calcification patterns, such as diffuse, central, laminated, and popcorn calcification.",
+    "entailment": 0.826,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "Elevated levels of lactate dehydrogenase (LDH) are associated with a poor prognosis in patients with lung cancer, particularly in those with metastatic stage IV lung cancer, with a study of 329 patients finding significantly higher LDH levels in these patients.",
+    "entailment": 0.862,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "Elevated plasma lactate dehydrogenase (LDH) levels were associated with a poorer prognosis in patients with lung cancer, while decreased plasma creatine kinase (CK) levels were observed in the early stages of the disease.",
+    "entailment": 0.967,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH and low albumin",
+    "written": true,
+    "sentence": "Elevated lactate dehydrogenase (LDH) levels are associated with increased glycolytic flux, tumor burden, and an immunosuppressive tumor microenvironment, while low albumin levels are associated with cancer cachexia, a condition characterized by severe malnutrition driven by the tumor's metabolic demands and systemic inflammation.",
+    "entailment": 0.979,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "The neutrophil-lymphocyte ratio (NLR) and platelet-lymphocyte ratio (PLR) are associated with the tumor progression and survival outcome in non-small cell lung cancer (NSCLC) patients.",
+    "entailment": 0.997,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "Elevated platelet to lymphocyte ratio (PLR) was associated with poor overall survival (OS) and disease-free survival (DFS)/progression-free survival (PFS) in patients with non-small cell lung cancer (NSCLC), with subgroup analysis showing enhanced prognostic efficiency in Caucasians with a PLR cut-off value >180.",
+    "entailment": 0.049,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.05 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Lung cancer patients with thrombocytosis who experience sustained platelet elevation have a worse first-line progression-free survival compared to those whose platelet count normalizes after treatment.",
+    "entailment": 0.984,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "treatment"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: treatment"
+    ]
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Dynamic patterns of platelet count were significantly associated with first-line PFS in lung cancer patients with thrombocytosis, with patients exhibiting fluctuation-type platelet count having the worst PFS.",
+    "entailment": 0.006,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "Preoperative anemia is associated with poor survival among lung cancer patients, with a 5-year overall survival rate of less than 20%.",
+    "entailment": 0.188,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.19 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "A high HALP score is associated with significantly improved overall survival in lung cancer patients, with a 44% mortality risk reduction.",
+    "entailment": 0.037,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "A 59-year-old male patient with small cell lung cancer was admitted with severe hyponatremia, which worsened upon initiating chemotherapy, leading to seizures and the need for ventilator support therapy.",
+    "entailment": 0.003,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "therapy"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3",
+     "banned wording: therapy"
+    ]
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "Unexplained refractory hyponatremia in patients with pulmonary lesions should prompt clinicians to consider the possibility of pulmonary malignant tumors with SIADH, and careful management of hyponatremia during chemotherapy is necessary.",
+    "entailment": 0.602,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "should"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: should"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is a common condition associated with 15% of patients with metastatic cancer, particularly with lung cancer and breast cancer in men and women, respectively.",
+    "entailment": 0.962,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "A late (venous)-phase contrast-enhanced CT scan is the optimal imaging protocol to visualise pleural thickening, with as little as 175 mL of pleural fluid able to blunt the costophrenic angle on a posteroanterior chest radiograph.",
+    "entailment": 0.548,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   }
+  ]
+ },
+ {
+  "model": "llama3.2:latest",
+  "expand": true,
+  "n": 41,
+  "written": 1.0,
+  "pass": 0.659,
+  "entail": 0.679,
+  "words": 26.8,
+  "seconds": 3.2,
+  "rows": [
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "A 49-year-old patient with pneumonia showed persistent consolidation on a follow-up chest X-ray 6 weeks after hospital discharge, which was later diagnosed as lung adenocarcinoma.",
+    "entailment": 0.995,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "Up to 4% of patients undergoing a chest X-ray following a pneumonia episode will develop lung cancer, with 27% of these cases presenting within 90 days (i.e. 12 weeks) of hospital discharge.",
+    "entailment": 0.994,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "A total of 388 patients with community acquired pneumonia were enrolled in the study, with consolidation being the main finding on chest x-ray (CXR) and computerized tomography (CT) examinations, with 89% and 80% of patients showing consolidation on CXR and CT respectively.",
+    "entailment": 0.039,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "Patients with community-acquired pneumonia (CAP) admitted to the ICU were included in the study if they had conclusive evidence of CAP confirmed by chest X-ray (CXR) and were aged \u226516 years.",
+    "entailment": 0.774,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "A CRP level above 40 mg/L has a sensitivity of 70% to 73% and a specificity of 90% to 65% in diagnosing bacterial pneumonia.",
+    "entailment": 0.808,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "Elevated CRP levels are associated with disease severity and mortality in community-acquired pneumonia.",
+    "entailment": 0.035,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "Elevated procalcitonin levels in patients suspected of having bacterial pneumonia are not sufficient to confirm or refute the diagnosis at the bedside.",
+    "entailment": 0.003,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "confirm"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3",
+     "banned wording: confirm"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "Median values of both biomarkers (C-reactive protein and procalcitonin) increased with level of certainty for CAP diagnosis, but no discriminant cutoff was established for procalcitonin.",
+    "entailment": 0.68,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "An elevated neutrophil-to-lymphocyte ratio is associated with approximately double the death risk in community-acquired pneumonia patients.",
+    "entailment": 0.993,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "Elevated neutrophil-to-lymphocyte ratio (NLR) was significantly associated with increased all-cause mortality risk in community-acquired pneumonia (CAP) patients, with a relative risk of 2.02 and a 95% confidence interval of 1.18-3.47, p<0.05.",
+    "entailment": 0.092,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.09 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Low lymphocyte count (lymphocyte count 1\u20132 \u00d7 10^9 cells/L) is associated with increased short- and longer-term mortality in patients with pneumonia.",
+    "entailment": 0.701,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Patients with pneumonia who have a low lymphocyte count (\u22641 \u00d7 10^9 cells/L) have a higher risk of 28-day and 1-year mortality compared to those with higher lymphocyte counts.",
+    "entailment": 0.979,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "CURB-65 is a severity scoring system that incorporates five factors, including urea levels, systolic blood pressure, respiratory rate, and age, to estimate mortality risk in patients with community-acquired pneumonia.",
+    "entailment": 0.129,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.13 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "Patients with a CURB-65 score of 3 to 5 have a higher mortality risk than those scoring between 0 and 2.",
+    "entailment": 0.996,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Low albumin levels have been associated with prolonged hospital stays, organ failure, and increased mortality in patients with pneumonia.",
+    "entailment": 0.017,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.02 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Lymphocyte count and serum albumin level were found to be significant predictors of in-hospital mortality and prolonged hospital stay in patients with community-acquired pneumonia, with the latter demonstrating the highest predictive accuracy.",
+    "entailment": 0.926,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "consolidation not resolving after antibiotics, possible malignancy",
+    "written": true,
+    "sentence": "Patients with radiographic consolidation after pneumonia are at risk of developing lung cancer, with up to 4% of patients developing lung cancer after a chest X-ray following a pneumonia episode, and 27% of these cases presenting within 12 weeks of hospital discharge.",
+    "entailment": 0.996,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lobar atelectasis with consolidation, central tumor obstructing a bronchus",
+    "written": true,
+    "sentence": "Invasive mucinous adenocarcinoma can present as a lobar consolidation or diffuse air-space filling process on CXR, associated with air-bronchograms, and may be distinguished from pneumonia by clinical findings, lack of response to antibiotic treatment, and presence of a central mass (\"Golden S or reversed S sign\").",
+    "entailment": 0.962,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "treatment"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: treatment"
+    ]
+   },
+   {
+    "topic": "pulmonary edema with cardiomegaly and pleural effusion",
+    "written": true,
+    "sentence": "Cardiogenic pulmonary edema is associated with elevated left atrial pressures, such as atrial outflow obstruction, left ventricular systolic dysfunction, and left ventricular diastolic dysfunction, and is characterized by mediastinal widening, pleural effusion, cardiomegaly, and opacities involving both the central and peripheral lungs.",
+    "entailment": 0.992,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Uncomplicated simple exudate (stage I) pleural effusion is usually a unilateral, small, free-flowing effusion with an associated area of consolidation.",
+    "entailment": 0.989,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Tuberculous pleural effusions are more common on the right side and are associated with parenchymal infiltrate in half of the cases.",
+    "entailment": 0.947,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "Adenocarcinoma of the lung can present as pneumonia, particularly in young adults, and may be initially misdiagnosed as an infectious process.",
+    "entailment": 0.905,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "Adenocarcinoma presenting as pneumonia is often mistaken for infectious pneumonia due to similar clinical manifestations, including cough, expectoration, and shortness of breath, and imaging features such as segmental, lobar, or pulmonary consolidation.",
+    "entailment": 0.992,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "A lung mass on chest radiograph with hilar enlargement may be associated with mediastinal invasion or bronchial obstruction.",
+    "entailment": 0.984,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "A pulmonary hilar region is a common location of missed lung cancers, with 65% of missed cancers locating at the pulmonary hilum.",
+    "entailment": 0.989,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung lesion at the apex or behind the heart overlooked on a chest film",
+    "written": true,
+    "sentence": "The apical lung zones are associated with a 72% prevalence of overlooked pulmonary tumors, with 60% of these tumors located in the apical or posterior segment.",
+    "entailment": 0.993,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Spiculation of the nodule's anatomical margins has been associated with an increased risk of lung cancer.",
+    "entailment": 0.997,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Perifissural nodules, defined as solid nodules in contact with a fissure or the pleural surface, are considered benign, most probably depicting intrapulmonary lymph nodes, and are associated with a low risk of lung cancer, even in patients with spiculated features.",
+    "entailment": 0.528,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "Elevated serum LDH levels were significantly higher in metastatic stage IV lung cancer patients, with a study of 329 patients showing this association.",
+    "entailment": 0.88,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "Elevated plasma lactate dehydrogenase (LDH) levels were associated with a poorer prognosis in patients with ADC (adenocarcinoma of the lung).",
+    "entailment": 0.909,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH and low albumin",
+    "written": true,
+    "sentence": "Elevated lactate dehydrogenase (LDH) levels are associated with increased glycolytic flux, leading to lactate accumulation and an immunosuppressive tumor microenvironment, while low albumin levels are a hallmark of cancer cachexia, driven by the tumor's metabolic demands and systemic inflammation.",
+    "entailment": 0.989,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "A high neutrophil-lymphocyte ratio (NLR) and platelet-lymphocyte ratio (PLR) were associated with the tumor progression and survival outcome in patients with non-small cell lung cancer (NSCLC).",
+    "entailment": 0.059,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.06 below 0.3"
+    ]
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "Elevated platelet to lymphocyte ratio (PLR) was associated with poor overall survival (OS) in patients with non-small cell lung cancer (NSCLC), with a combined hazard ratio (HR) of 1.42 and 95% confidence intervals (95% CI) of 1.25\u20131.61.",
+    "entailment": 0.97,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Among lung cancer patients with thrombocytosis, patients with sustained platelet elevation exhibited a worst first-line progression-free survival, whereas those with fluctuant platelet elevation had a worse but not statistically significant prognosis.",
+    "entailment": 0.944,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Patients with elevated platelets exhibited lower mean platelet volume (MPV) and platelet distribution width (PDW) and higher D-dimer levels, all of which were significantly associated with first-line progression-free survival (PFS).",
+    "entailment": 0.728,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "Preoperative anemia is associated with poor survival among lung cancer patients.",
+    "entailment": 0.062,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.06 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "A high HALP score is associated with a 44% mortality risk reduction in lung cancer patients.",
+    "entailment": 0.011,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "A 59-year-old male patient with small cell lung cancer was diagnosed with syndrome of inappropriate antidiuretic hormone secretion (SIADH) and severe hyponatremia, which worsened with chemotherapy.",
+    "entailment": 0.005,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "Unexplained refractory hyponatremia in patients with pulmonary lesions should prompt clinicians to consider the possibility of pulmonary malignant tumors with SIADH, and careful management of hyponatremia during chemotherapy is necessary.",
+    "entailment": 0.602,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "should"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: should"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is a common condition associated with secondary cancers, with lung cancer being the most common primary cause in men and breast cancer in women.",
+    "entailment": 0.979,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "cause"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: cause"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is more commonly associated with secondary cancers, with lung cancer being the most common primary cause in men and breast cancer in women.",
+    "entailment": 0.273,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "cause"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.27 below 0.3",
+     "banned wording: cause"
+    ]
+   }
+  ]
+ },
+ {
+  "model": "qwen2.5:3b",
+  "expand": false,
+  "n": 41,
+  "written": 1.0,
+  "pass": 0.634,
+  "entail": 0.564,
+  "words": 27.1,
+  "seconds": 3.8,
+  "rows": [
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "persistent consolidation on chest X-ray associated with lung adenocarcinoma.",
+    "entailment": 0.997,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "lung opacity and consolidation on chest X-ray associated with pneumonic-type lung adenocarcinoma (PLADC) that can be misdiagnosed as community-acquired pneumonia (CAP).",
+    "entailment": 0.735,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "Consolidation was the main radiographic finding on chest x-ray (CXR) and CT examinations in 89% and 80% of patients, respectively, with multi-lobar involvement and bilateral involvement observed in 45% and 40% of patients, respectively, associated with the need for mechanical ventilation.",
+    "entailment": 0.034,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.03 below 0.3"
+    ]
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "chest radiographs of enrolled patients showed evidence of new infiltrates, associated with the need for either noninvasive or invasive mechanical ventilation in the ICU.",
+    "entailment": 0.209,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.21 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "CRP levels above 40 mg/L have a sensitivity of 70% to 73% for diagnosing bacterial pneumonia associated with leukocytosis and elevated CRP.",
+    "entailment": 0.015,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "Leukocytosis and elevated CRP are associated with pneumonia, as shown in studies examining the prognostic value of leukocyte subtypes and inflammatory markers in various diseases.",
+    "entailment": 0.043,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "elevated procalcitonin is associated with suspected bacterial pneumonia in this population.",
+    "entailment": 0.001,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "elevated procalcitonin is associated with a diagnosis of bacterial pneumonia in this study, but discriminating values were not established.",
+    "entailment": 0.525,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "an elevated neutrophil-to-lymphocyte ratio is associated with approximately double the death risk in community-acquired pneumonia patients, findings supported by a meta-analysis.",
+    "entailment": 0.998,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "Elevated neutrophil-to-lymphocyte ratio is associated with increased all-cause mortality risk and ICU admission in community-acquired pneumonia patients.",
+    "entailment": 0.019,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.02 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "low lymphocyte count (1\u20132 \u00d7 109 cells/L) is associated with increased mortality in pneumonia",
+    "entailment": 0.992,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Lymphopenia (low lymphocyte count) is associated with increased 28-day and 1-year mortality in primary care pneumonia patients.",
+    "entailment": 0.975,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "elevated urea levels associated with pneumonia are associated with high CURB-65 severity.",
+    "entailment": 0.025,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.03 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "Elevated urea is associated with CURB-65 severity.",
+    "entailment": 0.747,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Low albumin levels are associated with poor outcomes in CAP, including prolonged hospital stays and increased mortality, and the Fibrinogen-to-albumin ratio (FAR) is a composite marker that reflects both inflammation and nutritional status, providing a more comprehensive assessment of disease severity than either marker alone.",
+    "entailment": 0.362,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "low albumin associated with in-hospital mortality and prolonged hospital stay in patients with community-acquired pneumonia.",
+    "entailment": 0.121,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.12 below 0.3"
+    ]
+   },
+   {
+    "topic": "consolidation not resolving after antibiotics, possible malignancy",
+    "written": true,
+    "sentence": "consolidation not resolving after antibiotics for community-acquired pneumonia associated with a possible malignancy presentation as pneumonic-type lung adenocarcinoma (P-LADC).",
+    "entailment": 0.962,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lobar atelectasis with consolidation, central tumor obstructing a bronchus",
+    "written": true,
+    "sentence": "lobar atelectasis with consolidation, central tumor obstructing a bronchus, can be associated with an associated central mass (\"Golden S or reversed S sign\"), irregular bronchial narrowing or obstruction, stretching or squeezing of the air-bronchograms within the consolidation.",
+    "entailment": 0.662,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pulmonary edema with cardiomegaly and pleural effusion",
+    "written": true,
+    "sentence": "Pulmonary edema associated with cardiomegaly and pleural effusion shows mediastinal widening with increased vascular pedicle width (>53 mm), pleural effusion, peribronchial cuffing, upper lobe pulmonary venous diversion, Kerley B lines, opacities involving both central and peripheral lungs, and reduced lung volume.",
+    "entailment": 0.941,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Uncomplicated infected pleural effusion on a chest radiograph is usually a unilateral, small, free-flowing effusion with an associated area of consolidation.",
+    "entailment": 0.954,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "pleural effusions associated with pleural infection may be unilateral and small to moderate in size in immune competent hosts, while HIV-positive patients are more likely to have bilateral effusions with parenchymal infiltration, associated with lymphocytic and exudative pleural fluid on US, which has a positive predictive value of 94% for tuberculous pleural infection.",
+    "entailment": 0.932,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "adenocarcinoma can present as pneumonia, mimicking an infectious process, as described in this case report",
+    "entailment": 0.993,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "Pulmonary adenocarcinoma (P-ADC) mimics pneumonia with similar clinical and imaging features, including cough, expectoration, shortness of breath, and consolidation, and can lead to secondary infections, bleeding, and other complications, thus clinicians must consider P-ADC in young adults presenting with pneumonia-like symptoms.",
+    "entailment": 0.004,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "must"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3",
+     "banned wording: must"
+    ]
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "A lung mass on chest radiograph with hilar enlargement is associated with mediastinal involvement of central neoplasia.",
+    "entailment": 0.982,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "lung mass associated with hilar enlargement is difficult to detect on chest radiograph due to the complexity of the pulmonary hilum, which includes important anatomical structures such as pulmonary vessels, major bronchi, and lymph nodes.",
+    "entailment": 0.975,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung lesion at the apex or behind the heart overlooked on a chest film",
+    "written": true,
+    "sentence": "Missed lung lesions at the apex or behind the heart are associated with the predominance of 72% missed lung cancers in the study of Shah et al., located in the apical or posterior segment, where little lung parenchyma is present and often obscured by anterior and posterior ribs, and associated with asymmetric calcification of the first costal cartilage, thickening of extrapleural fat, and pleural and subpleural fibrosis.",
+    "entailment": 0.724,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Spiculation of pulmonary nodule margins is associated with an increased risk of lung cancer, aligning with upper lobe location as a predictor of malignancy.",
+    "entailment": 0.984,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Punctuate, eccentric, and amorphous calcifications are indeterminate patterns for malignancy, associated with further investigation of pulmonary nodules.",
+    "entailment": 0.913,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "LDH, an enzyme elevated in various malignant tumors, is associated with poor prognosis in lung cancer patients, including those with metastatic stage IV disease and those treated with erlotinib, and its levels correlate with the efficacy of the treatment. CK, another enzyme, is associated with the status of innate immunity and may be recruited by growing tumor cells, leading to its decreased levels in lung cancer patients.",
+    "entailment": 0.038,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "treated",
+     "treatment"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3",
+     "banned wording: treated, treatment"
+    ]
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "LDH levels increased in early stage lung cancer, associated with decreased CK levels, suggesting diagnostic potential but not alone sufficient for molecular diagnosis.",
+    "entailment": 0.998,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH and low albumin",
+    "written": true,
+    "sentence": "elevated LDH and low albumin associated with lung cancer, tumor burden, and an immunosuppressive tumor microenvironment associated with poor survival.",
+    "entailment": 0.469,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio are associated with poor survival outcome in non-small cell lung cancer patients",
+    "entailment": 0.827,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio were associated with poor overall survival and disease-free survival in non-small cell lung cancer, with elevated PLR predicting poor overall survival in patients of Caucasian ethnicity and with PLR cut-off value >180.",
+    "entailment": 0.014,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Dynamic platelet count pattern is associated with worse first-line progression-free survival in lung cancer patients with thrombocytosis, while platelet-related parameters PDW, PLR, and NLR do not significantly impact first-line progression-free survival. Mean platelet volume and D-dimer are also associated with first-line progression-free survival.",
+    "entailment": 0.973,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Dynamic patterns of platelet count were associated with first-line progression-free survival (PFS) in lung cancer patients with thrombocytosis, while the time point of platelet elevation was not associated with first-line PFS.",
+    "entailment": 0.979,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "preoperative anemia and low hemoglobin levels are associated with poor overall survival in lung cancer patients according to a 2001 systematic review by Caro et al.",
+    "entailment": 0.042,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "A high HALP score is associated with significantly improved overall survival (OS) in lung cancer patients, but not with disease-free survival (DFS).",
+    "entailment": 0.986,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "Small cell lung cancer is associated with hyponatremia, which is often associated with syndrome of inappropriate antidiuretic hormone secretion (SIADH) in this case.",
+    "entailment": 0.725,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "unexplained refractory hyponatremia associated with pulmonary lesions associated with small cell lung cancer (SCLC) associated with syndrome of inappropriate antidiuretic hormone secretion (SIADH)",
+    "entailment": 0.132,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.13 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is associated with secondary cancers, with lung cancer and breast cancer being the most common primary cancers causing MPE in men and women, respectively. Thoracic ultrasound can be used to identify MPE with a sensitivity of 73% and specificity of 100%.",
+    "entailment": 0.041,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "lung cancer associated with pleural plaques, which are localised areas of thickening with shelf-like edges that exhibit a geographical appearance on chest radiographs and commonly show calcification.",
+    "entailment": 0.079,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.08 below 0.3"
+    ]
+   }
+  ]
+ },
+ {
+  "model": "qwen2.5:3b",
+  "expand": true,
+  "n": 41,
+  "written": 0.976,
+  "pass": 0.6,
+  "entail": 0.595,
+  "words": 27.9,
+  "seconds": 3.0,
+  "rows": [
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "lung opacity and consolidation on chest X-ray associated with a subsequent diagnosis of lung cancer.",
+    "entailment": 0.987,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia, lung opacity and consolidation on chest X-ray",
+    "written": true,
+    "sentence": "lung opacity and consolidation on chest X-ray associated with pneumonic-type lung adenocarcinoma (PLADC) that can be misdiagnosed as community-acquired pneumonia (CAP).",
+    "entailment": 0.735,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "Consolidation was the main radiographic finding on chest x-ray (CXR) and CT examinations in 89% and 80% of patients respectively, with multi-lobar involvement seen in 45% and 40% of patients on CXR and CT respectively.",
+    "entailment": 0.417,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "chest radiograph findings in pneumonia patients needing ICU admission",
+    "written": true,
+    "sentence": "Patients with pneumonia requiring ICU admission had chest radiograph findings evaluated for inclusion, with exclusion of those with inconclusive or indeterminate findings.",
+    "entailment": 0.169,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.17 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "CRP levels above 40 mg/L have a sensitivity of 70% to 73% and a specificity of 90% to 65% in diagnosing bacterial pneumonia.",
+    "entailment": 0.924,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with leukocytosis and elevated CRP",
+    "written": true,
+    "sentence": "Leukocytosis and elevated CRP are associated with pneumonia, supporting the prognostic use of these markers in CAP.",
+    "entailment": 0.108,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.11 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "elevated procalcitonin is associated with suspected bacterial pneumonia in this population.",
+    "entailment": 0.001,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.00 below 0.3"
+    ]
+   },
+   {
+    "topic": "elevated procalcitonin, suspected bacterial pneumonia",
+    "written": true,
+    "sentence": "elevated procalcitonin, associated with poor performance in diagnosing community-acquired pneumonia in adults with suspected lower respiratory tract infections, despite the use of an operational algorithm suggesting a cutoff value of 0.25 \u03bcg/L for antibiotic prescription.",
+    "entailment": 0.859,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "an elevated neutrophil-to-lymphocyte ratio is associated with approximately double the death risk in community-acquired pneumonia patients, findings supported by a meta-analysis.",
+    "entailment": 0.998,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated neutrophil-lymphocyte ratio",
+    "written": true,
+    "sentence": "Elevated neutrophil-to-lymphocyte ratio (NLR) is associated with increased all-cause mortality and ICU admission risk in community-acquired pneumonia (CAP) patients, as demonstrated in a systematic review and meta-analysis of 12 observational studies.",
+    "entailment": 0.333,
+    "numbers_not_in_passage": [
+     "12"
+    ],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "numbers not in passage: 12"
+    ]
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "low lymphocyte count was associated with a significant increase in both short- and longer-term mortality in this large primary care cohort of patients with pneumonia.",
+    "entailment": 0.967,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with low lymphocyte count",
+    "written": true,
+    "sentence": "Lymphopenia is associated with increased hazard of death in primary care pneumonia, even in patients with lymphocyte counts in the 1\u20132 \u00d7 10^9 cells/L range.",
+    "entailment": 0.96,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "Elevated urea levels associated with pneumonia are assessed using CURB-65, a severity score that includes age, urea, systolic blood pressure, respiratory rate, and altered mental status, while the fibrinogen-to-albumin ratio (FAR) is a composite marker reflecting both inflammation and nutritional status, potentially improving the prediction of in-hospital mortality in CAP patients.",
+    "entailment": 0.786,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pneumonia with elevated urea, CURB-65 severity",
+    "written": true,
+    "sentence": "elevated urea associated with pneumonia is associated with a higher CURB-65 score.",
+    "entailment": 0.161,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.16 below 0.3"
+    ]
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Low albumin levels are associated with adverse clinical outcomes in community-acquired pneumonia (CAP), and the Fibrinogen-to-albumin ratio (FAR) is a composite marker reflecting both inflammation and nutritional status, providing a more comprehensive assessment of disease severity than either marker alone. FAR could help identify CAP patients at high risk of in-hospital mortality and inform ICU management and treatment decisions.",
+    "entailment": 0.275,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "treatment"
+    ],
+    "passed": false,
+    "reasons": [
+     "entailment 0.28 below 0.3",
+     "banned wording: treatment"
+    ]
+   },
+   {
+    "topic": "pneumonia with low albumin",
+    "written": true,
+    "sentence": "Low albumin level associated with pneumonia is a significant predictor of in-hospital mortality and prolonged hospital stay, alongside lymphocyte count.",
+    "entailment": 0.181,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.18 below 0.3"
+    ]
+   },
+   {
+    "topic": "consolidation not resolving after antibiotics, possible malignancy",
+    "written": true,
+    "sentence": "consolidation not resolving after antibiotics for community-acquired pneumonia associated with a possible malignancy in some patients.",
+    "entailment": 0.996,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lobar atelectasis with consolidation, central tumor obstructing a bronchus",
+    "written": true,
+    "sentence": "lobar atelectasis with consolidation, central tumor obstructing a bronchus can be associated with an associated central mass (\"Golden S or reversed S sign\"), irregular bronchial narrowing or obstruction, stretching or squeezing of the air-bronchograms within the consolidation.",
+    "entailment": 0.577,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pulmonary edema with cardiomegaly and pleural effusion",
+    "written": true,
+    "sentence": "Pulmonary edema associated with cardiomegaly and pleural effusion shows mediastinal widening with increased vascular pedicle width (>53 mm), pleural effusion, peribronchial cuffing, upper lobe pulmonary venous diversion, Kerley B lines, opacities involving both central and peripheral lungs, and reduced lung volume.",
+    "entailment": 0.941,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "Uncomplicated infected pleural effusion on chest radiography appears as a unilateral, small, free-flowing effusion with an associated area of consolidation.",
+    "entailment": 0.988,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "pleural effusion with pneumonia",
+    "written": true,
+    "sentence": "HIV-positive patients are more likely to have bilateral pleural effusion and parenchymal infiltration compared to HIV-negative patients, with odds ratios of 3.81 and 4.38, respectively, associated with pleural tuberculosis.",
+    "entailment": 0.943,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "adenocarcinoma presenting as pneumonia associated with appropriate driver mutations, genetic alterations in the p53 gene, and smoking history.",
+    "entailment": 0.008,
+    "numbers_not_in_passage": [
+     "53"
+    ],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3",
+     "numbers not in passage: 53"
+    ]
+   },
+   {
+    "topic": "adenocarcinoma presenting as pneumonia",
+    "written": true,
+    "sentence": "Pulmonary adenocarcinoma (P-ADC) mimicking pneumonia is associated with similar early clinical manifestations, imaging features, and secondary complications as infectious pneumonia.",
+    "entailment": 0.994,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": true,
+    "sentence": "lung mass on chest radiograph with hilar enlargement is associated with a significant volume increase.",
+    "entailment": 0.005,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung mass on chest radiograph with hilar enlargement",
+    "written": false
+   },
+   {
+    "topic": "lung lesion at the apex or behind the heart overlooked on a chest film",
+    "written": true,
+    "sentence": "missed lung lesions at the apex or behind the heart are associated with overall increased opacity, asymmetric calcification of the first costal cartilage, thickening of extrapleural fat, dense pleural and subpleural fibrosis, and thickening of apical pleural caps less than 5 mm in thickness.",
+    "entailment": 0.148,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.15 below 0.3"
+    ]
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Spiculation is associated with an increased risk of lung cancer, a finding supported by the majority of lung cancers occurring in the upper lobes, where upper lobe nodule location is also a predictor of malignancy.",
+    "entailment": 0.286,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.29 below 0.3"
+    ]
+   },
+   {
+    "topic": "spiculated pulmonary nodule, lung cancer risk",
+    "written": true,
+    "sentence": "Perifissural and subpleural nodules, especially those with indeterminate calcification patterns, are associated with lung cancer risk.",
+    "entailment": 0.347,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "LDH levels are elevated in metastatic stage IV lung cancer patients and are associated with poor prognosis in various malignant tumors, including lung cancer. CK levels are also reduced in lung cancer patients, possibly due to tumor cells recruiting circulating CK.",
+    "entailment": 0.914,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH",
+    "written": true,
+    "sentence": "LDH levels increased in early stage lung cancer, associated with decreased CK levels, suggesting diagnostic potential but not alone for molecular diagnosis.",
+    "entailment": 0.998,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with elevated LDH and low albumin",
+    "written": true,
+    "sentence": "elevated baseline LDH and hypoalbuminemia independently predicted poor disease-free survival (DFS) in resectable NSCLC patients.",
+    "entailment": 0.007,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio are associated with poor survival outcome in non-small cell lung cancer patients",
+    "entailment": 0.827,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "high neutrophil-lymphocyte ratio and platelet-lymphocyte ratio in lung cancer",
+    "written": true,
+    "sentence": "Elevated platelet to lymphocyte ratio was associated with poor overall survival and disease-free survival in non-small cell lung cancer, with subgroup analysis showing enhanced prognostic efficiency in Caucasians and PLR cut-off value >180.",
+    "entailment": 0.014,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.01 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Dynamic platelet count elevation is associated with worse first-line progression-free survival in lung cancer patients with thrombocytosis, while sustained elevation is particularly detrimental. Mean platelet volume and D-dimer levels are also prognostic factors.",
+    "entailment": 0.941,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with thrombocytosis",
+    "written": true,
+    "sentence": "Dynamic patterns of platelet count were associated with first-line progression-free survival (PFS), while the time point of platelet elevation was not.",
+    "entailment": 0.991,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "preoperative anemia and low hemoglobin levels are associated with poor overall survival (OS) in lung cancer patients according to a 2001 systematic review by Caro et al.",
+    "entailment": 0.043,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "entailment 0.04 below 0.3"
+    ]
+   },
+   {
+    "topic": "lung cancer with low hemoglobin",
+    "written": true,
+    "sentence": "A high HALP score is associated with improved overall survival in lung cancer patients, but not with disease-free survival.",
+    "entailment": 0.995,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "Small cell lung cancer is associated with hyponatremia via syndrome of inappropriate antidiuretic hormone secretion (SIADH).",
+    "entailment": 0.995,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "small cell lung cancer with hyponatremia",
+    "written": true,
+    "sentence": "associated with TOPIC: small cell lung cancer with hyponatremia, prompt diagnosis based on SIADH criteria is crucial to determine its cause, and hyponatremia during chemotherapy requires careful management. More clinical research is needed to ascertain whether hyponatremia independently affects the prognosis of patients with SCLC.",
+    "entailment": 0.97,
+    "numbers_not_in_passage": [],
+    "banned": [
+     "cause"
+    ],
+    "passed": false,
+    "reasons": [
+     "banned wording: cause"
+    ]
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is associated with secondary cancers, with lung cancer and breast cancer being the most common primary malignancies in men and women, respectively. Thoracic ultrasound has a sensitivity of 73% for diagnosing malignant pleural effusion, though its accuracy depends on the operator's experience. PET scans may aid in identifying the primary malignancy but are not routinely requested for MPE diagnosis.",
+    "entailment": 0.554,
+    "numbers_not_in_passage": [],
+    "banned": [],
+    "passed": true,
+    "reasons": []
+   },
+   {
+    "topic": "lung cancer with malignant pleural effusion on imaging",
+    "written": true,
+    "sentence": "Malignant pleural effusion is associated with lung cancer and breast cancer, the most common primaries in men and women, respectively. Malignant pleural effusion is associated with pleural thickening and/or effusion, which on CT scanning, smooth pleural thickening is usually benign, while >1 cm thickening is suggestive of malignancy.",
+    "entailment": 0.44,
+    "numbers_not_in_passage": [
+     "1"
+    ],
+    "banned": [],
+    "passed": false,
+    "reasons": [
+     "numbers not in passage: 1"
+    ]
+   }
+  ]
+ }
+]

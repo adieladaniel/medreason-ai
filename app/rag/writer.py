@@ -61,11 +61,15 @@ def write_explanation(agent: dict, plan: dict, evidence: dict, model: str = MODE
         topic = "; ".join(p["queries"])
         reply = _ask(p, topic, model, timeout)
         sentence = re.sub(r"\s+", " ", reply).strip().strip('"')
-        if "NOT_ADDRESSED" in sentence or not sentence:
+        on_topic = not p.get("terms") or any(t in sentence.lower() for t in p["terms"])
+        if "NOT_ADDRESSED" in sentence or not sentence or not on_topic:
             not_addressed.append(p["n"])
         else:
             background.append({"n": p["n"], "text": sentence})
-    missing = [q["driver"] for q in evidence["unanswered"]]
+    # a driver counts as covered only if a passage fetched for it produced a kept sentence
+    kept = {n for n in (b["n"] for b in background)}
+    covered = {d for p in evidence["passages"] if p["n"] in kept for d in p["drivers"]}
+    missing = [q["driver"] for q in plan["queries"] if q["driver"] not in covered]
     return {"predicted_class": agent["belief"]["predicted_class"],   # copied from the agent, never from model text
             "case_sentences": case_sentences(agent, plan),
             "background": background,              # LLM-written, one per passage, still to be verified

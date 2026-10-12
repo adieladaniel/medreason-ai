@@ -27,10 +27,13 @@ import re
 
 NLI_MODEL = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
 WINDOW = 3
+MAX_WINDOWS = 5       # score only the windows sharing the most words with the sentence (speed)
 ENTAIL_MIN = 0.30          # inside the gap between the hand-made set's classes, see eval_faithfulness.py
 
-BANNED = re.compile(r"\b(treat\w*|therap\w*|dos(e|es|age)|prescrib\w*|recommend\w*|should|advis\w*|"
-                    r"must|medicat\w*|causes?|caused|proves?|proven|confirms?|guarantee\w*)\b", re.I)
+# (?<!-) and (?!-): a hyphen is a regex word boundary, so without them "all-cause mortality" and
+# "cause-specific" (standard epidemiology terms, not causal claims) were dropped as "causes".
+BANNED = re.compile(r"(?<!-)\b(treat\w*|therap\w*|dos(e|es|age)|prescrib\w*|recommend\w*|should|advis\w*|"
+                    r"must|medicat\w*|causes?|caused|proves?|proven|confirms?|guarantee\w*)\b(?!-)", re.I)
 _NUM = re.compile(r"\d+(?:\.\d+)?")
 
 _nli = None
@@ -55,9 +58,19 @@ def _windows(passage: str) -> list[str]:
     return [" ".join(sents[i:i + WINDOW]) for i in range(len(sents) - WINDOW + 1)]
 
 
+def _content_words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9]+", text.lower()) if len(w) > 3}
+
+
 def entailment(sentence: str, passage: str) -> float:
+    """Best entailment over the passage windows most related to the sentence. Scoring all windows of a
+    300-word passage took about 15 NLI passes per sentence on CPU; the claim can only rest on windows
+    that share its words, so the rest are skipped."""
     tok, mdl, entail, torch = _model()
     wins = _windows(passage)
+    if len(wins) > MAX_WINDOWS:
+        sw = _content_words(sentence)
+        wins = sorted(wins, key=lambda w: -len(sw & _content_words(w)))[:MAX_WINDOWS]
     enc = tok(wins, [sentence] * len(wins), return_tensors="pt", padding=True, truncation=True, max_length=512)
     with torch.no_grad():
         probs = torch.softmax(mdl(**enc).logits, dim=-1)[:, entail]

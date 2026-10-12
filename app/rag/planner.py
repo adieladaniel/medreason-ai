@@ -32,7 +32,7 @@ derived from the data; they decide which values are worth querying, not what is 
 """
 from __future__ import annotations
 
-MAX_QUERIES = 4
+MAX_QUERIES = 5
 IMAGE_MIN_VALUE = 0.5
 
 CLASS_PHRASE = {"Pneumonia": "pneumonia", "Lung Cancer": "lung cancer"}
@@ -76,6 +76,40 @@ CLINICAL_TERMS = {"mass", "nodule", "lesion", "tumor", "tumour", "malignancy", "
 SELF_WORDS = {"Pneumonia": {"pneumonia"}, "Lung Cancer": {"cancer", "carcinoma", "malignancy"}}
 
 
+# Substrings a background sentence must contain (any one) to count as being about the finding a query was
+# written for. Without this a sentence can be faithful to its passage yet about something else: the
+# "lung opacity" query pulled a case report of persistent consolidation later found to be cancer, and a
+# CT-timing note, and the writer model never answered NOT_ADDRESSED on its own.
+TERMS = {
+    "leukopenia": ("leukopeni", "leucopeni", "white blood", "wbc"),
+    "elevated white blood cell count": ("white blood", "wbc", "leukocyt", "leucocyt"),
+    "low red blood cell count": ("red blood", "rbc", "anemi", "anaemi"),
+    "low hemoglobin": ("hemoglobin", "haemoglobin", "anemi", "anaemi"),
+    "low hematocrit": ("hematocrit", "haematocrit"),
+    "thrombocytosis": ("thrombocytosis", "platelet"),
+    "neutrophilia": ("neutrophil",),
+    "low lymphocyte count": ("lymphocyt", "lymphopeni"),
+    "elevated monocytes": ("monocyt",),
+    "elevated C-reactive protein": ("c-reactive", "crp"),
+    "elevated erythrocyte sedimentation rate": ("sedimentation", "esr"),
+    "low albumin": ("albumin",),
+    "elevated LDH": ("ldh", "lactate dehydrogenase"),
+    "hyponatremia": ("hyponatr",),
+    "elevated urea": ("urea", "bun"),
+    "high neutrophil-lymphocyte ratio": ("neutrophil-to-lymphocyte", "neutrophil-lymphocyte", "neutrophil to lymphocyte", "nlr"),
+    "high platelet-lymphocyte ratio": ("platelet-to-lymphocyte", "platelet-lymphocyte", "platelet to lymphocyte", "plr"),
+    "consolidation": ("consolidat",),
+    "lung opacity": ("opacit", "infiltrat"),
+    "pulmonary edema": ("edema", "oedema"),
+    "pleural effusion": ("effusion",),
+    "atelectasis": ("atelecta",),
+    "cardiomegaly": ("cardiomegal", "cardiac enlargement", "enlarged heart"),
+    "lung nodule or mass": ("nodule", "mass", "lesion"),
+    "pneumothorax": ("pneumothora",),
+    "enlarged mediastinum": ("mediastin",),
+}
+
+
 def _blood_phrase(item: dict) -> str | None:
     rng = BLOOD_RANGES.get(item["feature"])
     if rng is None or item.get("value") is None:
@@ -110,41 +144,7 @@ def plan_queries(agent: dict) -> dict:
             return None
         return t["attributions"]["items"]
 
-    # lab drivers, strongest push first
-    blood = usable("blood") or []
-    blood_queries = []
-    for it in sorted((i for i in blood if i["direction"] == "supports"), key=lambda i: -i["effect"]):
-        phrase = _blood_phrase(it)
-        if phrase:
-            blood_queries.append({"text": f"{cls} with {phrase}", "modality": "blood",
-                                  "driver": f"{it['feature']} = {it['value']}", "effect": it["effect"]})
-        else:
-            out["skipped"].append(f"{it['feature']} = {it['value']}: supported the prediction but is within its "
-                                  "reference range (or has no usable phrase), so no literature query")
-    out["queries"] += blood_queries[:2]
-
-    # image drivers: the two strongest clearly-present channels
-    img = usable("image") or []
-    chans = [i for i in sorted(img, key=lambda i: -i["effect"])
-             if i["direction"] == "supports" and (i.get("value") or 0) >= IMAGE_MIN_VALUE and i["feature"] in IMAGE_PHRASES][:2]
-    if chans:
-        names = " and ".join(IMAGE_PHRASES[c["feature"]] for c in chans)
-        out["queries"].append({"text": f"{cls} chest X-ray with {names}", "modality": "image",
-                               "driver": ", ".join(f"{c['feature']} = {c['value']}" for c in chans),
-                               "effect": max(c["effect"] for c in chans)})
-
-    # text drivers: clinically meaningful words that supported the prediction
-    txt = usable("text") or []
-    words = []
-    for it in sorted((i for i in txt if i["direction"] == "supports" and i["effect"] >= 0.05), key=lambda i: -i["effect"]):
-        w = "".join(ch for ch in it["feature"].lower() if ch.isalnum())
-        if w in CLINICAL_TERMS and w not in SELF_WORDS[pred] and w not in words:
-            words.append(w)
-    if words:
-        out["queries"].append({"text": f"{cls} with {' and '.join(words[:2])}", "modality": "text",
-                               "driver": "indication words: " + ", ".join(words[:2]), "effect": None})
-
-    # a differential query when it matters
+    # differential query first: when modalities disagree it is the most useful one, and the cap must not cut it
     # The rival is the disease class a disagreeing modality predicted (strongest first), because the
     # pooled runner-up can be Normal, which has no literature to ask for. Fall back to the runner-up.
     probs = belief["probabilities"]
@@ -160,7 +160,45 @@ def plan_queries(agent: dict) -> dict:
             why = f"runner-up {rival} ({probs[rival]:.0%})"
         if rival in CLASS_PHRASE:
             out["queries"].append({"text": f"{cls} versus {CLASS_PHRASE[rival]} differential diagnosis imaging",
-                                   "modality": "agent", "driver": f"modalities disagree; {why}", "effect": None})
+                                   "modality": "agent", "driver": f"modalities disagree; {why}", "effect": None,
+                                   "terms": None})
+
+    # lab drivers, strongest push first
+    blood = usable("blood") or []
+    blood_queries = []
+    for it in sorted((i for i in blood if i["direction"] == "supports"), key=lambda i: -i["effect"]):
+        phrase = _blood_phrase(it)
+        if phrase:
+            blood_queries.append({"text": f"{cls} with {phrase}", "modality": "blood",
+                                  "driver": f"{it['feature']} = {it['value']}", "effect": it["effect"],
+                                  "terms": TERMS.get(phrase)})
+        else:
+            out["skipped"].append(f"{it['feature']} = {it['value']}: supported the prediction but is within its "
+                                  "reference range (or has no usable phrase), so no literature query")
+    out["queries"] += blood_queries[:2]
+
+    # image drivers: the two strongest clearly-present channels, one query each. A combined query
+    # ("edema and lung opacity") scored 3.3 on the reranker where "lung opacity" alone scored 10.8,
+    # because a cross-encoder rewards a passage that matches the whole query, and few passages do.
+    img = usable("image") or []
+    chans = [i for i in sorted(img, key=lambda i: -i["effect"])
+             if i["direction"] == "supports" and (i.get("value") or 0) >= IMAGE_MIN_VALUE and i["feature"] in IMAGE_PHRASES][:2]
+    for c in chans:
+        out["queries"].append({"text": f"{cls} chest X-ray with {IMAGE_PHRASES[c['feature']]}", "modality": "image",
+                               "driver": f"{c['feature']} = {c['value']}", "effect": c["effect"],
+                               "terms": TERMS.get(IMAGE_PHRASES[c["feature"]])})
+
+    # text drivers: clinically meaningful words that supported the prediction
+    txt = usable("text") or []
+    words = []
+    for it in sorted((i for i in txt if i["direction"] == "supports" and i["effect"] >= 0.05), key=lambda i: -i["effect"]):
+        w = "".join(ch for ch in it["feature"].lower() if ch.isalnum())
+        if w in CLINICAL_TERMS and w not in SELF_WORDS[pred] and w not in words:
+            words.append(w)
+    if words:
+        out["queries"].append({"text": f"{cls} with {' and '.join(words[:2])}", "modality": "text",
+                               "driver": "indication words: " + ", ".join(words[:2]), "effect": None,
+                               "terms": tuple(words[:2])})
 
     seen, uniq = set(), []
     for q in out["queries"]:

@@ -77,8 +77,6 @@ PHASE_BLURBS = {
 }
 
 REMAINING = [
-    {"phase": "5. Agentic layer", "work": "Orchestrator, belief state, consistency checker, missing-information planner, serving wrappers for the three models", "effort": "3 to 5 days"},
-    {"phase": "6. RAG", "work": "Small paper and guideline corpus, Qdrant, evidence planner, local LLM through Ollama", "effort": "4 to 6 days"},
     {"phase": "7. Backend and UI", "work": "FastAPI pipeline endpoint, PostgreSQL, Docker compose, the Analyze page with example cases", "effort": "5 to 7 days"},
     {"phase": "8. Integration and writeup", "work": "Sealed test-set evaluation, edge-case demo cases, input guard, rehearsal and recording, thesis writeup", "effort": "5 to 8 days"},
 ]
@@ -108,6 +106,7 @@ WATCHED = [
     "experiments/*/feature_importance.csv",
     "experiments/fusion/logreg_stack_coef.csv",
     "kaggle_upload/baseline_kernel/output/*.log",
+    "experiments/rag_retrieval/*.json",
 ]
 
 FUSION_MLP_LABELS = {"image": "Image", "blood": "Blood", "text": "Text"}
@@ -446,6 +445,42 @@ def _fusion_mlp():
     }
 
 
+# ---------------------------------------------------------------- phase 6, evidence retrieval
+RAG_VARIANTS = [   # (key in pipeline.json, label shown), in the order the story is told
+    ("dense (baseline)", "Embeddings only (first pick)"),
+    ("keyword only (BM25)", "Keyword search only"),
+    ("hybrid", "Embeddings + keywords"),
+    ("hybrid + MedCPT rerank (top 5)", "Hybrid + reranker (adopted)"),
+]
+
+
+def _rag():
+    pipe = _json("experiments/rag_retrieval/pipeline.json")
+    if not pipe:
+        return None
+    sources = _json("app/rag/corpus_sources.json") or {}
+    out = {
+        "papers": len(sources.get("sources", [])),
+        "random_p1": pipe["random"]["p@1"],
+        "variants": [{"label": lab, "dev_p1": pipe[k]["dev"]["p@1"], "test_p1": pipe[k]["test"]["p@1"],
+                      "mrr": pipe[k]["all"]["mrr"], "abstain_auc": pipe[k].get("abstain_auc_rerank")}
+                     for k, lab in RAG_VARIANTS if k in pipe],
+        "n_dev": pipe["hybrid"]["dev"]["n"], "n_test": pipe["hybrid"]["test"]["n"],
+    }
+    faith = _json("experiments/rag_retrieval/faithfulness_eval.json")
+    if faith:
+        good = [r["entailment"] for r in faith if r["faithful"]]
+        bad = [r["entailment"] for r in faith if not r["faithful"]]
+        out["faithfulness"] = {"n_faithful": len(good), "n_unfaithful": len(bad),
+                               "min_faithful": min(good), "max_unfaithful": max(bad),
+                               "points": [{"entailment": r["entailment"], "faithful": r["faithful"]} for r in faith]}
+    writer = _json("experiments/rag_retrieval/writer_eval.json")
+    if writer:
+        out["writer"] = [{k: w[k] for k in ("model", "expand", "n", "written", "pass", "entail", "words", "seconds")}
+                         for w in writer]
+    return out
+
+
 # ---------------------------------------------------------------- assemble
 def build() -> dict:
     data = _safe(_data)
@@ -453,6 +488,7 @@ def build() -> dict:
     fusion = _safe(_fusion)
     fusion_mlp = _safe(_fusion_mlp)
     preds = _safe(_predictions_section)
+    rag = _safe(_rag)
 
     head = {}
     if models and models["blood"]:
@@ -477,6 +513,7 @@ def build() -> dict:
         "fusion": fusion,
         "fusion_mlp": fusion_mlp,
         "predictions": preds,
+        "rag": rag,
         "remaining": REMAINING,
     }
 
@@ -518,6 +555,6 @@ def ensure_built() -> None:
 if __name__ == "__main__":
     out = write()
     print(f"wrote {OUT_PATH} ({OUT_PATH.stat().st_size / 1024:.0f} KB)")
-    for k in ("phases", "data", "models", "fusion", "predictions"):
+    for k in ("phases", "data", "models", "fusion", "predictions", "rag"):
         print(f"  {k}: {'ok' if out.get(k) else 'MISSING'}")
     print("  headline:", out["headline"])

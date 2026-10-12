@@ -741,8 +741,81 @@
     return { html, after() {} };
   }
 
+  /* ------------------------------------------------------------ evidence (phase 6) */
+  function evidencePage() {
+    const R = D.rag;
+    if (!R) return { html: pageHead('Evidence', '') + missing('Evidence retrieval results'), after() {} };
+    let html = pageHead('Evidence retrieval',
+      `After a prediction is made, the system looks up passages in a library of ${R.papers} open-access papers and writes a short cited note. It explains the result and never changes it. This page shows how well the lookup works and how the written sentences are checked.`);
+
+    const best = R.variants[R.variants.length - 1];
+    html += '<div class="grid4">' +
+      kpi('Library', num(R.papers), 'Open-access papers, license checked') +
+      kpi('Right passage first', pct(best.test_p1), `Held-out queries (n=${R.n_test}), adopted pipeline`, 'accent') +
+      kpi('Random ranking', pct(R.random_p1), 'The same measure for a shuffled list') +
+      kpi('Off-topic refused', best.abstain_auc != null ? Number(best.abstain_auc).toFixed(3) : 'n/a', 'ROC AUC, answerable versus off-corpus') + '</div>';
+
+    html += '<div class="grid2">' +
+      card('Finding the right passage', chartBox('c-ret', 300), {
+        sub: 'Share of queries whose top result is relevant. Pipeline variants were chosen on the dev queries and confirmed on the test queries.',
+        note: 'Keyword search alone beat the embedding model that was chosen first, partly because the queries share words with the papers. Relevance is a keyword-based proxy, checked by hand on 18 results, so read the levels as approximate and the comparisons as sturdier.',
+      });
+    if (R.faithfulness) {
+      const F = R.faithfulness;
+      html += card('Checking written sentences', chartBox('c-faith', 300), {
+        sub: `Entailment score of ${F.n_faithful + F.n_unfaithful} hand-made sentences against the passage they cite.`,
+        note: `Every faithful sentence scored ${f2(F.min_faithful)} or higher and every unfaithful one ${f2(F.max_unfaithful)} or lower, so the 0.30 cut-off sits in the gap. The set is small and written by the project author, so this is a sanity check on the checker, not an error rate on real output.`,
+      });
+    }
+    html += '</div>';
+
+    if (R.writer && R.writer.length) {
+      html += sectionHead('Which local model writes the notes', 'The faithfulness check is the judge. A sentence counts as written when the model did not answer NOT_ADDRESSED.');
+      html += card('', table(['Model', 'Sees next passage', 'Items', 'Written', 'Passed check', 'Mean entailment', 'Words', 'Seconds per item'],
+        R.writer.map((w) => [esc(w.model), w.expand ? 'yes' : 'no', w.n, pct(w.written), pct(w.pass), f2(w.entail), w.words, w.seconds]),
+        { numCols: [2, 3, 4, 5, 6, 7] }), { note: 'A model can pass by writing vague, short sentences, so length is shown next to the pass rate.' });
+    }
+
+    const after = () => {
+      mk('c-ret', {
+        type: 'bar',
+        data: {
+          labels: R.variants.map((v) => v.label),
+          datasets: [
+            { label: 'Dev queries', data: R.variants.map((v) => v.dev_p1), backgroundColor: '#94a3b8' },
+            { label: 'Test queries', data: R.variants.map((v) => v.test_p1), backgroundColor: '#4f46e5' },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          scales: { x: { min: 0, max: 1.1, ticks: { stepSize: 0.25, callback: (v) => (v <= 1 ? v : '') } }, y: { grid: { display: false } } },
+          plugins: { valueLabels: { format: (v) => Number(v).toFixed(2) } },
+        },
+      });
+      if (R.faithfulness) {
+        const jit = (i) => ((i * 37) % 11) / 22 - 0.25;
+        const pts = (ok) => R.faithfulness.points.map((p, i) => ({ x: p.entailment, y: (p.faithful ? 1 : 0) + jit(i), f: p.faithful }))
+          .filter((p) => p.f === ok);
+        mk('c-faith', {
+          type: 'scatter',
+          data: { datasets: [
+            { label: 'Faithful', data: pts(true), backgroundColor: '#2f9e77', pointRadius: 5 },
+            { label: 'Unfaithful', data: pts(false), backgroundColor: '#e0523d', pointRadius: 5 },
+          ] },
+          options: {
+            scales: {
+              x: { min: -0.04, max: 1.04, ticks: { callback: (v) => (v >= 0 && v <= 1 ? v : '') }, title: { display: true, text: 'Entailment score (higher means the passage supports the sentence)' } },
+              y: { min: -0.6, max: 1.6, ticks: { callback: (v) => (v === 1 ? 'Faithful' : v === 0 ? 'Unfaithful' : '') }, grid: { display: false } },
+            },
+          },
+        });
+      }
+    };
+    return { html, after };
+  }
+
   /* ------------------------------------------------------------ router */
-  const routes = { overview, data: dataPage, models: modelsPage, fusion: fusionPage, explain: explainPage, roadmap: roadmapPage };
+  const routes = { overview, data: dataPage, models: modelsPage, fusion: fusionPage, explain: explainPage, evidence: evidencePage, roadmap: roadmapPage };
 
   async function route() {
     const page = location.hash.replace('#/', '') || 'overview';

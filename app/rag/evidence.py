@@ -38,10 +38,12 @@ def assemble(plan: dict) -> dict:
                     continue
                 p = {"n": len(passages) + 1, "chunk_id": h["chunk_id"], "text": h["text"],
                      "heading": h.get("heading"), "citation": h.get("citation"), "title": h.get("title"),
-                     "url": h.get("url"), "rerank_score": h["rerank_score"], "drivers": [], "queries": []}
+                     "url": h.get("url"), "rerank_score": h["rerank_score"], "drivers": [], "queries": [], "terms": set()}
                 passages.append(p)
                 by_id[h["chunk_id"]] = p
             if q["driver"] not in p["drivers"]:
                 p["drivers"].append(q["driver"])
                 p["queries"].append(q["text"])
+            # a passage fetched for an ungated query (terms None) is never gated: it could be on topic for it
+            p["terms"] = None if (p["terms"] is None or not q.get("terms")) else p["terms"] | set(q["terms"])
     return {"passages": passages, "unanswered": unanswered}

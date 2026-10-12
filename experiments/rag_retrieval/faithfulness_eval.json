@@ -83,7 +83,7 @@
   "sentence": "Low albumin levels have been associated with adverse clinical outcomes in patients with pneumonia.",
   "faithful": true,
   "kind": "real writer output",
-  "entailment": 0.601,
+  "entailment": 0.603,
   "bad_numbers": [],
   "banned": []
  },
