@@ -481,6 +481,12 @@ def _rag():
     return out
 
 
+# ---------------------------------------------------------------- reliability (uncertainty, calibration, subgroups)
+def _uncertainty():
+    """experiments/uncertainty/metrics.json holds aggregates only (no identifiers), so it passes through."""
+    return _json("experiments/uncertainty/metrics.json")
+
+
 # ---------------------------------------------------------------- assemble
 def build() -> dict:
     data = _safe(_data)
@@ -489,6 +495,7 @@ def build() -> dict:
     fusion_mlp = _safe(_fusion_mlp)
     preds = _safe(_predictions_section)
     rag = _safe(_rag)
+    unc = _safe(_uncertainty)
 
     head = {}
     if models and models["blood"]:
@@ -514,6 +521,7 @@ def build() -> dict:
         "fusion_mlp": fusion_mlp,
         "predictions": preds,
         "rag": rag,
+        "uncertainty": unc,
         "remaining": REMAINING,
     }
 

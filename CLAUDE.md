@@ -386,6 +386,38 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
 - Left in Phase 6: nothing blocking. Corpus growth for image findings and a faster checker are
   tracked for Phase 7.
 
+### Reliability of the validation numbers (2026-10-12)
+
+`scripts/eval_uncertainty.py` (local, about 30 s, validation only, writes
+`experiments/uncertainty/metrics.json`, shown on the dashboard's Reliability page). It
+reproduces the saved fusion score (0.6133) before doing anything else.
+
+- Confidence intervals: cluster bootstrap over subjects (2,000 draws), because one patient has
+  several studies. Fusion macro F1 0.613 (0.569 to 0.650). Fusion minus the best single model
+  (text): +0.104 (+0.073 to +0.132), so the fusion gain is not sampling noise. Lung Cancer F1
+  0.425 (0.302 to 0.524) and ROC AUC 0.855 (0.798 to 0.900). The image model's Lung Cancer AUC is
+  0.527 (0.440 to 0.600), so on that class it cannot be told from guessing.
+- Calibration: the pooled probabilities are under-confident. Temperature scaling (T = 0.53,
+  fitted on out-of-fold train predictions only) cuts expected calibration error from 0.144 to
+  0.028 and Brier from 0.432 to 0.398, and never changes the predicted class.
+- Selective prediction: declining cases below confidence 0.55 (chosen on train to keep 80
+  percent) kept 81 percent of val, and accuracy on answered cases went from 72 to 76 percent,
+  macro F1 from 0.61 to 0.66. The cost falls unevenly: 32 percent of true Lung Cancer cases are
+  declined against 20 percent of Normal and 17 percent of Pneumonia.
+- Conformal sets (class-conditional, calibrated on out-of-fold train): coverage on val lands
+  near target for every class, including Lung Cancer (80 percent target: 79 / 81 / 84, 90
+  percent target: 88 / 90 / 91). The sets are large: 56 percent single-class at 80 percent
+  coverage, 25 percent at 90 percent. Useful as "not sure between these", not as a sharper answer.
+- Subgroups (sex, age band, recorded race): intervals overlap everywhere there are enough cases,
+  so no gap is clearly more than noise, and the data is too thin to show none exists. Groups with
+  fewer than 10 Lung Cancer cases (Hispanic, Asian, other race) are marked thin. Lung Cancer
+  recall is lower for men (0.41 against 0.55, 44 against 73 cases) and for age 80 and over
+  (0.18, 11 cases); both are suggestive only.
+- Limits: out-of-fold train predictions come from fold models and val predictions from the
+  full-train models, so calibration transfers approximately (val coverage shows how well).
+  Conformal guarantees assume exchangeability and patients repeat. The test set is untouched.
+  These checks should be repeated once, unchanged, on the test split at the end.
+
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
 

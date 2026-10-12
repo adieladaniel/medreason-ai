@@ -741,6 +741,74 @@
     return { html, after() {} };
   }
 
+  /* ------------------------------------------------------------ reliability */
+  function reliabilityPage() {
+    const U = D.uncertainty;
+    if (!U) return { html: pageHead('Reliability', '') + missing('Uncertainty results'), after() {} };
+    const ci = (o) => `${f2(o.value)} <span class="muted">(${f2(o.lo)} to ${f2(o.hi)})</span>`;
+    const rng = (a) => `${f2(a[0])} <span class="muted">(${f2(a[1])} to ${f2(a[2])})</span>`;
+    const fu = U.ci.fusion, d = U.fusion_minus_best_single;
+    let html = pageHead('Reliability',
+      `How far the validation numbers could move on a different sample, how well the probabilities can be trusted, and when the system should decline to answer. ${num(U.n)} cases from ${num(U.subjects)} patients. Intervals resample whole patients, because one patient has several studies.`);
+
+    html += '<div class="grid4">' +
+      kpi('Fusion macro F1', f2(fu.macro_f1.value), `95% interval ${f2(fu.macro_f1.lo)} to ${f2(fu.macro_f1.hi)}`, 'accent') +
+      kpi('Gain over best single', `+${f2(d.value)}`, `95% interval +${f2(d.lo)} to +${f2(d.hi)}, over ${d.best_single}`) +
+      kpi('Calibration error', f2(U.calibration.temperature_scaled.ece[0]), `from ${f2(U.calibration.raw.ece[0])} after temperature scaling`) +
+      kpi('Cancer ROC AUC', f2(fu.auc_cancer.value), `95% interval ${f2(fu.auc_cancer.lo)} to ${f2(fu.auc_cancer.hi)}`) + '</div>';
+
+    const names = { fusion: 'Fusion', image: 'Image', blood: 'Blood', text: 'Text' };
+    html += card('How sure are the scores?',
+      table(['Model', 'Macro F1', 'Lung Cancer F1', 'Lung Cancer ROC AUC'],
+        Object.keys(names).map((k) => [names[k], ci(U.ci[k].macro_f1), ci(U.ci[k].f1_cancer), ci(U.ci[k].auc_cancer)])), {
+      sub: 'Validation set, 95% intervals from 2,000 resamples of patients.',
+      note: `Fusion beats the best single model by a margin whose interval stays above zero. The image model's Lung Cancer AUC interval (${f2(U.ci.image.auc_cancer.lo)} to ${f2(U.ci.image.auc_cancer.hi)}) includes 0.5, so on that class it cannot be told apart from guessing.`,
+    });
+
+    const a = U.abstain_rule, T = U.calibration.temperature;
+    html += '<div class="grid2">' +
+      card('Calibration', table(['', 'Calibration error', 'Brier score', 'Log loss'],
+        [['Pooled probabilities', rng(U.calibration.raw.ece), f2(U.calibration.raw.brier[0]), f2(U.calibration.raw.nll[0])],
+         ['After temperature scaling', rng(U.calibration.temperature_scaled.ece), f2(U.calibration.temperature_scaled.brier[0]), f2(U.calibration.temperature_scaled.nll[0])]]), {
+        sub: `One number (${T.toFixed(2)}) fitted on out-of-fold training predictions only, then applied to validation.`,
+        note: `The value is below 1, so the pooled probabilities were under-confident: when they said 60 percent, the model was right more often than that. Scaling changes the stated confidence, never the predicted class, so F1 is untouched.`,
+      }) +
+      card('Declining uncertain cases', chartBox('c-rc', 280), {
+        sub: 'Keep only the cases the model is most confident about.',
+        note: `A threshold of ${f2(a.threshold)}, set on training data to keep 80 percent of cases, kept ${pct(a.val_coverage)} of validation cases. Accuracy on the answered cases rose from ${pct(a.accuracy_all)} to ${pct(a.accuracy_answered)}. The cost is not even: it declined ${pct(a.declined_by_class['Lung Cancer'])} of true Lung Cancer cases against ${pct(a.declined_by_class['Normal'])} of Normal and ${pct(a.declined_by_class['Pneumonia'])} of Pneumonia.`,
+      }) + '</div>';
+
+    const cf = (k) => U.conformal[k];
+    const row = (k) => { const c = cf(k); return [pct(c.target),
+      `${pct(c.coverage['Normal'].value)} / ${pct(c.coverage['Pneumonia'].value)} / ${pct(c.coverage['Lung Cancer'].value)}`,
+      c.mean_set_size.toFixed(2), pct(c.share_single), pct(c.accuracy_when_single)]; };
+    html += card('Prediction sets', table(['Target coverage', 'Achieved: Normal / Pneumonia / Lung Cancer', 'Average set size', 'Cases with one class', 'Accuracy when one class'], [row('0.2'), row('0.1')], { numCols: [2, 3, 4] }), {
+      sub: 'Instead of one label, return every class the calibration data cannot rule out. Calibrated per class on out-of-fold training predictions.',
+      note: 'Coverage on validation lands near its target for every class, including the rare one, so the method transfers. The sets are large: at 90 percent coverage only a quarter of cases get a single class. That is the honest picture of a model with macro F1 near 0.6, and it is the basis for saying "not sure between these".',
+    });
+
+    const sg = U.subgroups;
+    html += sectionHead('Subgroups', 'Fusion results by group. Groups with fewer than 10 Lung Cancer cases are marked thin and their macro F1 should not be read.');
+    html += card('', table(['Group', 'Cases', 'Lung Cancer cases', 'Macro F1', 'Accuracy', 'Recall: Normal / Pneumonia / Lung Cancer'],
+      sg.map((g) => [`${esc(g.attribute)}: ${esc(g.group)}${g.thin ? ' <span class="muted">(thin)</span>' : ''}`, num(g.n), g.cancer_cases, rng([g.macro_f1, ...g.macro_f1_ci]), rng([g.accuracy, ...g.accuracy_ci]),
+        ['Normal', 'Pneumonia', 'Lung Cancer'].map((c) => (g.recall[c] == null ? 'n/a' : f2(g.recall[c]))).join(' / ')]), { numCols: [1, 2] }), {
+      note: 'Intervals overlap for every pair of groups with enough cancer cases, so these results show no gap that is clearly more than sampling noise, and they are too thin to show that none exists. Race is the administrative field recorded in MIMIC-IV.',
+    });
+
+    const after = () => {
+      mk('c-rc', {
+        type: 'line',
+        data: { labels: U.risk_coverage.map((r) => pct(r.coverage)),
+          datasets: [
+            { label: 'Accuracy on answered cases', data: U.risk_coverage.map((r) => r.accuracy), borderColor: '#4f46e5', backgroundColor: '#4f46e5', tension: 0.25 },
+            { label: 'Macro F1 on answered cases', data: U.risk_coverage.map((r) => r.macro_f1), borderColor: '#14b8a6', backgroundColor: '#14b8a6', tension: 0.25 },
+          ] },
+        options: { scales: { y: { min: 0.5, max: 1, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Share of cases answered' } } } },
+      });
+    };
+    return { html, after };
+  }
+
   /* ------------------------------------------------------------ evidence (phase 6) */
   function evidencePage() {
     const R = D.rag;
@@ -815,7 +883,7 @@
   }
 
   /* ------------------------------------------------------------ router */
-  const routes = { overview, data: dataPage, models: modelsPage, fusion: fusionPage, explain: explainPage, evidence: evidencePage, roadmap: roadmapPage };
+  const routes = { overview, data: dataPage, models: modelsPage, fusion: fusionPage, explain: explainPage, reliability: reliabilityPage, evidence: evidencePage, roadmap: roadmapPage };
 
   async function route() {
     const page = location.hash.replace('#/', '') || 'overview';

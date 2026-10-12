@@ -219,6 +219,15 @@ Status: done. Corpus and retrieval core done 2026-10-11.
 - Carried to Phase 7: a faster checker (it takes about 6 s per sentence on CPU) and more corpus
   coverage for image findings such as edema.
 
+## Reliability checks (done on validation, repeat once on test)
+
+- `scripts/eval_uncertainty.py`: subject-level bootstrap intervals, calibration with temperature
+  scaling, selective prediction, class-conditional conformal sets, and subgroup results by sex,
+  age and recorded race. The fusion gain over the best single model is +0.10 (95% interval +0.07
+  to +0.13). Probabilities were under-confident and are now close to calibrated. Lung Cancer is
+  declined more often than other classes by a confidence rule, which matters for any abstention
+  design. The final test-set run should repeat all of this once, with nothing re-tuned.
+
 ## Phase 7, backend and API
 
 Status: not started. A first slice exists: the progress dashboard (`app/`), a FastAPI app
