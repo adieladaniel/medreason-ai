@@ -1,7 +1,7 @@
 # MedReason-AI
 
 An agentic multi-modal medical diagnostic assistant with explainable AI and evidence
-retrieval. Final-year capstone project.
+retrieval.
 
 The system takes a chest X-ray, the linked admission's blood labs, and the clinical
 indication for the exam, and predicts one of three classes: Normal, Pneumonia, or Lung
