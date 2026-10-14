@@ -180,7 +180,7 @@ Status: core done, 2026-09-20. `app/agent/` package.
 
 Status: done. Corpus and retrieval core done 2026-10-11.
 
-- Corpus (done): 27 open-access papers, about 82,500 words, listed in
+- Corpus (done): 44 open-access papers (27 at first, 17 added to close coverage gaps), about 144,500 words, listed in
   `app/rag/corpus_sources.json` and downloaded by `python -m app.rag.build_corpus` from
   Europe PMC into `data/corpus/` (git-ignored). The second batch of 13 was chosen from the
   models' own top features and image channels. Every license was checked against Europe PMC
@@ -221,8 +221,13 @@ Status: done. Corpus and retrieval core done 2026-10-11.
   caught none of the three subtle real errors, so the NLI checker stays. No checker catches
   sentences that blend true facts into a false claim, so the interface must show background as
   what a cited paper says.
-- Carried to Phase 7: a faster checker (it takes about 6 s per sentence on CPU) and more corpus
-  coverage for image findings such as edema.
+- Corpus coverage (done, `eval_gaps.py`): the planner's 52 possible queries were all run through
+  retrieval and 29 had no passage that mentions the finding. 17 more papers (44 in all, 811
+  passages) and a second query phrasing for image findings cut that to 13, and the 54-query
+  retrieval evaluation did not regress (test right-passage-first 0.857 to 0.893, off-corpus
+  queries still refused 16 of 16). The remaining gaps are mostly topics with little supportive
+  literature, so "no passage" stays the honest answer.
+- Carried to Phase 7: a faster checker (it takes about 6 s per sentence on CPU).
 
 ## Reliability checks (done on validation, repeat once on test)
 

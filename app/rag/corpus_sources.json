@@ -1,140 +1,225 @@
 {
-  "_note": "Open-access sources for the Phase 6 evidence corpus. Every entry was checked against Europe PMC's license field: CC BY, CC BY-NC, or CC BY-NC-SA only (no CC BY-NC-ND, since chunking is a derivative use). The text itself is downloaded by app/rag/build_corpus.py into data/corpus/ (git-ignored); only this manifest is committed. Citation metadata (authors, journal, year, DOI, license) is read from Europe PMC at build time.",
-  "sources": [
-    {
-      "pmcid": "PMC3898785",
-      "topic": "pneumonia",
-      "role": "Radiographic findings in community-acquired pneumonia (ICU cohort)"
-    },
-    {
-      "pmcid": "PMC10959314",
-      "topic": "pneumonia",
-      "role": "Chest X-ray follow-up in community-acquired pneumonia"
-    },
-    {
-      "pmcid": "PMC10253144",
-      "topic": "pneumonia",
-      "role": "Procalcitonin and other diagnostic tools in community-acquired pneumonia"
-    },
-    {
-      "pmcid": "PMC4608327",
-      "topic": "pneumonia",
-      "role": "CRP and procalcitonin diagnostic accuracy in suspected pneumonia"
-    },
-    {
-      "pmcid": "PMC1821031",
-      "topic": "pneumonia",
-      "role": "Clinical and laboratory parameters in community-acquired pneumonia"
-    },
-    {
-      "pmcid": "PMC12554325",
-      "topic": "pneumonia",
-      "role": "Neutrophil-lymphocyte ratio and pneumonia mortality (meta-analysis)"
-    },
-    {
-      "pmcid": "PMC8206195",
-      "topic": "lung_cancer",
-      "role": "Lung cancer and radiological imaging"
-    },
-    {
-      "pmcid": "PMC9431813",
-      "topic": "lung_cancer",
-      "role": "Lung cancers missed on chest radiograph"
-    },
-    {
-      "pmcid": "PMC6784443",
-      "topic": "lung_cancer",
-      "role": "Lung nodules, approach and management"
-    },
-    {
-      "pmcid": "PMC10313305",
-      "topic": "lung_cancer_labs",
-      "role": "NLR and PLR in non-small cell lung cancer"
-    },
-    {
-      "pmcid": "PMC4812293",
-      "topic": "lung_cancer_labs",
-      "role": "Platelet-lymphocyte ratio in non-small cell lung cancer"
-    },
-    {
-      "pmcid": "PMC5540491",
-      "topic": "lung_cancer_labs",
-      "role": "LDH and creatine kinase in lung cancer"
-    },
-    {
-      "pmcid": "PMC12688816",
-      "topic": "lung_cancer_labs",
-      "role": "LDH-to-albumin ratio in resectable NSCLC"
-    },
-    {
-      "pmcid": "PMC10035766",
-      "topic": "differential",
-      "role": "Adenocarcinoma mimicking pneumonia"
-    },
-    {
-      "pmcid": "PMC12890234",
-      "topic": "pneumonia",
-      "role": "Routine blood count and chemistry parameters (albumin, lymphocytes) and pneumonia outcomes"
-    },
-    {
-      "pmcid": "PMC10462911",
-      "topic": "pneumonia",
-      "role": "PSI versus CURB-65 for pneumonia mortality (urea component), meta-analysis"
-    },
-    {
-      "pmcid": "PMC13268932",
-      "topic": "pneumonia",
-      "role": "CURB-65 combined with platelet-lymphocyte ratio in severe pneumonia"
-    },
-    {
-      "pmcid": "PMC7846353",
-      "topic": "pneumonia",
-      "role": "Prior lymphopenia and pneumonia mortality"
-    },
-    {
-      "pmcid": "PMC12450093",
-      "topic": "pneumonia",
-      "role": "Fibrinogen-to-albumin ratio and ICU mortality in community-acquired pneumonia"
-    },
-    {
-      "pmcid": "PMC6548169",
-      "topic": "lung_cancer_labs",
-      "role": "Preoperative anemia as a prognostic factor in lung cancer, meta-analysis"
-    },
-    {
-      "pmcid": "PMC12386590",
-      "topic": "lung_cancer_labs",
-      "role": "HALP score (hemoglobin, albumin, lymphocyte, platelet) in lung cancer"
-    },
-    {
-      "pmcid": "PMC12180448",
-      "topic": "lung_cancer_labs",
-      "role": "Dynamic platelet count and thrombocytosis in lung cancer"
-    },
-    {
-      "pmcid": "PMC12885724",
-      "topic": "lung_cancer_labs",
-      "role": "Platelet indices as prognostic biomarkers in lung cancer, meta-analysis"
-    },
-    {
-      "pmcid": "PMC12464491",
-      "topic": "lung_cancer_labs",
-      "role": "Small cell lung cancer with severe hyponatremia, case report and literature review"
-    },
-    {
-      "pmcid": "PMC11606229",
-      "topic": "differential",
-      "role": "Community-acquired versus post-obstructive pneumonia from endobronchial tumors"
-    },
-    {
-      "pmcid": "PMC10928554",
-      "topic": "differential",
-      "role": "Imaging of pleural disease, including effusions"
-    },
-    {
-      "pmcid": "PMC4408723",
-      "topic": "differential",
-      "role": "Cardiogenic versus noncardiogenic pulmonary edema on imaging"
-    }
-  ]
+ "_note": "Open-access sources for the Phase 6 evidence corpus. Every entry was checked against Europe PMC's license field: CC BY, CC BY-NC, or CC BY-NC-SA only (no CC BY-NC-ND, since chunking is a derivative use). The text itself is downloaded by app/rag/build_corpus.py into data/corpus/ (git-ignored); only this manifest is committed. Citation metadata (authors, journal, year, DOI, license) is read from Europe PMC at build time.",
+ "sources": [
+  {
+   "pmcid": "PMC3898785",
+   "topic": "pneumonia",
+   "role": "Radiographic findings in community-acquired pneumonia (ICU cohort)"
+  },
+  {
+   "pmcid": "PMC10959314",
+   "topic": "pneumonia",
+   "role": "Chest X-ray follow-up in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC10253144",
+   "topic": "pneumonia",
+   "role": "Procalcitonin and other diagnostic tools in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC4608327",
+   "topic": "pneumonia",
+   "role": "CRP and procalcitonin diagnostic accuracy in suspected pneumonia"
+  },
+  {
+   "pmcid": "PMC1821031",
+   "topic": "pneumonia",
+   "role": "Clinical and laboratory parameters in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC12554325",
+   "topic": "pneumonia",
+   "role": "Neutrophil-lymphocyte ratio and pneumonia mortality (meta-analysis)"
+  },
+  {
+   "pmcid": "PMC8206195",
+   "topic": "lung_cancer",
+   "role": "Lung cancer and radiological imaging"
+  },
+  {
+   "pmcid": "PMC9431813",
+   "topic": "lung_cancer",
+   "role": "Lung cancers missed on chest radiograph"
+  },
+  {
+   "pmcid": "PMC6784443",
+   "topic": "lung_cancer",
+   "role": "Lung nodules, approach and management"
+  },
+  {
+   "pmcid": "PMC10313305",
+   "topic": "lung_cancer_labs",
+   "role": "NLR and PLR in non-small cell lung cancer"
+  },
+  {
+   "pmcid": "PMC4812293",
+   "topic": "lung_cancer_labs",
+   "role": "Platelet-lymphocyte ratio in non-small cell lung cancer"
+  },
+  {
+   "pmcid": "PMC5540491",
+   "topic": "lung_cancer_labs",
+   "role": "LDH and creatine kinase in lung cancer"
+  },
+  {
+   "pmcid": "PMC12688816",
+   "topic": "lung_cancer_labs",
+   "role": "LDH-to-albumin ratio in resectable NSCLC"
+  },
+  {
+   "pmcid": "PMC10035766",
+   "topic": "differential",
+   "role": "Adenocarcinoma mimicking pneumonia"
+  },
+  {
+   "pmcid": "PMC12890234",
+   "topic": "pneumonia",
+   "role": "Routine blood count and chemistry parameters (albumin, lymphocytes) and pneumonia outcomes"
+  },
+  {
+   "pmcid": "PMC10462911",
+   "topic": "pneumonia",
+   "role": "PSI versus CURB-65 for pneumonia mortality (urea component), meta-analysis"
+  },
+  {
+   "pmcid": "PMC13268932",
+   "topic": "pneumonia",
+   "role": "CURB-65 combined with platelet-lymphocyte ratio in severe pneumonia"
+  },
+  {
+   "pmcid": "PMC7846353",
+   "topic": "pneumonia",
+   "role": "Prior lymphopenia and pneumonia mortality"
+  },
+  {
+   "pmcid": "PMC12450093",
+   "topic": "pneumonia",
+   "role": "Fibrinogen-to-albumin ratio and ICU mortality in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC6548169",
+   "topic": "lung_cancer_labs",
+   "role": "Preoperative anemia as a prognostic factor in lung cancer, meta-analysis"
+  },
+  {
+   "pmcid": "PMC12386590",
+   "topic": "lung_cancer_labs",
+   "role": "HALP score (hemoglobin, albumin, lymphocyte, platelet) in lung cancer"
+  },
+  {
+   "pmcid": "PMC12180448",
+   "topic": "lung_cancer_labs",
+   "role": "Dynamic platelet count and thrombocytosis in lung cancer"
+  },
+  {
+   "pmcid": "PMC12885724",
+   "topic": "lung_cancer_labs",
+   "role": "Platelet indices as prognostic biomarkers in lung cancer, meta-analysis"
+  },
+  {
+   "pmcid": "PMC12464491",
+   "topic": "lung_cancer_labs",
+   "role": "Small cell lung cancer with severe hyponatremia, case report and literature review"
+  },
+  {
+   "pmcid": "PMC11606229",
+   "topic": "differential",
+   "role": "Community-acquired versus post-obstructive pneumonia from endobronchial tumors"
+  },
+  {
+   "pmcid": "PMC10928554",
+   "topic": "differential",
+   "role": "Imaging of pleural disease, including effusions"
+  },
+  {
+   "pmcid": "PMC4408723",
+   "topic": "differential",
+   "role": "Cardiogenic versus noncardiogenic pulmonary edema on imaging"
+  },
+  {
+   "pmcid": "PMC13264974",
+   "topic": "pneumonia",
+   "role": "HALP score (hemoglobin, albumin, lymphocytes, platelets) and 30-day mortality in pneumonia"
+  },
+  {
+   "pmcid": "PMC13186940",
+   "topic": "pneumonia",
+   "role": "Platelet count and 30-day mortality in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC13111880",
+   "topic": "pneumonia",
+   "role": "Neutrophil-to-lymphocyte and platelet-to-lymphocyte ratios for pneumonia severity"
+  },
+  {
+   "pmcid": "PMC13498356",
+   "topic": "pneumonia",
+   "role": "Hematological parameters including NLR and PLR in pneumonia"
+  },
+  {
+   "pmcid": "PMC13310506",
+   "topic": "pneumonia",
+   "role": "Lactate dehydrogenase to albumin ratio for severe community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC12889272",
+   "topic": "pneumonia",
+   "role": "CURB-65 (urea) versus qSOFA for outcomes in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC12045053",
+   "topic": "pneumonia",
+   "role": "Blood urea nitrogen to albumin ratio as a severity biomarker"
+  },
+  {
+   "pmcid": "PMC13206408",
+   "topic": "pneumonia",
+   "role": "Hemoglobin-to-lactate ratio and outcomes in pneumonia"
+  },
+  {
+   "pmcid": "PMC13574933",
+   "topic": "pneumonia",
+   "role": "Immune-inflammatory score (neutrophils and others) for 28-day mortality in community-acquired pneumonia"
+  },
+  {
+   "pmcid": "PMC13651040",
+   "topic": "pneumonia",
+   "role": "Biomarkers (white blood cell count, CRP, procalcitonin) for post-operative pneumonia, meta-analysis"
+  },
+  {
+   "pmcid": "PMC12608793",
+   "topic": "lung_cancer_labs",
+   "role": "Routine hematological markers and performance status for survival in lung cancer"
+  },
+  {
+   "pmcid": "PMC13408778",
+   "topic": "lung_cancer_labs",
+   "role": "Peripheral blood inflammatory markers and nutritional indices for survival in lung cancer"
+  },
+  {
+   "pmcid": "PMC13509242",
+   "topic": "lung_cancer_labs",
+   "role": "Systemic inflammation biomarkers (CRP, NLR and others) in advanced non-small cell lung cancer"
+  },
+  {
+   "pmcid": "PMC13379499",
+   "topic": "lung_cancer_labs",
+   "role": "C-reactive protein, albumin and lymphocyte index in resected lung cancer"
+  },
+  {
+   "pmcid": "PMC13075874",
+   "topic": "lung_cancer_labs",
+   "role": "Case report: marked leukocytosis with a Pancoast tumor"
+  },
+  {
+   "pmcid": "PMC13257746",
+   "topic": "differential",
+   "role": "Lung imaging patterns (edema, consolidation, atelectasis) in acute hypoxemic respiratory failure"
+  },
+  {
+   "pmcid": "PMC12719216",
+   "topic": "differential",
+   "role": "Chronic lobar collapse (atelectasis) on chest imaging, case report"
+  }
+ ]
 }

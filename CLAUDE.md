@@ -61,7 +61,7 @@ not, cut it.
 | 3. Multimodal fusion | done | late fusion, val macro F1 0.61 (+0.10 over best single) |
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
-| 6. RAG evidence retrieval | in progress | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
+| 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
 | 7. Backend and API | not started | |
 | 8. Integration, testing, writeup | not started | |
 
@@ -402,15 +402,42 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
 - Download note: a 3 GB Hugging Face model stalled mid-download twice here. `curl -C -` resumed
   it (verify the SHA-256, which is the blob name in the cache, because a retry restarts at the
   original offset). `pip install` of the minicheck package failed to build, so do not rely on it.
-- Image findings: edema is a real corpus gap (every edema query scored below 2 on the reranker;
-  PMC4408723 covers edema on imaging but not as a pneumonia feature). Adding weakly related
-  papers would add near-miss retrievals and force a rerun of the 54-query evaluation, so the
-  library says "no passage" instead. Lung opacity and consolidation queries do retrieve passages
-  (scores 9 to 14) but the gate keeps only sentences that mention the finding.
+- Corpus growth, stage 3 (2026-10-14, `eval_gaps.py`, `gap_probe_*.json`): instead of guessing
+  gaps, every query the planner can emit (each blood phrase and image channel, both diseases, 52
+  in all) was run through retrieval and counted as a gap when no returned passage mentions the
+  finding. With 27 papers, 29 of 52 were gaps, far more than the edema case I had in mind. 17
+  open-access papers were added from Europe PMC searches aimed at them (license checked, the
+  builder rejects others): pneumonia with hemoglobin, platelets, urea and CURB-65, LDH, NLR and
+  PLR, neutrophils and white blood cell count; lung cancer with white blood cell count,
+  lymphocytes, CRP and inflammation indices; one lung imaging review and one lobar collapse case.
+  The library is now 44 papers, 144,541 words, 811 passages. Gaps fell to 15 of 52, with none
+  that had been covered becoming empty.
+- Edema was mostly a phrasing problem: "pneumonia chest X-ray with pulmonary edema" scored 1.1
+  because no passage is about both, while "pulmonary edema chest X-ray" scored 8.1 on a passage
+  the library already held. The planner now gives each image query a fallback, "<finding> versus
+  <disease> chest radiograph" (5.1 on the new imaging review), used only when the primary query
+  returns nothing. With broader opacity terms (air-space, ground-glass) this brought gaps to 13
+  of 52. The 13 left are mostly queries where little supportive literature should exist
+  (leukopenia, hematocrit, cardiomegaly or pneumothorax with these diseases), so "no passage"
+  is the right output there. Lung Cancer with lung opacity is still empty.
+- Regression check on the original 54 queries (dev / test split unchanged), adopted pipeline,
+  27 papers then 44: right passage first 1.00 / 0.857 then 1.00 / 0.893, MRR 0.944 then 0.968,
+  abstention AUC 0.997 both, off-corpus queries refused 16 of 16 both, answerable queries kept
+  52 then 53 of 54. The one-query change on test is within noise, so read it as "no harm".
+  The weaker first-stage variants dipped a little with more documents (keyword only test
+  0.786 to 0.714, plain hybrid 0.750 to 0.714), which the reranker absorbs. The 54 queries
+  pre-date the new papers, so this checks for damage and does not prove the gain; the gain is
+  the gap count. Baseline numbers are kept in `pipeline_27papers.json`.
+- Effect on the real cases: white blood cell count now retrieves passages for the pneumonia
+  case, and the 3B writer then wrote sentences with figures the passages do not support (for
+  example a 15,000 per microlitre cut-off); the checker dropped both at entailment about 0.1, so
+  only an albumin sentence survived. More coverage raises the chance the writer has something to
+  summarise, and the checker decides what reaches the output. Writer quality is now the
+  limiting factor for the share of drafted sentences that survive.
 - Dashboard: an Evidence page (`evidencePage()` in `app/static/app.js`, `_rag()` in the builder)
   shows retrieval results, the checker's separation plot and the writer comparison.
-- Left in Phase 6: nothing blocking. Corpus growth for image findings and a faster checker are
-  tracked for Phase 7.
+- Left in Phase 6: nothing blocking. A faster checker (GPU or a smaller model) is tracked for
+  Phase 7. Cardiomegaly and pneumothorax coverage was left empty on purpose.
 
 ### Reliability of the validation numbers (2026-10-12)
 
@@ -561,8 +588,7 @@ Next:
 
 1. Phase 6 is done (the chain, its measurements and the dashboard page are in section 2).
    Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
-   the predicted label. Open items carried to Phase 7: a faster checker (GPU or a smaller
-   model) and more corpus coverage for image findings.
+   the predicted label. Open item carried to Phase 7: a faster checker (GPU or a smaller model).
 2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
@@ -596,7 +622,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 5 s, 45 tests). They use synthetic agent
+- Tests: `python -m pytest` from the repo root (about 15 s, 64 tests). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
   `tests` package in site-packages otherwise shadows the folder. Mark anything needing a model

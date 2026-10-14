@@ -844,6 +844,15 @@
         { numCols: [2, 3, 4, 5, 6, 7] }), { note: 'A model can pass by writing vague, short sentences, so length is shown next to the pass rate.' });
     }
 
+    if (R.coverage && R.coverage.length) {
+      const first = R.coverage[0], last = R.coverage[R.coverage.length - 1];
+      html += sectionHead('Does the library cover what the system asks?', 'Every query the planner can emit (blood findings and image findings, for both diseases) was run through retrieval. A gap means no passage that actually mentions the finding.');
+      html += card('', table(['Library', 'Queries tested', 'Queries with no on-topic passage', 'Covered'],
+        R.coverage.map((c) => [esc(c.stage), c.queries, c.gaps, pct((c.queries - c.gaps) / c.queries)]), { numCols: [1, 2, 3] }), {
+        note: `Growing the library from ${first.stage} to the last row cut the gaps from ${first.gaps} to ${last.gaps} of ${last.queries}. Image findings that no single passage links to a disease use a second phrasing that relates the two. The queries still empty are mostly ones where little supportive literature should exist, such as leukopenia or hematocrit in pneumonia, so an empty result there is the correct answer.`,
+      });
+    }
+
     if (R.checkers && R.checkers.length) {
       html += sectionHead('Which checker guards the written sentences', 'Three claim checkers scored on the same labelled sentences. Each uses its own default threshold, none tuned here.');
       html += card('', table(['Checker', 'Seconds per sentence', 'Faithful sentences wrongly dropped (real)', 'Unfaithful caught (real)', 'Unfaithful caught (hand-made)', 'ROC AUC (real)'],

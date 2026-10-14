@@ -145,3 +145,29 @@ def test_only_verified_sentences_are_shown_with_their_reference(monkeypatch, pne
     out = explain_case.explain(pneumonia_agent)
     assert out["references"] == [] and out["pass_rate"] == 0.0
     assert not any("[" in line and "]" in line for line in out["text"][3:] if "removed" not in line)
+
+
+# ------------------------------------------------------------------ fallback query for image findings
+def test_image_queries_carry_a_relational_fallback(pneumonia_agent):
+    from app.rag.planner import plan_queries
+    img = [q for q in plan_queries(pneumonia_agent)["queries"] if q["modality"] == "image"]
+    assert img and all(q["fallback"].endswith("versus pneumonia chest radiograph") for q in img)
+
+
+def test_fallback_is_used_only_when_the_primary_query_finds_nothing(stub_retrieve):
+    stub_retrieve({"primary": [], "fallback": [hit(5, "Pulmonary edema can mimic pneumonia.")]})
+    ev = evidence.assemble({"queries": [{**q("primary", "Edema = 0.5", ("edema",), "image"), "fallback": "fallback"}]})
+    assert [p["chunk_id"] for p in ev["passages"]] == [5] and ev["passages"][0]["queries"] == ["fallback"]
+    assert ev["unanswered"] == []
+
+
+def test_fallback_is_skipped_when_the_primary_query_succeeds(stub_retrieve):
+    stub_retrieve({"primary": [hit(1)], "fallback": [hit(2)]})
+    ev = evidence.assemble({"queries": [{**q("primary", "Lung Opacity = 0.7", ("albumin",), "image"), "fallback": "fallback"}]})
+    assert [p["chunk_id"] for p in ev["passages"]] == [1]
+
+
+def test_query_with_no_primary_and_no_fallback_hits_is_reported_unanswered(stub_retrieve):
+    stub_retrieve({})
+    ev = evidence.assemble({"queries": [{**q("primary", "Edema = 0.5", ("edema",), "image"), "fallback": "fallback"}]})
+    assert ev["passages"] == [] and len(ev["unanswered"]) == 1

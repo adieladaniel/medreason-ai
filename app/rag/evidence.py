@@ -27,7 +27,11 @@ def assemble(plan: dict) -> dict:
     by_id: dict[str, dict] = {}
     unanswered: list[dict] = []
     for q in plan["queries"]:
-        hits = retrieve(q["text"], k=PER_QUERY)
+        used = q["text"]
+        hits = retrieve(used, k=PER_QUERY)
+        if not hits and q.get("fallback"):
+            used = q["fallback"]
+            hits = retrieve(used, k=PER_QUERY)
         if not hits:
             unanswered.append(q)
             continue
@@ -43,7 +47,7 @@ def assemble(plan: dict) -> dict:
                 by_id[h["chunk_id"]] = p
             if q["driver"] not in p["drivers"]:
                 p["drivers"].append(q["driver"])
-                p["queries"].append(q["text"])
+                p["queries"].append(used)
             # a passage fetched for an ungated query (terms None) is never gated: it could be on topic for it
             p["terms"] = None if (p["terms"] is None or not q.get("terms")) else p["terms"] | set(q["terms"])
     return {"passages": passages, "unanswered": unanswered}

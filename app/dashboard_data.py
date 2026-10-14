@@ -474,6 +474,15 @@ def _rag():
         out["faithfulness"] = {"n_faithful": len(good), "n_unfaithful": len(bad),
                                "min_faithful": min(good), "max_unfaithful": max(bad),
                                "points": [{"entailment": r["entailment"], "faithful": r["faithful"]} for r in faith]}
+    stages = [("27 papers", "gap_probe_27papers.json"), ("44 papers", "gap_probe_44papers_nofallback.json"),
+              ("44 papers, fallback phrasing", "gap_probe.json")]
+    cov = []
+    for label, fn in stages:
+        rows = _json(f"experiments/rag_retrieval/{fn}")
+        if rows:
+            cov.append({"stage": label, "queries": len(rows), "gaps": sum(1 for r in rows if r["on_topic_hits"] == 0)})
+    if cov:
+        out["coverage"] = cov
     checkers = _json("experiments/rag_retrieval/checker_eval.json")
     if checkers:
         label = {"deberta-nli": "DeBERTa NLI (current)", "deberta-v3-large": "MiniCheck DeBERTa-v3-Large", "flan-t5-large": "MiniCheck Flan-T5-Large"}

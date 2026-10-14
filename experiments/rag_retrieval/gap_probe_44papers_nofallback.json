@@ -1,0 +1,314 @@
+[
+ {
+  "query": "pneumonia with leukopenia",
+  "hits": 1,
+  "on_topic_hits": 0,
+  "best": 6.3
+ },
+ {
+  "query": "pneumonia with elevated white blood cell count",
+  "hits": 2,
+  "on_topic_hits": 1,
+  "best": 10.0
+ },
+ {
+  "query": "pneumonia with low red blood cell count",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 11.5
+ },
+ {
+  "query": "pneumonia with low hemoglobin",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.3
+ },
+ {
+  "query": "pneumonia with low hematocrit",
+  "hits": 2,
+  "on_topic_hits": 0,
+  "best": 10.0
+ },
+ {
+  "query": "pneumonia with thrombocytosis",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 14.3
+ },
+ {
+  "query": "pneumonia with neutrophilia",
+  "hits": 1,
+  "on_topic_hits": 1,
+  "best": 15.4
+ },
+ {
+  "query": "pneumonia with low lymphocyte count",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 16.0
+ },
+ {
+  "query": "pneumonia with elevated monocytes",
+  "hits": 2,
+  "on_topic_hits": 0,
+  "best": 5.6
+ },
+ {
+  "query": "pneumonia with elevated C-reactive protein",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 10.8
+ },
+ {
+  "query": "pneumonia with elevated erythrocyte sedimentation rate",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.8
+ },
+ {
+  "query": "pneumonia with low albumin",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.7
+ },
+ {
+  "query": "pneumonia with elevated LDH",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 10.9
+ },
+ {
+  "query": "pneumonia with hyponatremia",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 9.9
+ },
+ {
+  "query": "pneumonia with elevated urea",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 14.5
+ },
+ {
+  "query": "pneumonia with high neutrophil-lymphocyte ratio",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 16.0
+ },
+ {
+  "query": "pneumonia with high platelet-lymphocyte ratio",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 12.4
+ },
+ {
+  "query": "pneumonia chest X-ray with consolidation",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.6
+ },
+ {
+  "query": "pneumonia chest X-ray with lung opacity",
+  "hits": 2,
+  "on_topic_hits": 1,
+  "best": 10.8
+ },
+ {
+  "query": "pneumonia chest X-ray with pulmonary edema",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "pneumonia chest X-ray with pleural effusion",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 8.1
+ },
+ {
+  "query": "pneumonia chest X-ray with atelectasis",
+  "hits": 1,
+  "on_topic_hits": 1,
+  "best": 13.2
+ },
+ {
+  "query": "pneumonia chest X-ray with cardiomegaly",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "pneumonia chest X-ray with lung nodule or mass",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 12.5
+ },
+ {
+  "query": "pneumonia chest X-ray with pneumothorax",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "pneumonia chest X-ray with enlarged mediastinum",
+  "hits": 1,
+  "on_topic_hits": 1,
+  "best": 8.7
+ },
+ {
+  "query": "lung cancer with leukopenia",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer with elevated white blood cell count",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 14.0
+ },
+ {
+  "query": "lung cancer with low red blood cell count",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer with low hemoglobin",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.8
+ },
+ {
+  "query": "lung cancer with low hematocrit",
+  "hits": 1,
+  "on_topic_hits": 0,
+  "best": 7.7
+ },
+ {
+  "query": "lung cancer with thrombocytosis",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.8
+ },
+ {
+  "query": "lung cancer with neutrophilia",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.3
+ },
+ {
+  "query": "lung cancer with low lymphocyte count",
+  "hits": 1,
+  "on_topic_hits": 1,
+  "best": 6.1
+ },
+ {
+  "query": "lung cancer with elevated monocytes",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 10.7
+ },
+ {
+  "query": "lung cancer with elevated C-reactive protein",
+  "hits": 1,
+  "on_topic_hits": 1,
+  "best": 5.4
+ },
+ {
+  "query": "lung cancer with elevated erythrocyte sedimentation rate",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer with low albumin",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 10.4
+ },
+ {
+  "query": "lung cancer with elevated LDH",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.9
+ },
+ {
+  "query": "lung cancer with hyponatremia",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.7
+ },
+ {
+  "query": "lung cancer with elevated urea",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer with high neutrophil-lymphocyte ratio",
+  "hits": 2,
+  "on_topic_hits": 1,
+  "best": 12.4
+ },
+ {
+  "query": "lung cancer with high platelet-lymphocyte ratio",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.8
+ },
+ {
+  "query": "lung cancer chest X-ray with consolidation",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 14.0
+ },
+ {
+  "query": "lung cancer chest X-ray with lung opacity",
+  "hits": 2,
+  "on_topic_hits": 0,
+  "best": 15.1
+ },
+ {
+  "query": "lung cancer chest X-ray with pulmonary edema",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer chest X-ray with pleural effusion",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 13.9
+ },
+ {
+  "query": "lung cancer chest X-ray with atelectasis",
+  "hits": 2,
+  "on_topic_hits": 1,
+  "best": 12.2
+ },
+ {
+  "query": "lung cancer chest X-ray with cardiomegaly",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer chest X-ray with lung nodule or mass",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.6
+ },
+ {
+  "query": "lung cancer chest X-ray with pneumothorax",
+  "hits": 0,
+  "on_topic_hits": 0,
+  "best": null
+ },
+ {
+  "query": "lung cancer chest X-ray with enlarged mediastinum",
+  "hits": 2,
+  "on_topic_hits": 2,
+  "best": 15.7
+ }
+]

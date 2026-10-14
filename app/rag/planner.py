@@ -99,7 +99,7 @@ TERMS = {
     "high neutrophil-lymphocyte ratio": ("neutrophil-to-lymphocyte", "neutrophil-lymphocyte", "neutrophil to lymphocyte", "nlr"),
     "high platelet-lymphocyte ratio": ("platelet-to-lymphocyte", "platelet-lymphocyte", "platelet to lymphocyte", "plr"),
     "consolidation": ("consolidat",),
-    "lung opacity": ("opacit", "infiltrat"),
+    "lung opacity": ("opacit", "infiltrat", "air-space", "airspace", "ground-glass", "ground glass"),
     "pulmonary edema": ("edema", "oedema"),
     "pleural effusion": ("effusion",),
     "atelectasis": ("atelecta",),
@@ -184,9 +184,15 @@ def plan_queries(agent: dict) -> dict:
     chans = [i for i in sorted(img, key=lambda i: -i["effect"])
              if i["direction"] == "supports" and (i.get("value") or 0) >= IMAGE_MIN_VALUE and i["feature"] in IMAGE_PHRASES][:2]
     for c in chans:
-        out["queries"].append({"text": f"{cls} chest X-ray with {IMAGE_PHRASES[c['feature']]}", "modality": "image",
+        finding = IMAGE_PHRASES[c["feature"]]
+        out["queries"].append({"text": f"{cls} chest X-ray with {finding}", "modality": "image",
                                "driver": f"{c['feature']} = {c['value']}", "effect": c["effect"],
-                               "terms": TERMS.get(IMAGE_PHRASES[c["feature"]])})
+                               "terms": TERMS.get(finding),
+                               # used only when the primary query finds nothing. A single passage about BOTH a
+                               # finding and a disease often does not exist ("pneumonia chest X-ray with pulmonary
+                               # edema" scored 1.1) while one that relates the two does ("pulmonary edema versus
+                               # pneumonia chest radiograph" scored 5.1).
+                               "fallback": f"{finding} versus {cls} chest radiograph"})
 
     # text drivers: clinically meaningful words that supported the prediction
     txt = usable("text") or []
