@@ -240,15 +240,23 @@ Status: done. Corpus and retrieval core done 2026-10-11.
 
 ## Phase 7, backend and API
 
-Status: not started. A first slice exists: the progress dashboard (`app/`), a FastAPI app
-with a static single-page UI that shows all results so far and rebuilds its data from
-`experiments/` automatically. The pipeline endpoints and the Analyze page will be added
-to it.
+Status: in progress. The design and its reasons are in `docs/PHASE7_DESIGN.md`. The progress
+dashboard (`app/`) already exists and the Analyze page will be added to it.
 
-- FastAPI service wrapping the full pipeline: upload, prediction, belief state, consistency
-  check, explanation, evidence.
-- PostgreSQL for case and result storage.
-- Docker containerization of the full stack.
+Steps, built and reported one at a time:
+
+1. Storage (done 2026-10-14): `app/config.py`, `app/database/{models,session,repository}.py`.
+   Cases, events and language-model calls, SQLite by default and Postgres through one setting,
+   restart recovery, retention, tested on SQLite (12 tests).
+2. Staged pipeline and job runner: prediction in about 10 seconds, explanations and evidence
+   after, one in-process worker.
+3. API: upload validation, `POST /api/cases` returning 202, status and results, progress stream.
+4. Analyze page in the dashboard.
+5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
+6. Containers: Dockerfile, compose (API, Postgres, Qdrant, Ollama), Qdrant server mode, a CI
+   workflow that runs the tests. Docker is not installed on this machine, so these will be
+   written and checked statically but not run here.
+7. End-to-end run on real cases and a timing budget.
 
 ## Phase 8, integration, testing, documentation
 

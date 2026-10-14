@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | not started | |
+| 7. Backend and API | in progress | storage layer done; staged pipeline, API, Analyze page, containers next |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -471,6 +471,25 @@ reproduces the saved fusion score (0.6133) before doing anything else.
   Conformal guarantees assume exchangeability and patients repeat. The test set is untouched.
   These checks should be repeated once, unchanged, on the test split at the end.
 
+### Phase 7, backend and API (in progress, started 2026-10-14)
+
+Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a report after each.
+
+- Step 1, storage (done): `app/config.py` (settings from `MEDREASON_*` environment variables or
+  `.env`), `app/database/models.py` (cases, events, llm_calls; JSON is JSONB on Postgres),
+  `session.py` (engine per URL, SQLite gets foreign keys and write-ahead logging, sessions are
+  short and never shared between threads), `repository.py` (the only code that touches the
+  tables; `jsonable` converts sets and numpy values, because pipeline output cannot go into a
+  JSON column raw). Each stage result is saved in its own column as soon as it exists.
+  Unfinished cases are marked failed at startup because the in-process worker does not survive a
+  restart. `purge_older_than` implements the 30-day retention. 12 tests; breaking the
+  in-place JSON edit and the restart recovery on purpose failed the right tests.
+- The staged-pipeline finding that shapes the rest: only the text explainer is slow (SHAP, 60
+  to 90 s), and `explain.text.predict_proba_texts` already gives the text prediction cheaply, so
+  the API can return the fused prediction in about 10 s and stream the rest. `run_case` computes
+  prediction and explanation together, so step 2 builds a staged version instead.
+- Not installed here: Docker and Postgres. Disk has about 15 GB free, so avoid large downloads.
+
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
 
@@ -622,7 +641,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 15 s, 64 tests). They use synthetic agent
+- Tests: `python -m pytest` from the repo root (about 15 s, 76 tests). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
   `tests` package in site-packages otherwise shadows the folder. Mark anything needing a model

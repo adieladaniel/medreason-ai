@@ -39,6 +39,13 @@ nltk==3.10.0   # Porter stemmer for BM25 keyword search
 fastapi==0.141.1
 uvicorn==0.53.0
 
+# Phase 7 backend: storage, settings, uploads, progress stream
+SQLAlchemy==2.0.30
+pydantic-settings==2.14.2
+python-multipart==0.0.32
+sse-starlette==3.4.11
+# psycopg[binary] is needed only for Postgres (docker compose); SQLite needs nothing extra
+
 # Kaggle CLI (remote image-model training: kernels push/status/output)
 kaggle==2.2.3
 pytest==9.1.1
