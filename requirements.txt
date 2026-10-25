@@ -49,3 +49,6 @@ psycopg[binary]==3.3.6   # only used when MEDREASON_DATABASE_URL points at Postg
 # Kaggle CLI (remote image-model training: kernels push/status/output)
 kaggle==2.2.3
 pytest==9.1.1
+# optional, only for the browser tests of the Analyze page (tests/test_analyze_page.py, run with -m slow); then
+# run: python -m playwright install chromium
+playwright==1.63.0

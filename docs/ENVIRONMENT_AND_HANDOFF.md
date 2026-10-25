@@ -9,7 +9,7 @@ CLAUDE.md first, then this file before touching Windows, WSL, Docker or the disk
 
 Phases 0 to 6 are done. Phase 7 (backend) has step 1 done (storage layer, commit 99e9e7f) and the
 staged pipeline is next. Since Phase 6 these were also built, one at a time, with a report after
-each: a test suite (`python -m pytest`, 181 tests), reliability checks on validation (intervals,
+each: a test suite (`python -m pytest`, 189 tests), reliability checks on validation (intervals,
 calibration, abstention, conformal sets, subgroups), a claim-checker comparison (the current NLI
 checker stays), and corpus growth from 27 to 44 papers driven by a measured gap list. Details are
 in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
@@ -39,6 +39,10 @@ in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
   (connection refused); start it with `ollama serve` if the writer fails to connect.
 - Python 3.11 is global under `C:\Users\HP\AppData\Local\Programs\Python\Python311`. The torch build
   is CPU only (2.11.0+cpu), so the GPU is unused by local Python.
+- Stopping Ollama by force leaves its `llama-server` model runners alive (an earlier cleanup did this twice and held
+  3.9 of the 4 GB of GPU memory for hours). Stop `ollama`, `ollama app` and `llama-server` together and check
+  `nvidia-smi`. Measured memory of the app: 1.2 GB with every model loaded, 2.3 GB after one case, plus 1.2 GB of RAM
+  and 2.4 GB of GPU memory for the language model.
 - Tool quirks seen here: a `sleep` as its own command is blocked, use a bounded wait loop or the
   Monitor tool; a background job piped through `grep` shows nothing until it exits; `ollama` typed in
   Git Bash hit the app launcher, use PowerShell; Hugging Face downloads over 3 GB stalled twice, use

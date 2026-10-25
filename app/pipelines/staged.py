@@ -165,7 +165,9 @@ def default_plotters() -> dict:
 
 def warm_up() -> dict:
     """Load every model once, so the first real case does not pay for it (the first run after a start
-    took about 90 seconds). Returns seconds per model. Memory: about 2 GB with everything loaded."""
+    took about 90 seconds). Returns seconds per model. Memory, measured: 0.5 GB for Python with torch, 1.2 GB once every
+    model here is loaded, 2.3 GB after one full case; the language model in Ollama is separate (1.2 GB of RAM and 2.4 GB of
+    the 4 GB GPU)."""
     import explain.blood as b, explain.image as i, explain.text as t
     from app.rag import faithfulness, hybrid, retrieve
     steps = {"image model": i._load, "blood model": b._load, "text model": t._load,

@@ -260,7 +260,10 @@ Steps, built and reported one at a time:
    a live event stream, figures and the uploaded image are readable; upload and input checks, a queue limit,
    startup recovery and expiry. Run against the real server and models. No login, and no check that an image is
    a chest X-ray.
-4. Analyze page in the dashboard.
+4. Analyze page in the dashboard (done 2026-10-25): `app/static/analyze.js`. A form built from the API's own input
+   spec, a live stage tracker, the prediction with a low-confidence flag, per-input explanations, the cited evidence
+   with each passage one click away, an audit view, recent cases and delete. Tested in a real browser (14 tests)
+   and run once with the real models.
 5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
 6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that
    runs the tests. Docker Desktop 4.49.0 is installed and verified (2026-10-25, notes in

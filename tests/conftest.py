@@ -3,6 +3,16 @@ Shared builders for the tests. The tests use synthetic agent results, never the 
 cases in experiments/explain_samples/, because those hold MIMIC images and text and are
 git-ignored, so a clean checkout (or CI) could not run tests that depended on them.
 """
+import os
+import tempfile
+
+# No test may touch the project's own database or upload folder (data/app.db, data/uploads). Anything that
+# builds an app or runs a job with the default settings lands in a throwaway folder instead. This has to be set
+# before app.config is first used, which is why it sits at the top; a caller may still override either variable.
+_SCRATCH = tempfile.mkdtemp(prefix="medreason_tests_")
+os.environ.setdefault("MEDREASON_DATABASE_URL", "sqlite:///" + os.path.join(_SCRATCH, "tests.db").replace("\\", "/"))
+os.environ.setdefault("MEDREASON_UPLOAD_DIR", os.path.join(_SCRATCH, "uploads"))
+
 import torch  # noqa: F401  (Windows: torch before sklearn/shap, see CLAUDE.md gotcha 7)
 
 import pytest

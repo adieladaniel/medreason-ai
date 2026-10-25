@@ -81,3 +81,12 @@ def test_server_mode_keeps_models_in_separate_collections(env):
 def test_the_client_is_created_once_per_model(env, fake_qdrant):
     env(qdrant_url="http://qdrant:6333")
     assert index._client("m") is index._client("m")
+
+
+def test_the_tests_never_use_the_projects_own_database_or_upload_folder(env):
+    """conftest points the default database and upload folder at a throwaway folder, so a test that forgets to
+    override them cannot create data/app.db or fill data/uploads."""
+    from app.config import ROOT
+    cfg = get_settings()
+    assert not cfg.database_url.startswith(f"sqlite:///{(ROOT / 'data').as_posix()}")
+    assert ROOT / "data" not in cfg.upload_dir.parents and cfg.upload_dir != ROOT / "data" / "uploads"

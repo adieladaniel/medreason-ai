@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # Jobs waiting for the worker. One runs at a time, so a long queue only means a long wait; past this
     # the API answers 429 and the caller retries, instead of promising work it cannot start soon.
     max_queue: int = 10
-    # Load every model when the server starts (about 2 GB of RAM, a minute or more) so the first case
+    # Load every model when the server starts (about 1.2 GB of RAM, about 20 seconds once the files are cached) so the first case
     # does not pay for it. Off by default so a plain `uvicorn` start is quick and tests stay light.
     warm_up_models: bool = False
     run_worker: bool = True

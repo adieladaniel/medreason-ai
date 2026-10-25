@@ -34,7 +34,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
 from app.api import validation
-from app.api.views import FIGURE_NAMES, TERMINAL, case_summary, event_dict, load_view
+from app.api.views import FIGURE_NAMES, TERMINAL, case_summary, event_dict, iso_utc, load_view
 from app.database import repository as repo
 from app.database.session import session_scope
 from app.pipelines.staged import provided_inputs
@@ -124,7 +124,7 @@ def get_llm_calls(request: Request, case_id: str = CaseId):
         case = repo.get_case(s, case_id)
         if case is None:
             raise HTTPException(404, "no such case")
-        return {"calls": [{"id": c.id, "ts": c.ts.isoformat(), "model": c.model, "purpose": c.purpose,
+        return {"calls": [{"id": c.id, "ts": iso_utc(c.ts), "model": c.model, "purpose": c.purpose,
                            "prompt": c.prompt, "response": c.response, "seconds": c.seconds} for c in case.llm_calls]}
 
 

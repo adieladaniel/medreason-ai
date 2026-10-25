@@ -23,6 +23,28 @@ from PIL import Image
 # keeps the two equal; this copy exists so the API does not have to import the model libraries to check input).
 LAB_NAMES = ["wbc", "rbc", "hemoglobin", "hematocrit", "platelets", "neutrophils", "lymphocytes", "monocytes",
              "crp", "esr", "albumin", "ldh", "sodium", "potassium", "glucose", "creatinine", "urea"]
+# For the form: a readable name, the unit MIMIC recorded the value in (the blood model was trained on these
+# units, so a value typed in another unit gives a wrong prediction without any error), and a group.
+# Units were read from the lab data itself, and the training medians match them (hemoglobin 9.7 g/dL).
+LAB_INFO = {
+    "wbc": ("White blood cells", "K/uL", "Blood count"),
+    "rbc": ("Red blood cells", "m/uL", "Blood count"),
+    "hemoglobin": ("Hemoglobin", "g/dL", "Blood count"),
+    "hematocrit": ("Hematocrit", "%", "Blood count"),
+    "platelets": ("Platelets", "K/uL", "Blood count"),
+    "neutrophils": ("Neutrophils", "% of white cells", "White cell differential"),
+    "lymphocytes": ("Lymphocytes", "% of white cells", "White cell differential"),
+    "monocytes": ("Monocytes", "% of white cells", "White cell differential"),
+    "crp": ("C-reactive protein", "mg/L", "Often not measured"),
+    "esr": ("Sedimentation rate", "mm/hr", "Often not measured"),
+    "albumin": ("Albumin", "g/dL", "Often not measured"),
+    "ldh": ("Lactate dehydrogenase", "IU/L", "Often not measured"),
+    "sodium": ("Sodium", "mEq/L", "Chemistry"),
+    "potassium": ("Potassium", "mEq/L", "Chemistry"),
+    "glucose": ("Glucose", "mg/dL", "Chemistry"),
+    "creatinine": ("Creatinine", "mg/dL", "Chemistry"),
+    "urea": ("Urea nitrogen", "mg/dL", "Chemistry"),
+}
 MAX_LAB_VALUE = 1_000_000.0       # no real lab is near this; it only stops absurd or overflowing input
 MIN_IMAGE_SIDE = 64
 IMAGE_EXTENSIONS = {"PNG": "png", "JPEG": "jpg"}
@@ -34,6 +56,18 @@ class InputError(ValueError):
     def __init__(self, field: str, message: str, status: int = 422):
         super().__init__(message)
         self.field, self.message, self.status = field, message, status
+
+
+def input_spec(cfg) -> dict:
+    """What the form may send, built from the same constants the checks use, so the page cannot offer a lab
+    the server would refuse or a limit the server does not enforce. `cfg` is the Settings object."""
+    return {
+        "image": {"formats": ["PNG", "JPEG"], "max_mb": cfg.max_upload_mb, "min_side": MIN_IMAGE_SIDE,
+                  "max_pixels": cfg.max_image_pixels},
+        "indication": {"max_chars": cfg.max_indication_chars},
+        "labs": [{"name": n, "label": LAB_INFO[n][0], "unit": LAB_INFO[n][1], "group": LAB_INFO[n][2]} for n in LAB_NAMES],
+        "lab_groups": list(dict.fromkeys(LAB_INFO[n][2] for n in LAB_NAMES)),
+    }
 
 
 def clean_indication(raw: str | None, max_chars: int) -> str | None:

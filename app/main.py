@@ -76,6 +76,11 @@ def create_app(settings: Settings | None = None, runner: JobRunner | None = None
     def health():
         return {"status": "ok"}
 
+    @app.get("/api/input-spec")
+    def input_spec():
+        """The fields, units and limits the Analyze form is built from."""
+        return validation.input_spec(settings)
+
     @app.get("/api/dashboard")
     def dashboard():
         if not dashboard_data.OUT_PATH.exists():

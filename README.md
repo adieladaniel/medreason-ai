@@ -58,7 +58,9 @@ note (`ollama serve`), then:
 python -m uvicorn app.main:app --port 8000
 ```
 
-Open http://localhost:8000/docs for interactive documentation, where `POST /api/cases` can be tried with a file
+Open http://localhost:8000/#/analyze for the Analyze page: upload a chest X-ray, type an indication, enter any
+labs, and watch the prediction, the explanations and the cited evidence fill in as each stage finishes. The
+interactive API documentation is at http://localhost:8000/docs, where `POST /api/cases` can be tried with a file
 upload. It takes a chest X-ray (PNG or JPEG), a clinical indication and lab values as a JSON object, any of them
 optional but at least one, and answers at once with a case id. `GET /api/cases/{id}` shows whatever stage results
 exist so far (the prediction arrives first, then explanations, then the cited evidence), and
@@ -92,7 +94,7 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   rag/                  corpus builder, hybrid retrieval, evidence planner, writer, faithfulness check, evaluations
   database/             Phase 7 storage: tables, sessions, repository
   config.py             settings from MEDREASON_* environment variables
-tests/                 181 tests, no models or services needed (python -m pytest)
+tests/                 189 tests (plus 26 slow ones: browser and Postgres), no models or services needed (python -m pytest)
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

@@ -37,8 +37,7 @@ def plan_missing_info(available: set[str], belief: np.ndarray, consistency: dict
         else:
             recommendation = (
                 f"All three modalities ran and confidence is still only {confidence:.0%}. "
-                "Consider clinical correlation or a follow-up study (for example CT) rather than "
-                "another automated input; the system has nothing further to add."
+                "The system has no further input to request, so treat this answer as uncertain."
             )
     elif confidence >= HIGH_CONFIDENCE and consistency["status"] == "agree":
         recommendation = None

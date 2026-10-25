@@ -63,3 +63,26 @@ def test_partial_names_the_outlier():
     out = check_consistency(_ev(N, P, P))   # image is the odd one
     assert "Image is the outlier" in out["detail"]
     assert out["modality_predictions"]["image"] == LABELS[0]
+
+
+# ------------------------------------------------------------------ the missing-information plan
+def test_a_low_confidence_answer_with_every_input_is_called_uncertain_without_clinical_advice():
+    """The project's scope excludes clinical advice and follow-up, and the page now shows this sentence."""
+    from app.agent.planner import plan_missing_info
+    belief = np.array([0.38, 0.40, 0.22])
+    plan = plan_missing_info({"image", "blood", "text"}, belief, {"status": "conflict"})
+    text = plan["recommendation"]
+    assert "uncertain" in text and "no further input" in text
+    import re
+    assert not re.search(r"follow-up|CT|clinical|consider|should|recommend", text, re.I), text
+
+
+def test_a_confident_answer_with_every_input_needs_no_note():
+    from app.agent.planner import plan_missing_info
+    assert plan_missing_info({"image", "blood", "text"}, np.array([0.05, 0.9, 0.05]), {"status": "agree"})["recommendation"] is None
+
+
+def test_a_missing_input_is_recommended_in_the_measured_order():
+    from app.agent.planner import plan_missing_info
+    plan = plan_missing_info({"image"}, np.array([0.4, 0.4, 0.2]), {"status": "single_modality"})
+    assert plan["missing_modalities"] == ["text", "blood"] and "adding text" in plan["recommendation"]

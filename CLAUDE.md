@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | in progress | storage, staged pipeline and case API done; Analyze page, observability, containers next |
+| 7. Backend and API | in progress | storage, staged pipeline, case API and Analyze page done; observability, containers next |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -548,6 +548,36 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   s with the model warm-up already finished (explaining 5.9 s, retrieving 11.7, writing 18.8, verifying 21.1),
   the figures and the uploaded image served back byte for byte, a bad lab name refused before any model ran, and
   delete returned 204 then 404.
+- Step 4, the Analyze page (done 2026-10-25): `app/static/analyze.js` (new), plus small changes to `app.js`
+  (route arguments such as `#/analyze/<id>`, a hook that stops the live stream when the user leaves the page,
+  shared helpers exposed as `window.MedReason`, and the page works even if `dashboard.json` is missing),
+  `style.css` and `index.html`. The form is built from a new `GET /api/input-spec` (lab names, units and limits come
+  from the same constants the server checks, so they cannot drift). Units were read from MIMIC itself and match
+  the training medians: K/uL, g/dL, mg/L, mEq/L, mg/dL, IU/L, mm/hr, % (urea is urea nitrogen, the three
+  differential counts are percentages of white cells). Submitting follows the case on the event stream with a
+  polling fallback and draws each section when its stage has stored something: the stage tracker, the
+  prediction, whether the inputs agree with a one-step-at-a-time table, per-input cards (uploaded X-ray,
+  Grad-CAM, SHAP bars, word shading, top contributions), the cited evidence note with each reference's passage one
+  click away and a "not proof about this patient" caveat, an audit table, links to the raw case and every model
+  prompt, delete, and a recent-cases list. Server and paper text is escaped before display. A confidence below
+  0.55 (where `eval_uncertainty.py` declines to answer) is flagged on the prediction as a weak guess. The API now
+  sends every time marked UTC (SQLite returns none, which made a browser show elapsed times 5.5 hours wrong).
+  Two changes outside the page: the Phase 5 planner no longer says "consider clinical correlation or a follow-up
+  study (for example CT)" for a low-confidence answer, because follow-up and clinical advice are out of scope and
+  the page now shows that sentence; it says the system has no further input to request and the answer is uncertain.
+  And `tests/conftest.py` points the default database and upload folder at a throwaway folder, so no test can touch
+  `data/app.db` or `data/uploads` (an empty project database appeared once during this work, from an earlier test
+  run that could not be reproduced).
+  Tested in a real browser (`tests/test_analyze_page.py`, 14 tests, slow-marked, needs `pip install playwright`
+  and `python -m playwright install chromium`, run with `-m slow`): real app and pipeline code, fake models. Running
+  it for the first time found two real bugs, a button with the id "reset" shadowing the form's own reset method
+  (so Clear did nothing) and a display rule overriding the hidden attribute (an empty X-ray placeholder), and a
+  layout bug (the page was wider than a phone screen); each has a test. Deliberate breakages were caught: the
+  Clear button, the hidden rule, unescaped sentences, unescaped paper text, and times without a zone. Then run
+  once more through the page with the real models on the validation conflict case (true label Lung Cancer,
+  predicted Pneumonia at 40 percent): no browser errors, all four images loaded, "the models disagree" shown,
+  94 s of work on a loaded machine (2.5 GB RAM free, and the prediction appeared at 25 s because the models
+  were still warming up when the case was submitted).
 - Docker Desktop 4.49.0 was installed on 2026-10-25 with its data on D: (`D:\DockerData`), and
   checked: hello-world ran, a Postgres 16 container answered on host port 5433, and a container
   reached the host's Ollama through `host.docker.internal:11434` with no change to `OLLAMA_HOST`.
@@ -716,7 +746,8 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 15 s, 181 tests, plus 10 Postgres runs of the storage tests that are skipped unless a throwaway
+- Tests: `python -m pytest` from the repo root (about 15 s, 189 tests, plus 26 slow-marked ones that are skipped by default: 14 browser tests of the Analyze page
+  and 12 Postgres runs of the storage tests, which need Playwright or a throwaway
   database URL is given). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
@@ -768,6 +799,16 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   Windows host, not in a container.
 - A new path means new Claude memory. The `memory` folder was copied to
   `C:\Users\HP\.claude\projects\d--finalyearproject\` on 2026-10-25. Keep chat transcripts out of git.
+- Memory of the app, measured 2026-10-25 (`psutil`, one real validation case): Python with torch 0.5 GB, 1.2 GB after
+  `warm_up()` loaded every model (17 s with the files cached), 2.3 GB after one full case (peak 2.3 GB). Ollama is a
+  separate process: its llama3.2 runner took 1.2 GB of RAM and 2.4 GB of the 4 GB of GPU memory. So the app plus the
+  language model need about 3.5 GB of RAM and 2.4 GB of GPU memory, and one worker means memory does not grow with
+  the number of users (the queue grows instead). VS Code is not part of that: on this laptop it used 4.4 GB, of which
+  the Pylance language server alone was 2.0 GB.
+- Stopping Ollama: `Stop-Process -Force` on `ollama` alone leaves its model runner, `llama-server`, running as an
+  orphan. Two of them sat for hours holding 2 GB of RAM and 3.9 of the 4 GB of GPU memory (which probably slowed
+  later runs). Stop all three names: `Get-Process ollama, "ollama app", llama-server | Stop-Process`, then check
+  `nvidia-smi` shows about 100 MiB used.
 - Ollama has to be running on the host for the writer (`ollama serve` in its own PowerShell window;
   it listens on 127.0.0.1 only, and containers still reach it). Do not set `OLLAMA_HOST=0.0.0.0`,
   which would expose it to the network.

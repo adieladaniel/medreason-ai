@@ -58,7 +58,7 @@ container differ by configuration, not code.
 1. Storage: models, sessions, repository, tests. (done)
 2. Staged pipeline and the job runner, with restart recovery.
 3. API: upload validation (size, real image, type), endpoints, progress stream.
-4. Analyze page in the existing dashboard.
+4. Analyze page in the existing dashboard. (done)
 5. Observability: structured logs with case ids, a readiness check that probes the database,
    Qdrant and Ollama.
 6. Containers: Dockerfile, compose with the API, Postgres and Qdrant, Qdrant server mode, a CI
@@ -91,6 +91,28 @@ after 30 days and can be deleted. At most 10 cases wait for the worker, and past
 one worker means a longer queue only means a longer wait. Nothing checks that an uploaded image is a chest
 X-ray. And the shown text for the same case can differ between runs, because the language model is not
 reproducible even at temperature 0 (the checker still decides what is shown).
+
+## The Analyze page (step 4, built 2026-10-25)
+
+**Built from the API's own description of its inputs.** The form asks `/api/input-spec` for the lab names, units
+and limits, so the page cannot offer a lab the server refuses or state a limit the server does not enforce. The
+units matter more than they look: the blood model was trained on MIMIC's units, and a value typed in another unit
+gives a wrong prediction with no error, so the units are read from the lab data and shown next to every field.
+
+**Each section appears when its stage has stored something.** The page draws from the same case view the plain GET
+returns, so what the stream shows and what a reload shows cannot differ. The prediction is on screen while the
+explanations still say "computing", which is the point of staging the pipeline.
+
+**Honest presentation.** A prediction below 0.55 confidence is flagged as a weak guess where it is headlined, because
+that is where the reliability analysis declines to answer. The literature note says in the page itself that it is
+background from papers, not proof about this patient, and every cited sentence has its source passage one click away,
+because the checker can miss a sentence that mixes true facts into a false claim. The page gives no clinical advice,
+and the one sentence of the agent layer that did was reworded.
+
+**Plain files, no build step.** Vanilla JavaScript on the dashboard's existing helpers, like the rest of it, with all
+server and paper text escaped before display. The front end is tested in a real browser with fake models, which found
+bugs no unit test could (an element id shadowing a form method, a display rule overriding the hidden attribute, a
+layout wider than a phone).
 
 ## Not in scope
 

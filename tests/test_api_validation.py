@@ -109,3 +109,18 @@ def test_a_truncated_file_is_refused_now_not_by_the_model_later():
     with pytest.raises(v.InputError) as e:
         v.check_image(whole[: len(whole) // 2], BIG)
     assert "damaged" in e.value.message or "not an image" in e.value.message
+
+
+# ------------------------------------------------------------------ what the form is built from
+def test_every_lab_has_a_name_unit_and_group():
+    assert list(v.LAB_INFO) == v.LAB_NAMES
+    assert all(label and unit and group for label, unit, group in v.LAB_INFO.values())
+
+
+def test_the_spec_lists_exactly_the_labs_the_checks_accept_with_the_configured_limits():
+    from app.config import Settings
+    spec = v.input_spec(Settings(max_upload_mb=7, max_indication_chars=300))
+    assert [lab["name"] for lab in spec["labs"]] == v.LAB_NAMES
+    assert spec["image"]["max_mb"] == 7 and spec["indication"]["max_chars"] == 300
+    assert set(lab["group"] for lab in spec["labs"]) == set(spec["lab_groups"])
+    assert next(l for l in spec["labs"] if l["name"] == "hemoglobin")["unit"] == "g/dL"

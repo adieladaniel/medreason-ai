@@ -735,8 +735,8 @@
       (D.remaining || []).map((r) => [`<b>${esc(r.phase)}</b>`, esc(r.work), esc(r.effort)])), {
       note: 'Effort is a rough estimate in focused working days, not a commitment.',
     });
-    html += card('What this dashboard will gain',
-      `<p><b>Analyze a case.</b> Upload a chest X-ray, type the clinical indication, and enter any blood labs (all optional). The page will show the fused prediction, the agent's step-by-step belief updates, any disagreement between the models, per-model explanations, and cited evidence passages.</p>
+    html += card('Analyze a case',
+      `<p>Built. Upload a chest X-ray, type the clinical indication, and enter any blood labs (all optional). The page shows the combined prediction, how each model's output moved it, whether the models agree, a per-model explanation, and cited evidence passages, filling in live as each stage finishes.</p>
        <p>The pages above stay as they are and update when new results are produced.</p>`);
     return { html, after() {} };
   }
@@ -903,13 +903,25 @@
   /* ------------------------------------------------------------ router */
   const routes = { overview, data: dataPage, models: modelsPage, fusion: fusionPage, explain: explainPage, reliability: reliabilityPage, evidence: evidencePage, roadmap: roadmapPage };
 
+  /* what other scripts (analyze.js) may reuse; `onLeave` registers a function that runs when the user leaves the page */
+  let leave = null;
+  window.MedReason = {
+    routes, esc, pct, f2, num, card, kpi, pill, pageHead, sectionHead, table, CLASSES, CCOL, MNAME,
+    onLeave: (fn) => { leave = fn; },
+  };
+
+  const UNAVAILABLE = '<section class="card"><h3>Dashboard data not available</h3><p class="muted">Run <code>python -m app.dashboard_data</code> from the repo root, then reload. The Analyze page does not need it.</p></section>';
+
   async function route() {
-    const page = location.hash.replace('#/', '') || 'overview';
+    const [first, arg] = location.hash.replace('#/', '').split('/');
+    const page = first || 'overview';
+    if (leave) { leave(); leave = null; }
     const fn = routes[page] || overview;
     charts.forEach((c) => c.destroy());
     charts = [];
     document.querySelectorAll('#nav a').forEach((a) => a.classList.toggle('active', a.dataset.page === (routes[page] ? page : 'overview')));
-    const out = await fn();
+    if (!D && page !== 'analyze') { main.innerHTML = UNAVAILABLE; return; }
+    const out = await fn(arg);
     main.innerHTML = out.html;
     out.after();
     window.scrollTo(0, 0);
@@ -921,8 +933,7 @@
       if (!r.ok) throw new Error(r.status);
       D = await r.json();
     } catch (e) {
-      main.innerHTML = '<section class="card"><h3>Dashboard data not available</h3><p class="muted">Run <code>python -m app.dashboard_data</code> from the repo root, then reload.</p></section>';
-      return;
+      D = null;
     }
     window.addEventListener('hashchange', route);
     route();

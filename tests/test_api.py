@@ -225,9 +225,10 @@ def test_results_are_visible_while_the_case_is_still_running(make_client):
     c = make_client(stages=fake_stages(gate))
     cid = submit(c, indication="fever").json()["id"]
     view = wait_for(c, cid, statuses=("running",))
-    while view["stage"] != "explaining":
+    while not view["explanations"]:                      # the stage name changes a moment before the first piece is saved
         view = c.get(f"/api/cases/{cid}").json()
         time.sleep(0.02)
+    assert view["stage"] == "explaining"
     assert view["status"] == "running" and view["prediction"]["belief"]["predicted_class"] == "Pneumonia"
     assert view["explanations"] == {"blood": {"figure": None}}                 # the piece saved by `progress`
     assert view["evidence"] is None
@@ -372,3 +373,24 @@ def test_the_image_endpoint_never_serves_a_file_from_outside_the_upload_folder(m
     with session_scope(c.db_url) as s:
         repo.get_case(s, cid).image_path = str(inside / "input.png")
     assert c.get(f"/api/cases/{cid}/image").status_code == 200
+
+
+def test_the_input_spec_endpoint_describes_the_form(make_client):
+    c = make_client(max_upload_mb=3)
+    spec = c.get("/api/input-spec").json()
+    assert spec["image"]["max_mb"] == 3 and len(spec["labs"]) == 17 and spec["lab_groups"][0] == "Blood count"
+    assert c.post("/api/cases", data={"labs": json.dumps({spec["labs"][0]["name"]: 5})}).status_code == 202   # every listed lab is accepted
+
+
+def test_every_time_the_api_sends_is_marked_as_utc(make_client):
+    """A time without a zone is read as local time by a browser, which showed elapsed times hours wrong."""
+    c = make_client()
+    cid = submit(c, indication="fever").json()["id"]
+    view = wait_for(c, cid)
+    with session_scope(c.db_url) as s:
+        repo.add_llm_call(s, repo.get_case(s, cid), model="m", purpose="p", prompt="P", response="R", seconds=1)
+    stamps = [view["created_at"], view["updated_at"], *[e["ts"] for e in view["events"]],
+              c.get("/api/cases").json()["cases"][0]["created_at"], c.get(f"/api/cases/{cid}/llm-calls").json()["calls"][0]["ts"]]
+    assert all(t.endswith("+00:00") for t in stamps), stamps
+    age = datetime.now(timezone.utc) - datetime.fromisoformat(view["created_at"])
+    assert timedelta(0) <= age < timedelta(minutes=2)

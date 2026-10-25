@@ -8,6 +8,8 @@ read-only data: building it never changes a case.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from app.database import repository as repo
 from app.database.models import Case
 from app.database.session import session_scope
@@ -16,12 +18,18 @@ TERMINAL = ("done", "partial", "failed")
 FIGURE_NAMES = ("blood", "image", "text")
 
 
+def iso_utc(dt: datetime) -> str:
+    """Times are stored in UTC, but SQLite hands them back without a zone, and a browser reads a time
+    without a zone as local time (5.5 hours off on this machine). Always say it is UTC."""
+    return (dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt).isoformat()
+
+
 def figure_url(case_id: str, name: str) -> str:
     return f"/api/cases/{case_id}/figures/{name}.png"
 
 
 def event_dict(e) -> dict:
-    return {"id": e.id, "ts": e.ts.isoformat(), "stage": e.stage, "status": e.status, "seconds": e.seconds,
+    return {"id": e.id, "ts": iso_utc(e.ts), "stage": e.stage, "status": e.status, "seconds": e.seconds,
             "detail": e.detail}
 
 
@@ -32,8 +40,8 @@ def case_view(case: Case) -> dict:
                         for m, e in case.explanations.items()}
     return {
         "id": case.id,
-        "created_at": case.created_at.isoformat(),
-        "updated_at": case.updated_at.isoformat(),
+        "created_at": iso_utc(case.created_at),
+        "updated_at": iso_utc(case.updated_at),
         "status": case.status,
         "stage": case.stage,
         "error": case.error,
@@ -50,7 +58,7 @@ def case_view(case: Case) -> dict:
 
 def case_summary(case: Case) -> dict:
     pred = (case.prediction or {}).get("belief", {})
-    return {"id": case.id, "created_at": case.created_at.isoformat(), "status": case.status, "stage": case.stage,
+    return {"id": case.id, "created_at": iso_utc(case.created_at), "status": case.status, "stage": case.stage,
             "predicted_class": pred.get("predicted_class"), "confidence": pred.get("confidence"),
             "modalities_used": (case.prediction or {}).get("modalities_used")}
 
