@@ -253,9 +253,11 @@ Steps, built and reported one at a time:
 3. API: upload validation, `POST /api/cases` returning 202, status and results, progress stream.
 4. Analyze page in the dashboard.
 5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
-6. Containers: Dockerfile, compose (API, Postgres, Qdrant, Ollama), Qdrant server mode, a CI
-   workflow that runs the tests. Docker is not installed on this machine, so these will be
-   written and checked statically but not run here.
+6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that
+   runs the tests. Docker Desktop 4.49.0 is to be installed by the user after the project moves to
+   D: (setup and risks in `docs/ENVIRONMENT_AND_HANDOFF.md`). Ollama stays on the Windows host and
+   the container's Postgres uses host port 5433. Until Docker is installed these files are written
+   and checked statically but not run.
 7. End-to-end run on real cases and a timing budget.
 
 ## Phase 8, integration, testing, documentation

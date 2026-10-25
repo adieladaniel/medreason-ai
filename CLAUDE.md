@@ -653,6 +653,8 @@ One component at a time, not big upfront builds.
   moves.
 - Git commits: plain message, no `Co-Authored-By` trailer and no AI attribution of any
   kind. The user's git identity is the sole author.
+- Claude never runs `git push`; the user pushes. Do one improvement at a time and report after
+  each. Ask before deleting or moving anything outside the repo.
 - Prose in this file, ROADMAP.md, README files, `*.txt`, docstrings, and the eventual
   writeup: no em dashes, no en dashes as punctuation, and avoid the patterns commonly
   flagged as AI writing (puffery, forced rule of three, "it is worth noting", opening
@@ -666,3 +668,23 @@ Claude Code keeps cross-session memory at
 `C:\Users\HP\.claude\projects\c--Users-HP-Desktop-finalyearproject\memory\`. `MEMORY.md`
 is its index. Those notes and this file should agree. If they drift, the code and
 `ROADMAP.md` win, then update both.
+
+---
+
+## 8. Machine and environment (read before touching Windows, WSL, Docker or the disks)
+
+Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). The short version:
+
+- Windows 11 Pro 22H2 (build 22621), and the user will not upgrade it. Docker Desktop must be
+  version 4.49.0, the last that supports this build. Newer versions refuse to install.
+- Installing WSL once sent this laptop into a boot loop (hypervisor DMA remapping). It boots through
+  a custom default entry with `hypervisoriommupolicy disable`. Make a restore point and export the
+  boot entries before any virtualization, driver or boot change. Never touch hibernation or boot
+  settings casually.
+- C: is small (about 38 GB free on 2026-10-25), D: has about 280 GB, both on one NVMe drive. The
+  project is moving to D:. Docker's data goes to `D:\DockerData` through
+  `--wsl-default-data-root`. Other projects live on D:, so never touch them.
+- Native PostgreSQL 18 holds port 5432, so the container's Postgres uses 5433. Ollama runs on the
+  Windows host, not in a container.
+- A new path means new Claude memory: copy the `memory` folder to the new project folder under
+  `C:\Users\HP\.claude\projects\`, and keep chat transcripts out of git.
