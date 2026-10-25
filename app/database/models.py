@@ -24,7 +24,9 @@ PortableJSON = JSON().with_variant(JSONB(), "postgresql")
 
 # Order matters: the progress view shows these as steps.
 STAGES = ["queued", "predicting", "explaining", "retrieving", "writing", "verifying", "done"]
-STATUSES = ["queued", "running", "done", "failed"]
+# "partial" means the prediction exists but a later stage (explanations, evidence, the written note) failed,
+# so a client can show what there is and say what is missing. "failed" means there is no prediction.
+STATUSES = ["queued", "running", "done", "partial", "failed"]
 
 
 def now() -> datetime:

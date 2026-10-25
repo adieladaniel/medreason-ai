@@ -5,9 +5,10 @@ retrieval.
 
 The system takes a chest X-ray, the linked admission's blood labs, and the clinical
 indication for the exam, and predicts one of three classes: Normal, Pneumonia, or Lung
-Cancer. A planned agent layer then reasons over the prediction. It tracks a belief state,
-checks whether the modalities agree, decides whether more information is needed, and
-retrieves supporting literature (RAG) to explain the result rather than to diagnose.
+Cancer. An agent layer then reasons over the prediction. It tracks a belief state, checks
+whether the modalities agree, decides whether more information is needed, and retrieves
+supporting literature (RAG) to explain the result rather than to diagnose. The trained models
+diagnose, the agent orchestrates, and retrieval can never change the predicted label.
 
 The aim of the project is to learn how to build a production-grade AI system. Benchmark
 accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
@@ -22,16 +23,21 @@ accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
 | 2. Unimodal baselines | done, image 0.50 / blood 0.46 / text 0.51 (val macro F1) |
 | 3. Multimodal fusion | done, val macro F1 0.61 |
 | 4. Explainability | core done (SHAP + Grad-CAM per modality) |
-| 5. Agentic layer | not started |
-| 6. RAG evidence retrieval | not started |
-| 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | not started |
+| 5. Agentic layer | core done (belief state, consistency checker, missing-information planner) |
+| 6. RAG evidence retrieval | done (44-paper library, hybrid search with reranking, constrained writer, faithfulness check) |
+| 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | in progress, storage layer done |
 | 8. Integration, testing, writeup | not started |
+
+The test split (2,099 studies) has not been used. All numbers above are validation numbers.
+Each phase is described in [ROADMAP.md](ROADMAP.md), and the Phase 7 design and its reasons are in
+[docs/PHASE7_DESIGN.md](docs/PHASE7_DESIGN.md).
 
 ## Progress dashboard
 
 A local web UI that shows everything done so far: phase tracker, data pipeline
 statistics, per-model results and training curves, fusion comparisons (ROC, precision
-recall, calibration, confusion matrices), and the explainability gallery.
+recall, calibration, confusion matrices), the explainability gallery, the evidence
+retrieval results, and a reliability page (confidence intervals, calibration, abstention).
 
 ```bash
 python -m uvicorn app.main:app --port 8000
@@ -64,8 +70,13 @@ scripts/               data pipeline, run from repo root, local, no GPU
   train_text_baseline.py     text baseline (frozen Bio_ClinicalBERT + logreg, local CPU)
   generate_oof_predictions.py / train_fusion.py    Phase 3 fusion
 explain/               Phase 4 per-modality explainers (SHAP, Grad-CAM)
-app/                   FastAPI app, progress dashboard, and the Phase 5 agent
-  agent/                orchestrator, belief state, consistency checker, planner
+app/                   FastAPI app, progress dashboard, agent, evidence retrieval, storage
+  agent/                orchestrator, belief state, consistency checker, missing-information planner
+  rag/                  corpus builder, hybrid retrieval, evidence planner, writer, faithfulness check, evaluations
+  database/             Phase 7 storage: tables, sessions, repository
+  config.py             settings from MEDREASON_* environment variables
+tests/                 126 tests, no models or services needed (python -m pytest)
+docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored
 data/                  git-ignored (see above)
@@ -98,3 +109,19 @@ python scripts/train_fusion.py                       # needs image OOF preds fro
 
 Image-model training is driven through the `kaggle` CLI against
 `kaggle_upload/baseline_kernel/`. See [CLAUDE.md](CLAUDE.md) section 4.
+
+Build the evidence library and its index, then run the tests:
+
+```bash
+python -m app.rag.build_corpus      # downloads the open-access papers listed in app/rag/corpus_sources.json
+python -m app.rag.index --build     # embeds them into the local Qdrant folder
+python -m pytest                    # about 15 seconds
+```
+
+Run one case through the agent and the evidence chain (the text explanation step takes one to two
+minutes on CPU, and the writer needs Ollama running with `llama3.2`):
+
+```bash
+python -m app.agent.orchestrator --study-id 53383543
+python -m app.rag.explain_case --study-id 53383543
+```

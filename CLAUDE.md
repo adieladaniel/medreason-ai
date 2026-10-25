@@ -172,9 +172,13 @@ saves PNGs plus JSON. That is the interface the Phase 5 agent will call.
 - `explain/blood.py`: SHAP `TreeExplainer` (exact, tree_path_dependent) on the HGB model.
   Contributions in log-odds. Horizontal bar figure.
 - `explain/text.py`: SHAP with a word-level (`\W+`) Text masker over the whole
-  embed-then-logreg pipeline. Per-word effect on P(predicted class). About 60 to 90
-  seconds per case on CPU (`max_evals=300`). Fine for pre-computed demo cases, too slow
-  for a live UI, so cache them.
+  embed-then-logreg pipeline. Per-word effect on P(predicted class). `max_evals=300`.
+  Measured 2026-10-25 on a quiet machine: 0.4 to 0.9 s for a typical indication (the median
+  is 8 words) and 10 to 17 s for the longest ones (95 to 153 words). An earlier note here said
+  60 to 90 s; that was not reproduced, and probably came from a loaded machine or an unusual
+  text. SHAP cannot run on fewer than two words: it crashed on "cough" and on an empty
+  indication (about 4 percent of the validation set), so those now get an exact single-word
+  effect, or none.
 - `explain/image.py`: Grad-CAM. Keep image, backbone, 18 pathology probs, and the 3-class
   logit as one differentiable chain, hook the backbone's last conv map, backprop the
   predicted logit. The input tensor must call `requires_grad_(True)` because the backbone
@@ -299,10 +303,25 @@ could not show improvements.
 - Scoring detail that mattered: reranker scores must be raw logits. Sigmoid probabilities
   saturate at exactly 1.0, create ties that the sort breaks arbitrarily (it inflated the first
   MedCPT numbers), and make any threshold hair-thin.
-- Latency: the cross-encoder is essentially all of it. Reranking 5 passages takes about 1 to
-  1.5 s per query now; earlier measurements on the same machine were 3 to 6 times slower, so
-  expect 1 to 8 s. Depth 5, 10, and 20 gave the same quality. Fewer passages clear the
-  threshold at depth 5 (often 1 to 3), which is the trade-off.
+- Latency, measured 2026-10-25 (`eval_latency.py`; the 54 answerable and 16 off-corpus queries, one at
+  a time, CPU-only torch with 10 threads on 16 logical CPUs, AC power, Balanced plan). The same code gave
+  three very different results depending on what else was running:
+  quiet machine (Chrome, WhatsApp, Docker and WSL closed, VS Code open, 7.8 GB RAM free, `latency.json`,
+  108 timings): lookup p50 1.1 s, p95 1.3 s, max 1.4 s, flat across the whole run. Chrome and VS Code open
+  (run with 162 timings, raw samples overwritten, summary kept here): p50 3.9 s, p95 4.7 s, max 5.0 s.
+  Chrome used heavily with 3.3 GB RAM free (`latency_loaded_run.json`, 54 timings, run from the user's own
+  terminal): p50 16.4 s, p95 42.5 s, max 45 s, recovering to 7 to 8 s late in the run. So a lookup is about
+  1 s when the laptop is quiet and several times slower when it is not. Memory pressure is the likely
+  cause (free RAM was 3.3 GB in the slow run), but that was not isolated. It is not the torch thread
+  count (4, 6, 8, 10 and 16 threads all gave p50 3.4 to 4.5 s in the Chrome-open state), and it is not
+  foreground versus background (the user's foreground run was the slowest).
+  Hybrid search alone is 0.05 to 0.1 s, so the cross-encoder is almost all of the time (about 0.2 s per
+  passage when quiet). A first query after the process starts took 15 to 24 s (retriever build 1 to 6 s,
+  then loading the reranker), measured with the OS file cache warm, so a start after a reboot will be
+  slower. Say "about 1 s on a quiet laptop, 4 s with a browser open" and never one bare number. Close the
+  browser before timing or demoing, and remember that Docker's WSL VM can hold up to 8 GB of the 16 GB.
+  Depth 5, 10, and 20 gave the same quality. Fewer passages clear the threshold at depth 5 (often 1 to 3),
+  which is the trade-off.
 - Known limits: the reranker can rank a near-miss first with a high score (for "platelet to
   lymphocyte ratio in pneumonia" it put an NLR passage ahead of the paper on exactly that),
   and a high score means on-topic, not that the passage supports a claim. The explanation
@@ -484,11 +503,45 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   Unfinished cases are marked failed at startup because the in-process worker does not survive a
   restart. `purge_older_than` implements the 30-day retention. 12 tests; breaking the
   in-place JSON edit and the restart recovery on purpose failed the right tests.
-- The staged-pipeline finding that shapes the rest: only the text explainer is slow (SHAP, 60
-  to 90 s), and `explain.text.predict_proba_texts` already gives the text prediction cheaply, so
-  the API can return the fused prediction in about 10 s and stream the rest. `run_case` computes
-  prediction and explanation together, so step 2 builds a staged version instead.
-- Not installed here: Docker and Postgres. Disk has about 15 GB free, so avoid large downloads.
+- Step 2, staged pipeline and job runner (done 2026-10-25): `app/pipelines/staged.py` (the stages),
+  `app/pipelines/runner.py` (`run_job`, the `JobRunner` worker thread, and a CLI that runs one validation
+  case through it), `app/agent/reasoning.py` (the one belief, consistency and plan function that both
+  `run_case` and the staged prediction call). Stages: predicting, explaining (blood and image saved while
+  text runs), retrieving, writing, verifying. Each result is saved the moment it exists, with a started and
+  finished event and its seconds, and every model call is stored with its prompt. A failure after the first
+  stage leaves the case "partial" with everything before it; a failed first stage is "failed". Explainer
+  probabilities are compared with the stored prediction, and a difference is recorded, never applied. The
+  retrieval lookup cache (`retrieve.py`) makes a repeated query free. `predict_image`, `predict_blood` and
+  `predict_text` give probabilities without the attribution step.
+  Measured on real validation cases (scratch database, quiet machine): the staged belief, consistency and
+  plan are identical to `run_case`'s, and all three explainers matched the stored prediction exactly (largest
+  difference 0.0). Seconds per stage: cold start (first case after launch) predicting 6.3, explaining 7.6,
+  retrieving 19.3, writing 31.5, verifying 24.4, total 89; warm, same case again, 0.3, 1.0, 0.0 (lookups
+  cached), 15.2, 20.3, total 37; a conflict case with one new lookup, 0.2, 0.9, 1.0, 12.9, 3.3, total 18. So
+  the answer is ready in under a second when warm, and nearly all the waiting is the language model (about 3
+  s per passage) and the entailment checker. Staging matters for those stages, not for SHAP, which turned out
+  to be quick.
+- Two findings from that run. The writer is not reproducible even at temperature 0: the same case wrote a
+  different albumin sentence the second time, and the checker passed the first (entailment 0.57) and dropped
+  the second (0.01), so the shown text can differ between runs of the same case. And the text explainer
+  crashed on one-word or empty indications; fixed (see the text explainer bullet), with tests.
+- Docker Desktop 4.49.0 was installed on 2026-10-25 with its data on D: (`D:\DockerData`), and
+  checked: hello-world ran, a Postgres 16 container answered on host port 5433, and a container
+  reached the host's Ollama through `host.docker.internal:11434` with no change to `OLLAMA_HOST`.
+- Settings for compose (done 2026-10-25, `app/config.py`): `MEDREASON_OLLAMA_URL` and
+  `MEDREASON_OLLAMA_MODEL` (the writer reads them at call time), `MEDREASON_QDRANT_URL` (unset means
+  the embedded folder under `MEDREASON_QDRANT_PATH`, set means a Qdrant server, whose collections are
+  named per embedding model). Checked for real: embedded retrieval still returns the same kind of
+  passages, and a `qdrant/qdrant:v1.19.1` container was filled through `build_index` and read back
+  through `search` and the `Retriever`. A server starts empty, so compose needs one
+  `python -m app.rag.index --build` run against it.
+- The storage layer was run against a real Postgres 16 container: all 10 storage tests passed, and
+  the JSON columns are `jsonb`. To repeat it, start the container, set
+  `MEDREASON_TEST_POSTGRES_URL=postgresql+psycopg://postgres:test@localhost:5433/postgres` and run
+  `python -m pytest tests/test_database.py -m slow`. That run drops and recreates the three tables.
+- `requirements.txt` now pins `torchxrayvision==1.5.4` and `psycopg[binary]==3.3.6`.
+- Commands run from the tool here sometimes left a new container in the "Created" state instead of
+  starting it (seen twice, not with the user's own terminal). `docker start <name>` fixed it.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -611,9 +664,8 @@ Next:
 2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
-   the dashboard's placeholder "Analyze a case" page against that endpoint. Watch out for
-   the text explainer's 60 to 90 second SHAP run; either move it off the request path or
-   show the prediction and image and blood explanations first, then stream text after.
+   the dashboard's placeholder "Analyze a case" page against that endpoint. The staged
+   pipeline (step 2, done) already runs the prediction first, then the explanations, then the evidence.
 3. Cancer-class polish (focal loss, cascade, thresholds) stays deferred. Only if the
    sealed test set demands it at the end.
 
@@ -641,7 +693,8 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 15 s, 76 tests). They use synthetic agent
+- Tests: `python -m pytest` from the repo root (about 15 s, 126 tests, plus 10 Postgres runs of the storage tests that are skipped unless a throwaway
+  database URL is given). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
   `tests` package in site-packages otherwise shadows the folder. Mark anything needing a model
@@ -665,9 +718,10 @@ One component at a time, not big upfront builds.
 ## 7. Persistent memory
 
 Claude Code keeps cross-session memory at
-`C:\Users\HP\.claude\projects\c--Users-HP-Desktop-finalyearproject\memory\`. `MEMORY.md`
-is its index. Those notes and this file should agree. If they drift, the code and
-`ROADMAP.md` win, then update both.
+`C:\Users\HP\.claude\projects\d--finalyearproject\memory\` (the project moved from C: to D: on
+2026-10-25; the old `c--Users-HP-Desktop-finalyearproject` folder still holds the earlier
+transcript). `MEMORY.md` is its index. Those notes and this file should agree. If they drift, the
+code and `ROADMAP.md` win, then update both.
 
 ---
 
@@ -682,9 +736,15 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   boot entries before any virtualization, driver or boot change. Never touch hibernation or boot
   settings casually.
 - C: is small (about 38 GB free on 2026-10-25), D: has about 280 GB, both on one NVMe drive. The
-  project is moving to D:. Docker's data goes to `D:\DockerData` through
-  `--wsl-default-data-root`. Other projects live on D:, so never touch them.
+  project now lives at `D:\finalyearproject` (moved 2026-10-25). Docker Desktop 4.49.0 is
+  installed and verified, with its data in `D:\DockerData` (`docker_data.vhdx` and `ext4.vhdx`). WSL
+  is capped at 8 GB by `C:\Users\HP\.wslconfig`. The boot entries are backed up in `D:\bcd-backup`.
+  Docker's automatic updates are turned off, so leave them off. Other projects live on D:, so never
+  touch them.
 - Native PostgreSQL 18 holds port 5432, so the container's Postgres uses 5433. Ollama runs on the
   Windows host, not in a container.
-- A new path means new Claude memory: copy the `memory` folder to the new project folder under
-  `C:\Users\HP\.claude\projects\`, and keep chat transcripts out of git.
+- A new path means new Claude memory. The `memory` folder was copied to
+  `C:\Users\HP\.claude\projects\d--finalyearproject\` on 2026-10-25. Keep chat transcripts out of git.
+- Ollama has to be running on the host for the writer (`ollama serve` in its own PowerShell window;
+  it listens on 127.0.0.1 only, and containers still reach it). Do not set `OLLAMA_HOST=0.0.0.0`,
+  which would expose it to the network.

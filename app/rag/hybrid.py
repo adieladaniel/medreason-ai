@@ -133,7 +133,7 @@ class Retriever:
         client = dense_index._client(model_name)
         pts, offset = [], None
         while True:
-            batch, offset = client.scroll(dense_index.COLLECTION, limit=256, offset=offset, with_payload=True)
+            batch, offset = client.scroll(dense_index.collection(model_name), limit=256, offset=offset, with_payload=True)
             pts += batch
             if offset is None:
                 break

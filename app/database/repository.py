@@ -8,6 +8,7 @@ pipeline's results contain sets and numpy numbers that the JSON column cannot se
 """
 from __future__ import annotations
 
+import shutil
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -100,6 +101,14 @@ def fail_case(s: Session, case: Case, error: str) -> None:
     case.status, case.error = "failed", error[:2000]
 
 
+def finish_case(s: Session, case: Case, error: str | None = None) -> None:
+    """Mark the end of a run. With an error text the case is "partial": the prediction is stored but
+    something after it failed, and the text says what."""
+    case.stage = "done"
+    case.status = "partial" if error else "done"
+    case.error = error[:2000] if error else None
+
+
 def interrupted_to_failed(s: Session) -> int:
     """At startup: a case still 'queued' or 'running' belongs to a process that no longer exists
     (the server was restarted mid-run), so it can never finish. Mark it failed so the client sees
@@ -111,12 +120,16 @@ def interrupted_to_failed(s: Session) -> int:
     return len(stuck)
 
 
-def purge_older_than(s: Session, days: int, delete_files: bool = True) -> int:
-    """Delete cases (events and LLM calls go with them) and their uploaded images past retention."""
+def purge_older_than(s: Session, days: int, delete_files: bool = True, case_dir: Path | None = None) -> int:
+    """Delete cases (events and LLM calls go with them) and their uploaded images past retention.
+    `case_dir` is the folder that holds one sub-folder per case (the saved explanation figures); each
+    purged case's sub-folder goes too."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     old = list(s.scalars(select(Case).where(Case.created_at < cutoff)))
     for c in old:
         if delete_files and c.image_path:
             Path(c.image_path).unlink(missing_ok=True)
+        if delete_files and case_dir is not None:
+            shutil.rmtree(Path(case_dir) / c.id, ignore_errors=True)
         s.delete(c)
     return len(old)

@@ -171,3 +171,29 @@ def test_query_with_no_primary_and_no_fallback_hits_is_reported_unanswered(stub_
     stub_retrieve({})
     ev = evidence.assemble({"queries": [{**q("primary", "Edema = 0.5", ("edema",), "image"), "fallback": "fallback"}]})
     assert ev["passages"] == [] and len(ev["unanswered"]) == 1
+
+
+# ------------------------------------------------------------------ recording the model calls
+def test_every_model_call_goes_to_the_recorder_with_the_exact_prompt(monkeypatch, pneumonia_agent):
+    monkeypatch.setattr(writer, "_ask", lambda *a, **k: "Low albumin is associated with mortality.")
+    calls = []
+    ev = {"passages": [passage(1), passage(2)], "unanswered": []}
+    writer.write_explanation(pneumonia_agent, {"queries": [q("pneumonia with low albumin", "albumin = 2.8")]}, ev,
+                             model="m1", recorder=lambda **c: calls.append(c))
+    assert [c["purpose"] for c in calls] == ["background_sentence"] * 2 and {c["model"] for c in calls} == {"m1"}
+    system, user = writer.build_prompt(ev["passages"][0], "pneumonia with low albumin")
+    assert calls[0]["prompt"] == f"{system}\n\n{user}" and "Low albumin was associated with mortality." in calls[0]["prompt"]
+    assert calls[0]["response"] == "Low albumin is associated with mortality." and calls[0]["seconds"] >= 0
+
+
+def test_compose_gives_the_same_text_as_explain(monkeypatch, pneumonia_agent, stub_retrieve):
+    """explain() is now plan, assemble, write, verify, compose; the staged pipeline runs the same steps one by one."""
+    from app.rag.planner import plan_queries
+    stub_retrieve({"pneumonia with low albumin": [hit(1)]})
+    monkeypatch.setattr(writer, "_ask", lambda *a, **k: "Low albumin is associated with mortality.")
+    monkeypatch.setattr(faithfulness, "entailment", lambda s, p: 0.9)
+    whole = explain_case.explain(pneumonia_agent)
+    plan = plan_queries(pneumonia_agent)
+    ev = evidence.assemble(plan)
+    stepwise = explain_case.compose(plan, ev, faithfulness.verify(writer.write_explanation(pneumonia_agent, plan, ev), ev))
+    assert stepwise == whole

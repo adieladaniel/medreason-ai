@@ -25,12 +25,11 @@ from app.rag.planner import plan_queries
 from app.rag.writer import write_explanation
 
 
-def explain(agent: dict, model: str | None = None) -> dict:
-    plan = plan_queries(agent)
-    evidence = assemble(plan)
-    kw = {"model": model} if model else {}
-    written = write_explanation(agent, plan, evidence, **kw)
-    result = verify(written, evidence)
+def compose(plan: dict, evidence: dict, result: dict) -> dict:
+    """The shown explanation from a verified result: case sentences, verified background with its [n]
+    markers, one note per kind of gap, and the references actually cited. Split out of explain() so the
+    staged pipeline can run planning, retrieval, writing and verifying as separate steps and still end
+    with exactly this."""
     cited = sorted({b["n"] for b in result["verified"]})
     refs = [{"n": p["n"], "citation": p["citation"], "url": p["url"]} for p in evidence["passages"] if p["n"] in cited]
     notes = []
@@ -47,6 +46,15 @@ def explain(agent: dict, model: str | None = None) -> dict:
             "model": result["model"]}
 
 
+def explain(agent: dict, model: str | None = None) -> dict:
+    plan = plan_queries(agent)
+    evidence = assemble(plan)
+    kw = {"model": model} if model else {}
+    written = write_explanation(agent, plan, evidence, **kw)
+    result = verify(written, evidence)
+    return compose(plan, evidence, result)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--study-id", type=int, required=True)
@@ -56,7 +64,7 @@ def main() -> None:
     a = ap.parse_args()
     from app.agent.orchestrator import _case_from_split, run_case
     case = _case_from_split(a.study_id, a.split, set(a.drop))
-    print(f"study {a.study_id}  true label: {case['true_label']}  (the text SHAP step takes 1 to 2 minutes)")
+    print(f"study {a.study_id}  true label: {case['true_label']}  (the first run after a start loads the models and takes a minute or more)")
     agent = run_case(image_path=case["image_path"], labs=case["labs"], indication=case["indication"])
     out = explain(agent, a.model)
     print()

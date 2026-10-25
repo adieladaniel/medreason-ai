@@ -63,6 +63,14 @@ def _load():
     return _cache["model"], _cache["explainer"]
 
 
+def predict_blood(labs: dict) -> dict:
+    """Class probabilities only, with no SHAP. Same feature vector and model as explain_blood."""
+    model, _ = _load()
+    proba = model.predict_proba(pd.DataFrame(_feature_vector(labs), columns=FEATURES))[0]
+    return {"modality": "blood", "predicted_class": LABEL_NAMES[int(proba.argmax())],
+            "probabilities": {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)}}
+
+
 def explain_blood(labs: dict, top_k: int = 8) -> dict:
     """labs: {raw_lab_name: value|None}. Returns the common attribution contract."""
     model, explainer = _load()

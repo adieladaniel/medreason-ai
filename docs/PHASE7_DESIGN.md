@@ -6,17 +6,18 @@ reuse them. The status of each step is in ROADMAP.md.
 ## What the backend has to do
 
 Accept a case (an X-ray, the clinical indication, optional labs), run the pipeline, and let a
-browser watch it finish. The pipeline is slow and heavy: three models, a text explainer that
-takes 60 to 90 seconds, a cross-encoder reranker, a local language model on a 4 GB GPU and an
+browser watch it finish. The pipeline is slow and heavy: three models, a text explainer, a cross-encoder reranker, a local language model on a 4 GB GPU and an
 entailment checker that takes seconds per sentence. It runs on one laptop.
 
 ## Decisions
 
-**Prediction first, explanations after.** Only the text explainer is slow, and the code already
-has a cheap text prediction (`predict_proba_texts`). So the first response, in about 10 seconds,
-is the fused prediction, the agreement check and the missing-information plan. The explanations,
-evidence and written note follow as they finish. A user waits 10 seconds for the answer instead of
-two minutes. This needs a staged pipeline, which `app/agent/orchestrator.run_case` is not, because
+**Prediction first, explanations after.** The first response is the fused prediction, the agreement
+check and the missing-information plan, from the models' probabilities alone. The explanations, evidence
+and written note follow as they finish. This was designed on the belief that the text SHAP step took 60
+to 90 seconds. Measured later, it takes under a second for a typical indication, so the explanations are
+quick; the slow part is the language model (about 3 seconds per passage) and the entailment checker (3
+to 20 seconds a case), roughly 35 seconds warm and 89 seconds cold. The staged design still holds, with
+the prediction ready in under a second warm, but the reason is the evidence stages, not SHAP. This needs a staged pipeline, which `app/agent/orchestrator.run_case` is not, because
 it computes prediction and explanation together per modality.
 
 **A job, not a long request.** `POST /api/cases` stores the case and returns 202 with an id. A
@@ -34,8 +35,8 @@ survive a restart, so at startup any unfinished case is marked failed (tested).
 and the difference is one setting, `MEDREASON_DATABASE_URL`. SQLite makes the tests and local
 runs need no service. Foreign keys and write-ahead logging are switched on for SQLite, because it
 enforces neither foreign keys nor concurrent reads by default. JSON columns are JSONB on
-Postgres. Docker is not installed on this machine, so the Postgres and compose parts cannot be
-run here and will be marked untested until they are.
+Postgres. The storage tests also ran against a real Postgres 16 container (10 of 10 passed, JSON
+columns are `jsonb`). The compose file itself is not written or run yet.
 
 **Results are saved stage by stage.** The prediction is written the moment it exists, in its own
 column, so a client can read it while the explanations are still running.
@@ -60,8 +61,9 @@ container differ by configuration, not code.
 4. Analyze page in the existing dashboard.
 5. Observability: structured logs with case ids, a readiness check that probes the database,
    Qdrant and Ollama.
-6. Containers: Dockerfile, compose with Postgres, Qdrant and Ollama, Qdrant server mode, a CI
-   workflow that runs the tests.
+6. Containers: Dockerfile, compose with the API, Postgres and Qdrant, Qdrant server mode, a CI
+   workflow that runs the tests. Ollama stays on the Windows host (it already uses the GPU and holds
+   the model), and the API reaches it through a setting instead of the hardcoded localhost address.
 7. End-to-end run on real cases and a timing budget.
 
 ## Not in scope

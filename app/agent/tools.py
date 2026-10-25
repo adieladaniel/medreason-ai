@@ -30,8 +30,10 @@ def run_text(indication: str) -> dict:
 
 TOOLS = {"image": run_image, "blood": run_blood, "text": run_text}
 
-# The order the ablation in scripts/train_fusion.py found each modality helps in
-# (text contributes most, then blood, then image). The planner and the orchestrator's
-# default run order both use this so the agent's behavior matches what was measured,
-# not a guess.
-MODALITY_PRIORITY = ["text", "blood", "image"]
+# The same three models without the attribution step: probabilities and nothing else. These are what
+# makes the staged pipeline fast, because the slow part of a tool call is the explanation, not the model.
+PREDICTORS = {"image": _image.predict_image, "blood": _blood.predict_blood, "text": _text.predict_text}
+
+# MODALITY_PRIORITY (text, blood, image: the measured ablation order) is defined in app/agent/__init__.py
+# and re-exported here so existing imports keep working.
+from app.agent import MODALITY_PRIORITY  # noqa: E402,F401

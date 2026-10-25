@@ -87,6 +87,18 @@ def _display_image(image_path: str) -> np.ndarray:
     return (arr - arr.min()) / (arr.ptp() + 1e-8)
 
 
+def predict_image(image_path: str) -> dict:
+    """Class probabilities only: one forward pass with no gradients, so no Grad-CAM and no attribution.
+    The staged pipeline uses it to answer fast. It runs the same preprocessing, backbone and head as
+    explain_image and rounds the same way, so the numbers are identical to explain_image's."""
+    st = _load()
+    x = _preprocess(image_path)
+    with torch.no_grad():
+        proba = F.softmax(st["head"](st["backbone"](x)), dim=1)[0]
+    return {"modality": "image", "predicted_class": LABEL_NAMES[int(proba.argmax())],
+            "probabilities": {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)}}
+
+
 def explain_image(image_path: str, top_k: int = 6) -> dict:
     st = _load()
     backbone, head, pathologies = st["backbone"], st["head"], st["pathologies"]

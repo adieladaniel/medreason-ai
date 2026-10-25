@@ -1,4 +1,13 @@
-"""Phase 7 storage layer, on a throwaway SQLite file."""
+"""Phase 7 storage layer, on a throwaway SQLite file and, when asked, on a real Postgres.
+
+The Postgres run is off by default (marked slow, skipped without a URL) because it DROPS and recreates
+the three tables, so it must only ever point at a throwaway database. With the docker Postgres:
+
+    docker run -d --name pgtest -e POSTGRES_PASSWORD=test -p 5433:5432 postgres:16-alpine
+    set MEDREASON_TEST_POSTGRES_URL=postgresql+psycopg://postgres:test@localhost:5433/postgres
+    python -m pytest tests/test_database.py -m slow
+"""
+import os
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -7,15 +16,26 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 
 from app.database import repository as repo
-from app.database.models import Case, Event, LlmCall
-from app.database.session import init_db, session_factory, session_scope
+from app.database.models import Base, Case, Event, LlmCall
+from app.database.session import init_db, make_engine, session_factory, session_scope
+
+POSTGRES_URL = os.environ.get("MEDREASON_TEST_POSTGRES_URL")
 
 
-@pytest.fixture
-def url(tmp_path):
-    u = f"sqlite:///{(tmp_path / 'test.db').as_posix()}"
-    init_db(u)
-    return u
+@pytest.fixture(params=["sqlite", pytest.param("postgres", marks=[
+    pytest.mark.slow, pytest.mark.skipif(not POSTGRES_URL, reason="set MEDREASON_TEST_POSTGRES_URL to run on Postgres")])])
+def url(request, tmp_path):
+    if request.param == "sqlite":
+        u = f"sqlite:///{(tmp_path / 'test.db').as_posix()}"
+        init_db(u)
+        yield u
+        return
+    engine = make_engine(POSTGRES_URL)
+    Base.metadata.drop_all(engine)
+    init_db(POSTGRES_URL)
+    yield POSTGRES_URL
+    Base.metadata.drop_all(engine)
+    engine.dispose()
 
 
 def test_jsonable_handles_what_the_pipeline_produces():
@@ -152,3 +172,29 @@ def test_sessions_are_independent_per_url(tmp_path):
     with session_scope(b) as s:
         assert repo.list_cases(s) == []
     assert session_factory(a) is session_factory(a)
+
+
+def test_purge_also_removes_the_per_case_figure_folder(url, tmp_path):
+    figures = tmp_path / "figures"
+    with session_scope(url) as s:
+        old, fresh = repo.create_case(s, indication="old"), repo.create_case(s, indication="fresh")
+        old.created_at = datetime.now(timezone.utc) - timedelta(days=40)
+        old_id, fresh_id = old.id, fresh.id
+    for cid in (old_id, fresh_id):
+        (figures / cid).mkdir(parents=True)
+        (figures / cid / "blood.png").write_bytes(b"png")
+    with session_scope(url) as s:
+        assert repo.purge_older_than(s, days=30, case_dir=figures) == 1
+    assert not (figures / old_id).exists() and (figures / fresh_id / "blood.png").exists()
+
+
+def test_a_finished_case_is_done_or_partial_depending_on_the_error(url):
+    with session_scope(url) as s:
+        a, b = repo.create_case(s, indication="a"), repo.create_case(s, indication="b")
+        repo.finish_case(s, a)
+        repo.finish_case(s, b, error="writing failed: ollama is not running")
+        ids = (a.id, b.id)
+    with session_scope(url) as s:
+        a, b = (repo.get_case(s, i) for i in ids)
+        assert (a.status, a.stage, a.error) == ("done", "done", None)
+        assert (b.status, b.stage) == ("partial", "done") and b.error.startswith("writing failed")

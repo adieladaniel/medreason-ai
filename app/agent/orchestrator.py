@@ -22,9 +22,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.agent.belief import BeliefState
-from app.agent.consistency import check_consistency
-from app.agent.planner import plan_missing_info
+from app.agent.reasoning import reason  # noqa: F401  (re-exported: the shared belief, consistency and plan step)
 from app.agent.tools import MODALITY_PRIORITY, TOOLS
 from explain.blood import RAW_LABS
 from explain.text import extract_indication
@@ -37,26 +35,17 @@ def run_case(image_path: str | None = None, labs: dict | None = None,
     if not provided:
         raise ValueError("run_case needs at least one of image_path, labs, indication")
 
-    belief = BeliefState()
     tool_outputs = {}
-    # run in the validated priority order (text, blood, image) so the belief-after-each-
-    # step narrative always adds the most informative modality first
     for modality in MODALITY_PRIORITY:
-        if modality not in provided:
-            continue
-        result = TOOLS[modality](provided[modality])
-        tool_outputs[modality] = result
-        belief.update(modality, result["probabilities"])
+        if modality in provided:
+            tool_outputs[modality] = TOOLS[modality](provided[modality])
 
-    pooled = belief.pool()
-    consistency = check_consistency(belief.evidence)
-    plan = plan_missing_info(set(belief.evidence.keys()), pooled, consistency)
-
+    reasoned = reason({m: r["probabilities"] for m, r in tool_outputs.items()})
     return {
-        "belief": belief.as_dict(),
+        "belief": reasoned["belief"],
         "tool_outputs": tool_outputs,
-        "consistency": consistency,
-        "missing_info_plan": plan,
+        "consistency": reasoned["consistency"],
+        "missing_info_plan": reasoned["missing_info_plan"],
     }
 
 

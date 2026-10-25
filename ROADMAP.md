@@ -123,8 +123,9 @@ one-line summary) plus a matplotlib figure.
 - Blood (`explain/blood.py`): SHAP `TreeExplainer` (tree_path_dependent, exact) on the
   saved `HistGradientBoostingClassifier`. Attributions in log-odds, horizontal bar plot.
 - Text (`explain/text.py`): SHAP with a word-level (`\W+`) Text masker over the whole
-  embed-then-logreg pipeline. Per-word effect on P(predicted). About 60 to 90 seconds per
-  case on CPU (`max_evals=300`). Renders the indication with words shaded by effect.
+  embed-then-logreg pipeline. Per-word effect on P(predicted). 0.4 to 0.9 s for a typical
+  indication and 10 to 17 s for a 100-word one (measured; an earlier 60 to 90 s figure did not
+  reproduce). One-word or empty indications get an exact single-word effect or none. Renders the indication with words shaded by effect.
 - Image (`explain/image.py`): Grad-CAM. Keep image, backbone, 18 pathology probs, and the
   3-class logit as one differentiable chain, hook the backbone's last conv map, backprop
   the predicted logit (the input needs `requires_grad` because the backbone is frozen).
@@ -194,7 +195,9 @@ Status: done. Corpus and retrieval core done 2026-10-11.
   refused all 16 off-corpus queries. Keyword search alone (0.81 / 0.79) beat the semantic
   model, query expansion did not help and was dropped, and a hand audit of 18 results
   (`AUDIT.md`) shows the keyword-based relevance proxy is roughly right but approximate.
-  Retrieval takes about 1 to 8 seconds per query on CPU.
+  Retrieval takes about 1 second per query on this CPU when the laptop is quiet and about 4 seconds with
+  a browser open (measured, `eval_latency.py`, p50 1.1 s and p95 1.3 s on a quiet run), almost all of it
+  the reranker. Under heavy load it was 16 seconds.
 - Known limits: a reranker can rank a near-miss first with a high score, and a high score
   means on-topic rather than supportive, so the explanation writer must check what a passage
   actually states.
@@ -248,16 +251,20 @@ Steps, built and reported one at a time:
 1. Storage (done 2026-10-14): `app/config.py`, `app/database/{models,session,repository}.py`.
    Cases, events and language-model calls, SQLite by default and Postgres through one setting,
    restart recovery, retention, tested on SQLite (12 tests).
-2. Staged pipeline and job runner: prediction in about 10 seconds, explanations and evidence
-   after, one in-process worker.
+2. Staged pipeline and job runner (done 2026-10-25): `app/pipelines/`. The prediction is stored
+   first (0.3 s warm, 6 s cold), then explanations, then retrieval, writing and verifying (about 35 s
+   warm, nearly all the language model and the entailment checker). One in-process worker, results saved
+   stage by stage, a late failure leaves a "partial" case, a retrieval cache, and a belief identical to
+   `run_case` on real cases.
 3. API: upload validation, `POST /api/cases` returning 202, status and results, progress stream.
 4. Analyze page in the dashboard.
 5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
 6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that
-   runs the tests. Docker Desktop 4.49.0 is to be installed by the user after the project moves to
-   D: (setup and risks in `docs/ENVIRONMENT_AND_HANDOFF.md`). Ollama stays on the Windows host and
-   the container's Postgres uses host port 5433. Until Docker is installed these files are written
-   and checked statically but not run.
+   runs the tests. Docker Desktop 4.49.0 is installed and verified (2026-10-25, notes in
+   `docs/ENVIRONMENT_AND_HANDOFF.md`). Ollama stays on the Windows host and the container's
+   Postgres uses host port 5433. Done ahead of the compose file: the Ollama and Qdrant addresses are
+   settings (`app/config.py`), Qdrant server mode and the storage layer on Postgres were each run
+   against a real container, and `requirements.txt` has the missing packages.
 7. End-to-end run on real cases and a timing budget.
 
 ## Phase 8, integration, testing, documentation

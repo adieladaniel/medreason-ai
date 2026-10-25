@@ -1,10 +1,11 @@
 """
 Embeds the corpus passages and stores them in Qdrant, then answers similarity queries.
 
-Qdrant runs in embedded (local) mode here, as a folder under data/qdrant/, so there is
-nothing to install or start. The Phase 7 Docker setup swaps this for a Qdrant server by
-changing the one connection line in `_client`; collections, payloads and queries are the
-same API either way.
+By default Qdrant runs in embedded (local) mode, as a folder under data/qdrant/, so there is
+nothing to install or start. Setting MEDREASON_QDRANT_URL (see app/config.py) switches to a
+Qdrant server, which is what docker compose uses; collections, payloads and queries are the
+same API either way. A server starts empty, so run `python -m app.rag.index --build` once with
+the same setting to fill it.
 
 The embedding model is a parameter because it was chosen by measurement, not assumed:
 app/rag/eval_retrieval.py scores candidate models on hand-written clinical questions.
@@ -19,16 +20,14 @@ import torch  # noqa: F401  (import before sklearn/shap-adjacent code on Windows
 
 import atexit
 import re
-from pathlib import Path
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
 from sentence_transformers import SentenceTransformer
 
+from app.config import get_settings
 from app.rag.chunker import Chunk, load_chunks
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-QDRANT_ROOT = ROOT / "data" / "qdrant"
 COLLECTION = "evidence"
 DEFAULT_MODEL = "NeuML/pubmedbert-base-embeddings"
 # Passages scoring below this are treated as "no supporting evidence". Chosen from
@@ -60,23 +59,34 @@ def _model(name: str) -> SentenceTransformer:
     return _models[name]
 
 
+def collection(name: str) -> str:
+    """Embedded mode keeps one folder per model, so the collection name is the same in each. A server
+    holds every model in one place, so there the model is part of the name and two models' vectors
+    (which can have different sizes) never land in the same collection."""
+    return f"{COLLECTION}_{_slug(name)}" if get_settings().qdrant_url else COLLECTION
+
+
 def _client(name: str) -> QdrantClient:
     if name not in _clients:
-        path = QDRANT_ROOT / _slug(name)
-        path.mkdir(parents=True, exist_ok=True)
-        _clients[name] = QdrantClient(path=str(path))   # <- swap for QdrantClient(url=...) in Phase 7
+        s = get_settings()
+        if s.qdrant_url:
+            _clients[name] = QdrantClient(url=s.qdrant_url)
+        else:
+            path = s.qdrant_path / _slug(name)
+            path.mkdir(parents=True, exist_ok=True)
+            _clients[name] = QdrantClient(path=str(path))
     return _clients[name]
 
 
 def build_index(model_name: str = DEFAULT_MODEL, chunks: list[Chunk] | None = None) -> int:
     chunks = chunks if chunks is not None else load_chunks()
-    model, client = _model(model_name), _client(model_name)
+    model, client, coll = _model(model_name), _client(model_name), collection(model_name)
     vectors = model.encode([c.embed_text for c in chunks], batch_size=32, normalize_embeddings=True,
                            show_progress_bar=False)
-    if client.collection_exists(COLLECTION):
-        client.delete_collection(COLLECTION)
-    client.create_collection(COLLECTION, vectors_config=VectorParams(size=vectors.shape[1], distance=Distance.COSINE))
-    client.upsert(COLLECTION, points=[
+    if client.collection_exists(coll):
+        client.delete_collection(coll)
+    client.create_collection(coll, vectors_config=VectorParams(size=vectors.shape[1], distance=Distance.COSINE))
+    client.upsert(coll, points=[
         PointStruct(id=c.chunk_id, vector=v.tolist(), payload={
             "chunk_id": c.chunk_id, "pmcid": c.pmcid, "topic": c.topic, "heading": c.heading, "text": c.text,
             "citation": c.citation, "title": c.title, "url": c.url, "license": c.license,
@@ -88,7 +98,7 @@ def build_index(model_name: str = DEFAULT_MODEL, chunks: list[Chunk] | None = No
 def search(query: str, k: int = 5, model_name: str = DEFAULT_MODEL, topic: str | None = None) -> list[dict]:
     q = _model(model_name).encode(QUERY_PREFIX.get(model_name, "") + query, normalize_embeddings=True)
     flt = Filter(must=[FieldCondition(key="topic", match=MatchValue(value=topic))]) if topic else None
-    hits = _client(model_name).query_points(COLLECTION, query=q.tolist(), limit=k, query_filter=flt).points
+    hits = _client(model_name).query_points(collection(model_name), query=q.tolist(), limit=k, query_filter=flt).points
     return [{"score": round(float(h.score), 4), **h.payload} for h in hits]
 
 

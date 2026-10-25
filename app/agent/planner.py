@@ -7,14 +7,14 @@ choice, not a measured one, there is no ground truth for "should have asked for 
 data" to calibrate against. They implement the behavior described in the project's
 architecture notes: skip requesting more input when confidence is already high, but flag
 it when confidence is only middling. What is not a guess is which modality to recommend:
-that uses MODALITY_PRIORITY (app/agent/tools.py), which is read from the real Phase 3
+that uses MODALITY_PRIORITY (app/agent/__init__.py), which is read from the real Phase 3
 ablation (text contributes most, then blood, then image).
 """
 from __future__ import annotations
 
 import numpy as np
 
-from app.agent.tools import MODALITY_PRIORITY
+from app.agent import MODALITY_PRIORITY
 
 ALL_MODALITIES = {"image", "blood", "text"}
 HIGH_CONFIDENCE = 0.85

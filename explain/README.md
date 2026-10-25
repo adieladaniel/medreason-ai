@@ -25,7 +25,7 @@ and the Phase 5 agent can both read.
 | module | model explained | method | notes |
 |---|---|---|---|
 | `blood.py` | `HistGradientBoostingClassifier` | SHAP `TreeExplainer`, tree-path-dependent (exact) | contributions in log-odds; `softmax(base + sum(shap)) == predict_proba` |
-| `text.py` | frozen Bio_ClinicalBERT (mean-pooled) then LogisticRegression, INDICATION only | SHAP with a word-level (`\W+`) `Text` masker over the whole embed-then-classify pipeline | about 60 to 90 seconds per case on CPU (`max_evals=300`); per-word effect on P(predicted) |
+| `text.py` | frozen Bio_ClinicalBERT (mean-pooled) then LogisticRegression, INDICATION only | SHAP with a word-level (`\W+`) `Text` masker over the whole embed-then-classify pipeline | 0.4 to 0.9 s for a typical indication, 10 to 17 s for a 100-word one (`max_evals=300`); per-word effect on P(predicted); fewer than two words get an exact single-word effect |
 | `image.py` | frozen torchxrayvision DenseNet121, 18 pathology probs, MLP head | Grad-CAM (last conv layer, predicted-class logit) plus pathology-channel attribution `d(logit)/d(prob) * prob` | the input tensor needs `requires_grad_(True)` because the backbone is frozen |
 
 ## Entrypoint

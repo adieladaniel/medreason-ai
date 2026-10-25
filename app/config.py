@@ -26,6 +26,18 @@ class Settings(BaseSettings):
     # Cases hold clinical text, labs and an X-ray, so they are not kept forever.
     retention_days: int = 30
 
+    # The local language model. Ollama runs on the Windows host (it already uses the GPU), so inside a
+    # container the address is http://host.docker.internal:11434. Docker Desktop forwards that to the
+    # host's localhost, so Ollama does not have to listen on the network.
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:latest"
+
+    # Evidence index. Unset means embedded mode: one folder per embedding model under qdrant_path, nothing
+    # to start. A URL (for example http://qdrant:6333 in compose) means a Qdrant server, which has to be
+    # filled once with `python -m app.rag.index --build` using the same setting.
+    qdrant_url: str | None = None
+    qdrant_path: Path = ROOT / "data" / "qdrant"
+
 
 @lru_cache
 def get_settings() -> Settings:

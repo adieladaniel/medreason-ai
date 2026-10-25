@@ -19,10 +19,11 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import urllib.request
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-MODEL = "llama3.2:latest"
+from app.config import get_settings
+
 NUM_CTX = 4096
 
 SYSTEM = ("You summarise one passage from a medical research paper in a single sentence. "
@@ -46,20 +47,40 @@ def case_sentences(agent: dict, plan: dict) -> list[str]:
     return out
 
 
+def chat_url() -> str:
+    """Read at call time, not import time, so a changed MEDREASON_OLLAMA_URL takes effect."""
+    return get_settings().ollama_url.rstrip("/") + "/api/chat"
+
+
+def build_prompt(passage: dict, topic: str) -> tuple[str, str]:
+    """The (system, user) text sent to the model for one passage. Kept separate so the exact prompt can be
+    stored with the answer, which is what makes a written sentence traceable afterwards."""
+    return SYSTEM, f"TOPIC: {topic}\n\nPASSAGE ({passage['title']}, section {passage['heading']}):\n{passage['text']}"
+
+
 def _ask(passage: dict, topic: str, model: str, timeout: int) -> str:
-    user = f"TOPIC: {topic}\n\nPASSAGE ({passage['title']}, section {passage['heading']}):\n{passage['text']}"
+    system, user = build_prompt(passage, topic)
     body = {"model": model, "stream": False, "options": {"temperature": 0, "num_ctx": NUM_CTX},
-            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]}
-    req = urllib.request.Request(OLLAMA_URL, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+    req = urllib.request.Request(chat_url(), data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.load(r)["message"]["content"].strip()
 
 
-def write_explanation(agent: dict, plan: dict, evidence: dict, model: str = MODEL, timeout: int = 300) -> dict:
+def write_explanation(agent: dict, plan: dict, evidence: dict, model: str | None = None, timeout: int = 300,
+                      recorder=None) -> dict:
+    """`recorder`, if given, is called after every model call as recorder(model=, purpose=, prompt=,
+    response=, seconds=). The storage layer passes one that writes the llm_calls table."""
+    model = model or get_settings().ollama_model
     background, not_addressed = [], []
     for p in evidence["passages"]:
         topic = "; ".join(p["queries"])
+        t0 = time.perf_counter()
         reply = _ask(p, topic, model, timeout)
+        if recorder:
+            system, user = build_prompt(p, topic)
+            recorder(model=model, purpose="background_sentence", prompt=f"{system}\n\n{user}", response=reply,
+                     seconds=time.perf_counter() - t0)
         sentence = re.sub(r"\s+", " ", reply).strip().strip('"')
         on_topic = not p.get("terms") or any(t in sentence.lower() for t in p["terms"])
         if "NOT_ADDRESSED" in sentence or not sentence or not on_topic:

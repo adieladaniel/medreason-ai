@@ -13,6 +13,13 @@ which are the same saved Phase 2 models used throughout the project.
                       agreement numbers from the validation set, not an invented rule
     planner.py       decides whether more input is worth requesting, using the real
                       modality ablation ranking from Phase 3
-    orchestrator.py  runs the above in sequence for one case
+    reasoning.py     belief, consistency and plan from per-modality probabilities (no models loaded)
+    orchestrator.py  runs the tools and the reasoning in sequence for one case
 """
 LABEL_NAMES = ["Normal", "Pneumonia", "Lung Cancer"]
+
+# The order the ablation in scripts/train_fusion.py found each modality helps in (text contributes most,
+# then blood, then image). The planner and the default run order both use this so the agent's behavior
+# matches what was measured, not a guess. It lives here, not in tools.py, so code that only reasons about
+# probabilities does not have to import the model-loading explainers.
+MODALITY_PRIORITY = ["text", "blood", "image"]

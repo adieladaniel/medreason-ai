@@ -9,7 +9,7 @@ CLAUDE.md first, then this file before touching Windows, WSL, Docker or the disk
 
 Phases 0 to 6 are done. Phase 7 (backend) has step 1 done (storage layer, commit 99e9e7f) and the
 staged pipeline is next. Since Phase 6 these were also built, one at a time, with a report after
-each: a test suite (`python -m pytest`, 76 tests), reliability checks on validation (intervals,
+each: a test suite (`python -m pytest`, 126 tests), reliability checks on validation (intervals,
 calibration, abstention, conformal sets, subgroups), a claim-checker comparison (the current NLI
 checker stays), and corpus growth from 27 to 44 papers driven by a measured gap list. Details are
 in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
@@ -32,8 +32,8 @@ in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
   Never change hypervisor, virtualization or driver settings without a restore point and a
   `bcdedit /export` backup.
 - WSL 2 is installed with an Ubuntu distribution (about 2.85 GB, under
-  `C:\Users\HP\AppData\Local\wsl\`). The user reported WSL at version 3.0.3. Docker Desktop is not
-  installed yet.
+  `C:\Users\HP\AppData\Local\wsl\`). WSL is version 3.0.3. Docker Desktop 4.49.0 has been installed since
+  2026-10-25 (section 4), and it adds its own `docker-desktop` WSL distro next to Ubuntu.
 - A native PostgreSQL 18 service (`postgresql-x64-18`) runs on port 5432 and starts automatically.
 - Ollama is the normal Windows install, with `llama3.2:latest`. The server was found stopped once
   (connection refused); start it with `ollama serve` if the writer fails to connect.
@@ -65,7 +65,17 @@ in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
   `ncbi/MedCPT-Cross-Encoder`, `emilyalsentzer/Bio_ClinicalBERT`,
   `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli`.
 
-## 4. Docker plan (not done yet; the user asked for help once the project is on D:)
+## 4. Docker plan (installed and verified on 2026-10-25)
+
+Status: Docker Desktop 4.49.0 is installed. The user ran the boot-entry check (`hypervisoriommupolicy
+Disable` was in place), `bcdedit /export D:\bcd-backup`, wrote `.wslconfig` and ran the installer
+command below. No restart was needed. The data went to `D:\DockerData` (`disk\docker_data.vhdx`,
+`main\ext4.vhdx`), nothing from Docker landed on C: except the 3.5 GB program, and C: had 63 GB free
+afterwards. The engine sees about 8.3 GB of memory. Automatic updates, start at login and usage
+statistics were turned off in Docker's settings. Verified: hello-world, a Postgres 16 container
+reachable from Windows on port 5433, and a container reaching the host's Ollama through
+`host.docker.internal:11434` while Ollama listened on 127.0.0.1 only, so `OLLAMA_HOST` stays unset
+(setting it to 0.0.0.0 would expose Ollama to Wi-Fi). The notes below are the original plan.
 
 - Version: Docker Desktop **4.49.0 only**. Release notes say support for Windows 11 22H2 ended with
   4.49 and later versions require 23H2. Link, checked to exist (569,957,808 bytes, published
@@ -108,6 +118,11 @@ Pin Windows to 22H2 so an automatic feature update cannot start (administrator P
 
 ## 6. Moving the project from C: to D:
 
+Done on 2026-10-25. The project is at `D:\finalyearproject`: git is clean on `main`, the `origin`
+remote is intact, the 76 tests of that day passed from D:, and `data/` and the model files came across. The memory
+folder was copied to `C:\Users\HP\.claude\projects\d--finalyearproject\memory`. Not verified here:
+whether the old C: copy has been deleted. The steps below are kept as the record of how it was done.
+
 1. Close VS Code and Claude Code.
 2. `robocopy "C:\Users\HP\Desktop\finalyearproject" "D:\finalyearproject" /E /COPY:DAT /DCOPY:DAT /R:1 /W:1 /MT:16 /XD __pycache__ .pytest_cache`
 3. From D:, check `git status` is clean and `python -m pytest` passes. Only then delete the C: copy.
@@ -118,7 +133,7 @@ Pin Windows to 22H2 so an automatic feature update cannot start (administrator P
    transcript outside the repo (for example `D:\archive\claude\`). Never commit it: it contains
    MIMIC lab values and clinical text from printed outputs.
 5. In a new session, give the transcript path and ask for it to be read for context.
-6. Update the memory path text in CLAUDE.md section 7 after the move.
+6. Update the memory path text in CLAUDE.md section 7 after the move (done 2026-10-25).
 
 ## 7. Working agreements with the user
 

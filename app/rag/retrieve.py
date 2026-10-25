@@ -26,6 +26,9 @@ from __future__ import annotations
 
 import torch  # noqa: F401
 
+import threading
+from collections import OrderedDict
+
 from app.rag.hybrid import Retriever
 
 RERANKER = "ncbi/MedCPT-Cross-Encoder"
@@ -39,6 +42,16 @@ CANDIDATES = 5
 
 _retriever: Retriever | None = None
 
+# The library is fixed while the process runs and the planner asks the same phrases again and again
+# ("pneumonia with low albumin"), so an answer is kept and the reranker, which is nearly all of the
+# time, runs once per distinct query. An empty answer is cached too: "no passage" is a result. The
+# cache holds the answer after the threshold, so it can never return something the threshold removed.
+# It is lost when the process restarts, which is when a rebuilt index would be picked up anyway.
+CACHE_SIZE = 512
+_cache: OrderedDict[tuple[str, int], list[dict]] = OrderedDict()
+_cache_lock = threading.Lock()
+_stats = {"hits": 0, "misses": 0}
+
 
 def retriever() -> Retriever:
     global _retriever
@@ -47,10 +60,33 @@ def retriever() -> Retriever:
     return _retriever
 
 
+def cache_info() -> dict:
+    return {**_stats, "size": len(_cache), "max_size": CACHE_SIZE}
+
+
+def clear_cache() -> None:
+    with _cache_lock:
+        _cache.clear()
+        _stats.update(hits=0, misses=0)
+
+
 def retrieve(query: str, k: int = 5) -> list[dict]:
-    """Up to k passages, best first, each with its citation and its reranker score."""
+    """Up to k passages, best first, each with its citation and its reranker score. Callers get copies,
+    so changing a returned passage cannot change what the next caller sees."""
+    key = (query, k)
+    with _cache_lock:
+        if key in _cache:
+            _cache.move_to_end(key)
+            _stats["hits"] += 1
+            return [dict(r) for r in _cache[key]]
     results = retriever().search(query, k=CANDIDATES, mode="hybrid", rerank=RERANKER, rerank_depth=CANDIDATES)
-    return [r for r in results if r["rerank_score"] >= MIN_RERANK_SCORE][:k]
+    kept = [r for r in results if r["rerank_score"] >= MIN_RERANK_SCORE][:k]
+    with _cache_lock:
+        _stats["misses"] += 1
+        _cache[key] = kept
+        while len(_cache) > CACHE_SIZE:
+            _cache.popitem(last=False)
+    return [dict(r) for r in kept]
 
 
 if __name__ == "__main__":
