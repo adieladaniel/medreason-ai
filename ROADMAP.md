@@ -241,6 +241,11 @@ Status: done. Corpus and retrieval core done 2026-10-11.
   declined more often than other classes by a confidence rule, which matters for any abstention
   design. The final test-set run should repeat all of this once, with nothing re-tuned.
 
+- Text dominance check (done, `scripts/eval_dominance.py`): text is the strongest input and is close to a keyword rule
+  (0.502 against 0.509), image and blood each add a small but clearly nonzero amount, text dominates only the rare class,
+  and averaging the models loses cancers the text model finds (50 percent against 61 percent). Options recorded in
+  CLAUDE.md: prediction sets on low-confidence cases, a cancer alert, better image weights.
+
 ## Phase 7, backend and API
 
 Status: in progress. The design and its reasons are in `docs/PHASE7_DESIGN.md`. The progress

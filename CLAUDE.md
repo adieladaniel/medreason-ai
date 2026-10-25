@@ -490,6 +490,49 @@ reproduces the saved fusion score (0.6133) before doing anything else.
   Conformal guarantees assume exchangeability and patients repeat. The test set is untouched.
   These checks should be repeated once, unchanged, on the test split at the end.
 
+### Does the text input carry the project? (2026-10-25, `scripts/eval_dominance.py`, validation only)
+
+Raised by testing the Analyze page: the text model decided most cases, and on the lung cancer case only the text model
+found the cancer. Measured, with 95 percent intervals that resample patients:
+
+- Text is the strongest input but not the only one that matters. Adding an input to the other two raises macro F1 by
+  +0.105 for text (+0.064 to +0.145), +0.051 for blood (+0.021 to +0.078) and +0.026 for image (+0.011 to +0.041). All
+  three intervals stay above zero, but the image adds the least, and its gain is small.
+- The trained text model is close to a keyword rule. A crude rule written from clinical common sense and not tuned on
+  these cases (a cancer word means Lung Cancer, an infection word means Pneumonia, otherwise Normal) scores macro F1
+  0.502 against the text model's 0.509. So the text input mostly carries the referring clinician's own suspicion in
+  words ("evaluate for pneumonia", "questionable metastasis"). It is a legitimate input, available before the film is
+  read, but it is clinical context, not the AI understanding a report, and the project should be described that way.
+- Text dominates the rare class, not the common ones. Per-class F1 (Normal / Pneumonia / Lung Cancer): image 0.56 / 0.73
+  / 0.15, blood 0.45 / 0.73 / 0.20, text 0.53 / 0.69 / 0.32. For Pneumonia text is the weakest single model, and for
+  Normal the image is slightly better. Only for Lung Cancer is text far ahead.
+- Where the indication has no cancer or infection word (57 percent of cases, 1,320 of 2,315) text alone is the weakest
+  (macro F1 0.43, accuracy 53 percent), image plus blood score 0.51 (accuracy 70 percent), and all three 0.56. That is
+  where the image and blood models earn their place.
+- The image model cannot see cancer here. Its Lung Cancer ROC AUC is 0.53 (earlier note). Likely reasons, not proven:
+  the frozen backbone's Nodule and Mass channels are the untrained ones, the label is built from admission-level codes
+  and reports so the film may show nothing, and there are only 1,011 cancer cases in total.
+- Of the 117 validation cancers, text alone finds 71 (61 percent), image 34, blood 26. Averaging the three finds only
+  58 (50 percent): it lost 18 cancers the text model found and gained 5. Eight cancers are found only by image and eight
+  only by blood, and 28 (24 percent) by none. So "highest probability wins" is a poor rule for the rare class. It raises
+  macro F1 (cancer F1 0.32 to 0.42) by cutting false alarms, at the cost of recall.
+- Only 7 percent of cancer cases have "metastasis" in the indication, and text finds 88 percent of those. 60 percent have
+  some cancer-type word.
+- A cancer alert (flag "possible lung cancer" when the fused cancer probability reaches t, with t chosen on training
+  out-of-fold predictions and applied once to validation) trades recall for false alarms: t = 0.358 catches 56 percent
+  at 8.9 alerts per 100 cases (32 percent real), 0.304 catches 66 percent at 13.0 (26 percent real), 0.244 catches 76
+  percent at 21.0 (18 percent real), 0.188 catches 84 percent at 33.0 (13 percent real). Cancer is 5.1 percent of cases.
+  The conflict case seen on the page had a fused cancer probability of 0.22, so only the last setting flags it. This is
+  a design option and one run; if adopted it needs a decision on how many false alarms are acceptable, wording that
+  reports the model's signal without advising anything, and a single confirmation on the test split at the end.
+- Limits: the keyword lists and the "no clue" subset are mine and unchecked by anyone else, 117 cancer cases make every
+  cancer number wide, and these are validation numbers.
+- What to say about the project honestly: the engineering (staged pipeline, explanations, evidence with verified
+  sentences, calibration and abstention measured) is the substance. The model quality is modest, the text input is
+  mostly clinician context, and Lung Cancer is hard. Things to do if wanted: show prediction sets ("not sure between
+  these") instead of one headline class on low-confidence cases, add the cancer alert, and try image weights that have
+  Nodule and Mass channels (their training data is not stated, so check for overlap with this dataset first).
+
 ### Phase 7, backend and API (in progress, started 2026-10-14)
 
 Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a report after each.
@@ -566,8 +609,9 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   study (for example CT)" for a low-confidence answer, because follow-up and clinical advice are out of scope and
   the page now shows that sentence; it says the system has no further input to request and the answer is uncertain.
   And `tests/conftest.py` points the default database and upload folder at a throwaway folder, so no test can touch
-  `data/app.db` or `data/uploads` (an empty project database appeared once during this work, from an earlier test
-  run that could not be reproduced).
+  `data/app.db` or `data/uploads` (an empty project database appeared once during this work. I first blamed a test
+  run, but none could recreate it, and it was most likely made when the server was first started, because the app creates
+  the database at startup. The guard is kept anyway).
   Tested in a real browser (`tests/test_analyze_page.py`, 14 tests, slow-marked, needs `pip install playwright`
   and `python -m playwright install chromium`, run with `-m slow`): real app and pipeline code, fake models. Running
   it for the first time found two real bugs, a button with the id "reset" shadowing the form's own reset method
@@ -799,6 +843,18 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   Windows host, not in a container.
 - A new path means new Claude memory. The `memory` folder was copied to
   `C:\Users\HP\.claude\projects\d--finalyearproject\` on 2026-10-25. Keep chat transcripts out of git.
+- Why three different X-rays all came out Pneumonia on the page (2026-10-25, checked with the real models): the example
+  values are pneumonia-like text and labs (text 60 percent, blood 80 percent Pneumonia), and the image has the weakest
+  vote in the fusion, so it is outvoted. The Normal X-ray alone gave Normal 69 percent but fused with the example values
+  gave Pneumonia 49 percent ("two of three agree"). The image alone called the Lung Cancer film Pneumonia 39 percent
+  (its Lung Cancer AUC is 0.53). With each case's own indication and labs the answers differ as they should: pneumonia
+  92 percent, normal 92 percent (all agree), and the lung cancer case Pneumonia 40 percent flagged as a conflict (text
+  Cancer 62 percent, blood Normal 93 percent). Use `scripts/submit_case.py --study-id ID` to send such a case to the
+  running server. UI to do later: the single example button is misleading next to an uploaded X-ray (offer normal-like and
+  cancer-like examples, or load a validation case), and the Phase 8b example-case loader covers it.
+- A validation case with no labs on record (for example study 57386788) is sent without a blood input, so the blood
+  model takes no part; the offline evaluations fed the blood model all-missing values in that situation (it said
+  Normal 66 percent), which is a small difference between the evaluation setup and the app.
 - Memory of the app, measured 2026-10-25 (`psutil`, one real validation case): Python with torch 0.5 GB, 1.2 GB after
   `warm_up()` loaded every model (17 s with the files cached), 2.3 GB after one full case (peak 2.3 GB). Ollama is a
   separate process: its llama3.2 runner took 1.2 GB of RAM and 2.4 GB of the 4 GB of GPU memory. So the app plus the

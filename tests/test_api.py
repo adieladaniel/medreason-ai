@@ -394,3 +394,36 @@ def test_every_time_the_api_sends_is_marked_as_utc(make_client):
     assert all(t.endswith("+00:00") for t in stamps), stamps
     age = datetime.now(timezone.utc) - datetime.fromisoformat(view["created_at"])
     assert timedelta(0) <= age < timedelta(minutes=2)
+
+
+# ------------------------------------------------------------------ the helper that sends a validation case
+def test_the_case_helper_sends_what_the_form_would_and_leaves_dropped_inputs_out(tmp_path):
+    import sys
+    sys.path.insert(0, "scripts")
+    import submit_case
+    film = tmp_path / "x.jpg"
+    film.write_bytes(png(fmt="JPEG"))
+    case = {"indication": "fever", "labs": {"wbc": 12.5, "crp": None}, "image_path": str(film), "true_label": "Pneumonia"}
+    data, files = submit_case.build_request(case, set())
+    assert data == {"indication": "fever", "labs": json.dumps({"wbc": 12.5})} and files["image"][0] == "film.jpg"
+    data, files = submit_case.build_request(case, {"image", "blood"})
+    assert data == {"indication": "fever"} and files is None
+
+
+def test_the_case_helper_does_not_offer_the_sealed_test_split():
+    import subprocess, sys
+    r = subprocess.run([sys.executable, "scripts/submit_case.py", "--study-id", "1", "--split", "test"], capture_output=True, text=True)
+    assert r.returncode != 0 and "invalid choice" in r.stderr
+
+
+def test_what_the_helper_sends_is_accepted_by_the_api(make_client, tmp_path):
+    import sys
+    sys.path.insert(0, "scripts")
+    import submit_case
+    film = tmp_path / "x.jpg"
+    film.write_bytes(png(fmt="JPEG"))
+    data, files = submit_case.build_request({"indication": "fever", "labs": {"wbc": 12.5}, "image_path": str(film)}, set())
+    c = make_client()
+    r = c.post("/api/cases", data=data, files=files)
+    assert r.status_code == 202
+    assert wait_for(c, r.json()["id"])["prediction"]["modalities_used"] == ["blood", "image", "text"]

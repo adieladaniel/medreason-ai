@@ -68,6 +68,19 @@ exist so far (the prediction arrives first, then explanations, then the cited ev
 `DELETE /api/cases/{id}`. There is no login: this is a local demonstration and must not be given real patient
 data.
 
+To look at a real case without typing 13 lab values, send a validation case to the running server and open the address it
+prints. Everything comes from the same study, which is what the models were built for:
+
+```bash
+python scripts/submit_case.py --study-id 53383543     # a pneumonia case
+python scripts/submit_case.py --study-id 57386788     # a normal case (this one has no lab values on record)
+python scripts/submit_case.py --study-id 50262066     # a lung cancer case the models get wrong, flagged as a conflict
+```
+
+The page's "Fill example values" button is one made-up pneumonia-like set. Combined with a different patient's X-ray,
+the text and blood models outvote the image, so every case comes out Pneumonia. That is the fusion working, not a bug.
+The test split is not offered by the helper: it stays sealed until the final evaluation.
+
 ## Data is not included in this repo
 
 The dataset is built from MIMIC-CXR and MIMIC-IV v3.1 (PhysioNet credentialed data). The
