@@ -9,7 +9,7 @@ CLAUDE.md first, then this file before touching Windows, WSL, Docker or the disk
 
 Phases 0 to 6 are done. Phase 7 (backend) has step 1 done (storage layer, commit 99e9e7f) and the
 staged pipeline is next. Since Phase 6 these were also built, one at a time, with a report after
-each: a test suite (`python -m pytest`, 189 tests), reliability checks on validation (intervals,
+each: a test suite (`python -m pytest`, 211 tests), reliability checks on validation (intervals,
 calibration, abstention, conformal sets, subgroups), a claim-checker comparison (the current NLI
 checker stays), and corpus growth from 27 to 44 papers driven by a measured gap list. Details are
 in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.

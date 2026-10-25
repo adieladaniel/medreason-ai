@@ -244,7 +244,8 @@ Status: done. Corpus and retrieval core done 2026-10-11.
 - Text dominance check (done, `scripts/eval_dominance.py`): text is the strongest input and is close to a keyword rule
   (0.502 against 0.509), image and blood each add a small but clearly nonzero amount, text dominates only the rare class,
   and averaging the models loses cancers the text model finds (50 percent against 61 percent). Options recorded in
-  CLAUDE.md: prediction sets on low-confidence cases, a cancer alert, better image weights.
+  CLAUDE.md. Prediction sets, a low-confidence headline and a cancer alert were built on 2026-10-26 (`app/agent/decision.py`,
+  rules from `scripts/build_decision_rules.py`); better image weights remain open.
 
 ## Phase 7, backend and API
 

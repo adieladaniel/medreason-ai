@@ -30,7 +30,9 @@ from collections import namedtuple
 from pathlib import Path
 
 from app.agent import MODALITY_PRIORITY
+from app.agent.decision import decide
 from app.agent.reasoning import reason
+from app.config import get_settings
 from app.rag.evidence import assemble
 from app.rag.explain_case import compose
 from app.rag.faithfulness import verify
@@ -75,7 +77,11 @@ def stage_predict(ctx: dict) -> dict:
             preds[m] = predictors[m](ctx["inputs"][m])
             seconds[m] = round(time.perf_counter() - t0, 3)
     reasoned = reason({m: p["probabilities"] for m, p in preds.items()})
-    return {**reasoned,
+    cfg = get_settings()
+    # how sure the system is; read from the pooled probabilities and never changes the predicted class
+    decision = decide(reasoned["belief"]["probabilities"], list(preds), set_coverage=cfg.prediction_set_coverage,
+                      alert_recall=cfg.cancer_alert_recall)
+    return {**reasoned, "decision": decision,
             "modalities": {m: {"predicted_class": p["predicted_class"], "probabilities": p["probabilities"]}
                            for m, p in preds.items()},
             "modalities_used": [m for m in MODALITY_PRIORITY if m in preds], "seconds": seconds}

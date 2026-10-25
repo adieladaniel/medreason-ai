@@ -284,22 +284,66 @@ def test_markup_in_paper_text_or_model_output_is_shown_as_text_and_never_runs(pa
     assert "<b id=" in page.inner_text("#r-evid") or "&lt;" in page.inner_html("#r-evid")      # the text itself is still there, visibly
 
 
-def test_a_low_confidence_answer_is_flagged_as_a_weak_guess(page, site):
-    disagree = {"text": probs(0.2, 0.2, 0.6), "blood": probs(0.7, 0.2, 0.1), "image": probs(0.3, 0.5, 0.2)}
-    ACTIVE["P"] = disagree
+def run_with(page, probabilities, click_example=True, image=None):
+    """Runs one case whose three fake models answer with `probabilities`, then restores the confident default."""
+    ACTIVE["P"] = probabilities
     try:
-        page.click("#f-example")
+        if click_example:
+            page.click("#f-example")
+        if image:
+            page.set_input_files("#f-image", str(image))
         page.click("#f-go")
         finish(page)
     finally:
         ACTIVE["P"] = P
-    assert page.locator("#r-pred .pill.no", has_text="Low confidence").count() == 1
-    assert "weak guess" in page.inner_text("#r-pred") and page.locator("#r-pred .pred.weak").count() == 1
-    assert "follow-up" not in page.inner_text("#r-pred").lower()
 
 
-def test_a_confident_answer_carries_no_weakness_flag(page):
-    page.click("#f-example")
-    page.click("#f-go")
-    finish(page)
+def test_a_low_confidence_answer_is_headlined_as_uncertain_with_the_best_guess_below(page):
+    run_with(page, {m: probs(0.38, 0.40, 0.22) for m in P})          # the lung cancer case the real models get wrong
+    text = page.inner_text("#r-pred")
+    assert page.locator("#r-pred .pred-class").inner_text() == "Uncertain"
+    assert "Best guess by probability" in text and page.locator("#r-pred .pill", has_text="Low confidence").count() == 1
+    assert page.locator("#r-pred .pred.weak").count() == 1 and "weak guess" in text
+    assert page.locator("#r-pred .set-badges .badge").count() == 3 and "None of the classes can be ruled out" in text
+    assert "follow-up" not in text.lower()
+
+
+def test_a_confident_answer_keeps_its_class_headline_and_a_one_class_set(page):
+    run_with(page, P)
+    assert page.locator("#r-pred .pred-class").inner_text() == "Pneumonia"
     assert page.locator("#r-pred .pill", has_text="Low confidence").count() == 0
+    assert page.locator("#r-pred .set-badges .badge").all_inner_texts() == ["Pneumonia"]
+    assert "Only this class remains possible" in page.inner_text("#r-pred") and "validation cases a set like this held" in page.inner_text("#r-pred")
+    assert page.locator("#r-pred .alert").count() == 0
+
+
+def test_a_cancer_signal_under_another_headline_shows_the_alert_with_its_numbers(page):
+    from app.agent.decision import decide
+    from app.agent.reasoning import reason
+    signal = {"text": probs(0.10, 0.50, 0.40), "blood": probs(0.20, 0.45, 0.35), "image": probs(0.30, 0.40, 0.30)}
+    belief = reason(signal)["belief"]
+    d = decide(belief["probabilities"], list(signal))
+    assert belief["predicted_class"] == "Pneumonia" and d["cancer_alert"]["flag"], "the scenario must really contain a cancer signal"
+    run_with(page, signal)
+    banner = page.inner_text("#r-pred .alert")
+    assert "Lung Cancer signal" in banner and "not a diagnosis" in banner and "alerts per 100 cases" in banner
+    assert page.locator("#r-pred .set-badges .badge", has_text="Lung Cancer").count() == 1
+    assert page.locator("#r-pred .pred-class").inner_text() in ("Pneumonia", "Uncertain")        # the headline is still a model prediction
+
+
+def test_an_alert_that_is_no_better_than_chance_is_not_shown_and_the_page_says_why(page, site):
+    image_only = {m: (probs(0.2, 0.4, 0.4) if m == "image" else P[m]) for m in P}
+    run_with(page, image_only, click_example=False, image=site.film)
+    assert page.locator("#r-pred .alert").count() == 0
+    assert "No cancer alert is offered for this combination of inputs" in page.inner_text("#r-pred")
+
+
+def test_a_set_that_leaves_out_the_most_probable_class_says_why(page):
+    """Each class has its own bar, so a near-even case can give a set holding only the rare class. That is correct for the
+    method but looks wrong without an explanation."""
+    from app.agent.decision import decide
+    even = {m: probs(0.34, 0.33, 0.33) for m in P}
+    assert decide({"Normal": 0.34, "Pneumonia": 0.33, "Lung Cancer": 0.33}, list(P))["prediction_set"] == ["Lung Cancer"]
+    run_with(page, even)
+    assert page.locator("#r-pred .set-badges .badge").all_inner_texts() == ["Lung Cancer"]
+    assert "most probable class is not in the set" in page.inner_text("#r-pred")

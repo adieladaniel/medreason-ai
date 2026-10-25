@@ -104,7 +104,11 @@ p.section-sub { margin: 0 0 14px; color: var(--muted); font-size: 14px; max-widt
   padding: 16px 18px; display: flex; flex-direction: column; gap: 2px;
 }
 .kpi .pred.weak { border-left: 4px solid #e0a020; }
-.pred.weak .pred-class { opacity: 0.85; }
+.pred-class.unsure { color: #64748b; font-size: 34px; }
+.setline, .pred > .note { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+.setline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.setline .k-sub { flex-basis: 100%; }
+.set-badges { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .pred-main .pill { align-self: flex-start; margin-top: 8px; }
 .k-label { font-size: 13px; color: var(--muted); }
 .kpi .k-val { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }

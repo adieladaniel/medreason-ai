@@ -22,9 +22,6 @@
     ['verifying', 'Checking', 'Each sentence is checked against its passage.'],
   ];
   const TERMINAL = ['done', 'partial', 'failed'];
-  // below this the reliability analysis (scripts/eval_uncertainty.py) declines to answer; the page says so instead of
-  // headlining a weak guess in large type
-  const LOW_CONFIDENCE = 0.55;
   // made-up values, not a patient: they only show what the fields expect
   const EXAMPLE = {
     indication: 'Fever, productive cough and shortness of breath for three days. Evaluate for pneumonia.',
@@ -294,15 +291,38 @@
     }).join('');
     const plan = p.missing_info_plan || {};
     const rec = plan.recommendation ? `<div class="callout">${esc(plan.recommendation)}</div>` : '';
-    const low = b.confidence < LOW_CONFIDENCE;
-    const lowNote = low
-      ? `<span class="pill no">Low confidence</span><span class="k-sub">Below ${LOW_CONFIDENCE}, the level at which the reliability analysis declines to answer. Treat this as a weak guess, not a finding.</span>`
+    const d = p.decision;                      // how sure the system is; null for a case stored before this existed
+    const low = !!(d && d.low_confidence);
+    const al = d && d.cancer_alert;
+    const alertBanner = al && al.informative && al.flag && cls !== 'Lung Cancer'
+      ? alertBox('warn', 'Lung Cancer signal.', `The combined probability for Lung Cancer is ${pct(al.probability)}, at or above this tool's alert level of ${pct(al.threshold)}. This is the models' signal, not a diagnosis. At this level on validation cases the alert caught ${pct(al.validation.recall)} of the Lung Cancer cases, and about ${pct(al.validation.share_of_alerts_real)} of its alerts were real Lung Cancer (${al.validation.alerts_per_100} alerts per 100 cases).`)
       : '';
-    return `<section class="card pred${low ? ' weak' : ''}">
-        <div class="pred-main"><span class="k-label">Predicted by the trained models</span>
-          <span class="pred-class" style="color:${CCOL[cls]}">${esc(cls)}</span>
-          <span class="k-sub">${pct(b.confidence)} probability, combining ${esc(used)}</span>${lowNote}</div>
-        <div class="pred-probs">${probRows(b.probabilities)}</div>
+    const noAlert = al && !al.informative
+      ? '<p class="note">No cancer alert is offered for this combination of inputs: on validation cases its alerts were barely better than chance.</p>' : '';
+    const headline = low
+      ? `<span class="k-label">Predicted by the trained models</span><span class="pred-class unsure">Uncertain</span>
+          <span class="k-sub">Best guess by probability: <b style="color:${CCOL[cls]}">${esc(cls)}</b> ${pct(b.confidence)}. Combining ${esc(used)}.</span>
+          <span class="pill no">Low confidence</span>
+          <span class="k-sub">After calibration its confidence is ${d.confidence.calibrated.toFixed(2)}, below the cut-off of ${d.confidence.threshold.toFixed(2)} at which the reliability analysis declines to answer. That rule answered ${pct(d.confidence.answered)} of validation cases and was right on ${pct(d.confidence.accuracy_answered)} of those. Treat this as a weak guess, not a finding.</span>`
+      : `<span class="k-label">Predicted by the trained models</span><span class="pred-class" style="color:${CCOL[cls]}">${esc(cls)}</span>
+          <span class="k-sub">${pct(b.confidence)} probability, combining ${esc(used)}</span>`;
+    let setLine = '';
+    if (d) {
+      const n = d.prediction_set.length;
+      const meaning = n === 0 ? 'No class clears the bar, so nothing can be said with confidence.'
+        : n === 1 ? 'Only this class remains possible at this level.'
+        : n === 3 ? 'None of the classes can be ruled out, so these inputs do not settle it.'
+        : 'These classes cannot be told apart at this level.';
+      const outside = n > 0 && !d.prediction_set.includes(cls)
+        ? ' The most probable class is not in the set: each class has its own bar, set from how low the true cases of that class usually score, and the rarer a class is the more leniently it is judged.' : '';
+      const held = CLASSES.map((c) => `${c} ${pct(d.set_validation.coverage[c])}`).join(', ');
+      setLine = `<div class="setline"><span class="k-label">Cannot be ruled out (${pct(d.set_coverage)} prediction set)</span>
+          <span class="set-badges">${d.prediction_set.map(badge).join(' ') || '<span class="muted">none</span>'}</span>
+          <span class="k-sub">${meaning}${outside} On validation cases a set like this held the true class: ${held}.</span></div>`;
+    }
+    return `${alertBanner}<section class="card pred${low ? ' weak' : ''}">
+        <div class="pred-main">${headline}</div>
+        <div class="pred-probs">${probRows(b.probabilities)}</div>${setLine}${noAlert}
       </section>
       <section class="card"><h3>Do the inputs agree? <span class="pill ${cpill[0]}">${cpill[1]}</span></h3>
         <p>${esc(c.detail)}</p>

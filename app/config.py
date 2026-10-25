@@ -11,6 +11,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,6 +33,28 @@ class Settings(BaseSettings):
     # does not pay for it. Off by default so a plain `uvicorn` start is quick and tests stay light.
     warm_up_models: bool = False
     run_worker: bool = True
+
+    # How the page expresses uncertainty (rules in app/data/decision_rules.json, built by scripts/build_decision_rules.py).
+    # prediction_set_coverage: 0.8 or 0.9. A higher value gives larger sets, "not sure between these" more often.
+    # cancer_alert_recall: 0.5, 0.6, 0.7 or 0.8, the share of true cancers the alert is set to catch on training data.
+    # Higher catches more cancers and raises more false alarms (validation, all inputs: 0.5 gives 8.9 alerts per 100 cases,
+    # 0.6 gives 13.0, 0.7 gives 21.0, 0.8 gives 33.0). It is a product decision, so it is a setting.
+    prediction_set_coverage: float = 0.8
+    cancer_alert_recall: float = 0.6
+
+    @field_validator("prediction_set_coverage")
+    @classmethod
+    def _coverage(cls, v: float) -> float:
+        if v not in (0.8, 0.9):
+            raise ValueError("prediction_set_coverage must be 0.8 or 0.9, the levels the rules file was built for")
+        return v
+
+    @field_validator("cancer_alert_recall")
+    @classmethod
+    def _recall(cls, v: float) -> float:
+        if v not in (0.5, 0.6, 0.7, 0.8):
+            raise ValueError("cancer_alert_recall must be 0.5, 0.6, 0.7 or 0.8, the levels the rules file was built for")
+        return v
 
     # Cases hold clinical text, labs and an X-ray, so they are not kept forever.
     retention_days: int = 30

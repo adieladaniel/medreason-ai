@@ -529,9 +529,9 @@ found the cancer. Measured, with 95 percent intervals that resample patients:
   cancer number wide, and these are validation numbers.
 - What to say about the project honestly: the engineering (staged pipeline, explanations, evidence with verified
   sentences, calibration and abstention measured) is the substance. The model quality is modest, the text input is
-  mostly clinician context, and Lung Cancer is hard. Things to do if wanted: show prediction sets ("not sure between
-  these") instead of one headline class on low-confidence cases, add the cancer alert, and try image weights that have
-  Nodule and Mass channels (their training data is not stated, so check for overlap with this dataset first).
+  mostly clinician context, and Lung Cancer is hard. Done on 2026-10-26: prediction sets, a low-confidence headline and the cancer alert
+  (see the Phase 7 notes). Still open: try image weights that have Nodule and Mass channels (their training data is not
+  stated, so check for overlap with this dataset first).
 
 ### Phase 7, backend and API (in progress, started 2026-10-14)
 
@@ -602,8 +602,8 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   prediction, whether the inputs agree with a one-step-at-a-time table, per-input cards (uploaded X-ray,
   Grad-CAM, SHAP bars, word shading, top contributions), the cited evidence note with each reference's passage one
   click away and a "not proof about this patient" caveat, an audit table, links to the raw case and every model
-  prompt, delete, and a recent-cases list. Server and paper text is escaped before display. A confidence below
-  0.55 (where `eval_uncertainty.py` declines to answer) is flagged on the prediction as a weak guess. The API now
+  prompt, delete, and a recent-cases list. Server and paper text is escaped before display. A low-confidence flag on
+  the prediction was first a raw 0.55 comparison, replaced on 2026-10-26 by the calibrated rule described below. The API now
   sends every time marked UTC (SQLite returns none, which made a browser show elapsed times 5.5 hours wrong).
   Two changes outside the page: the Phase 5 planner no longer says "consider clinical correlation or a follow-up
   study (for example CT)" for a low-confidence answer, because follow-up and clinical advice are out of scope and
@@ -790,7 +790,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 15 s, 189 tests, plus 26 slow-marked ones that are skipped by default: 14 browser tests of the Analyze page
+- Tests: `python -m pytest` from the repo root (about 25 s, 211 tests, plus 30 slow-marked ones that are skipped by default: 14 browser tests of the Analyze page
   and 12 Postgres runs of the storage tests, which need Playwright or a throwaway
   database URL is given). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
@@ -843,6 +843,32 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   Windows host, not in a container.
 - A new path means new Claude memory. The `memory` folder was copied to
   `C:\Users\HP\.claude\projects\d--finalyearproject\` on 2026-10-25. Keep chat transcripts out of git.
+- Prediction sets, a low-confidence headline and a cancer alert on the page (done 2026-10-26), answering the finding that
+  averaging the three models loses cancers the text model finds. `app/agent/decision.py` applies rules from
+  `app/data/decision_rules.json`, which `scripts/build_decision_rules.py` builds from the TRAIN out-of-fold predictions only
+  (validation is used once, to report what each rule does, and the numbers are stored beside it; the test split is untouched).
+  The rules are built separately for each of the seven combinations of inputs, because the pooled probabilities behave
+  differently with two inputs than with three, so a case without labs uses different rules. Three outputs, none of which
+  changes the predicted class (a test fuzzes this): (1) low confidence, when the calibrated top probability is below the level
+  that keeps 80 percent of train cases (0.553 for all three inputs, the same abstain rule as `eval_uncertainty.py`; the earlier
+  page flag compared the raw probability with 0.55, which was not what that analysis measured, and is replaced); (2) a
+  prediction set from class-conditional conformal prediction (same functions as `eval_uncertainty.py`), 80 percent by default,
+  90 percent by setting; (3) a cancer alert when the pooled Lung Cancer probability reaches a threshold chosen on train to
+  catch 50, 60, 70 or 80 percent of true cancers, 60 percent by default. All-input validation results: confidence rule answers
+  81 percent and is right on 76 percent of those; sets held the true class 79, 81 and 84 percent (Normal, Pneumonia, Lung
+  Cancer) with 56 percent single-class; alert levels catch 56, 66, 76 and 84 percent of cancers at 8.9, 13.0, 21.0 and 33.0
+  alerts per 100 cases, with 32, 26, 18 and 13 percent of alerts real (cancer is 5.1 percent of cases).
+  An alert is offered only if its alerts were at least twice as often real as the base rate on validation (`MIN_ALERT_LIFT`):
+  with the image alone they were 1.1 times (flags 42 of 100 cases, 6 percent real) and with blood alone 1.98 times, so
+  neither shows one, and the page says so. Settings: `MEDREASON_PREDICTION_SET_COVERAGE` (0.8 or 0.9) and
+  `MEDREASON_CANCER_ALERT_RECALL` (0.5, 0.6, 0.7 or 0.8). The page headlines "Uncertain" with the best guess below when
+  confidence is low, lists what cannot be ruled out, and shows the alert as a banner (worded as the models' signal, not a
+  diagnosis, with its measured recall and false-alarm cost) when it fires under a different headline. A class-conditional set
+  can leave out the most probable class (near-even probabilities give only Lung Cancer, because the rare class is judged
+  more leniently); the page says so. Honest result on the case that prompted this (study 50262066, true Lung Cancer, fused
+  Pneumonia 40 percent): it is headlined Uncertain with all three classes in the set, but its fused cancer probability is
+  0.22, so the default alert (0.30) does not fire; only the 80 percent level (0.19, 33 alerts per 100 cases) does. Tested with
+  real models through the page, 8 deliberate breakages caught, 17 browser tests.
 - Why three different X-rays all came out Pneumonia on the page (2026-10-25, checked with the real models): the example
   values are pneumonia-like text and labs (text 60 percent, blood 80 percent Pneumonia), and the image has the weakest
   vote in the fusion, so it is outvoted. The Normal X-ray alone gave Normal 69 percent but fused with the example values

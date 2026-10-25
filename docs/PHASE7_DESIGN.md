@@ -114,6 +114,31 @@ server and paper text escaped before display. The front end is tested in a real 
 bugs no unit test could (an element id shadowing a form method, a display rule overriding the hidden attribute, a
 layout wider than a phone).
 
+## Saying how sure the system is (2026-10-26)
+
+**The models diagnose; this only reports confidence.** `app/agent/decision.py` reads the pooled probabilities and a small rules
+file and returns whether confidence is low, which classes cannot be ruled out, and whether the Lung Cancer probability is high
+enough for an alert. It has no predicted class of its own and a test fuzzes that it never changes its input.
+
+**Rules come from a file, built from training data only.** `scripts/build_decision_rules.py` fits everything on the out-of-fold
+training predictions and uses validation once, to report what each rule does. The app reads the committed file, because the
+training predictions are git-ignored and absent from a deployment. A slow test checks the file is exactly what the script
+produces.
+
+**Calibrated per combination of inputs.** Pooling two models gives probabilities that behave differently from pooling three,
+and a case without labs is common, so each of the seven combinations has its own rules. Using the all-inputs rule for a case
+with one input missing would be unjustified.
+
+**A separate alert, not a replacement for the answer.** Highest-probability-wins finds 50 percent of validation cancers where
+the text model alone finds 61 percent. A cancer alert at a chosen cost in false alarms is shown beside the headline instead of
+changing it. How many false alarms to accept is a product decision, so it is a setting, defaulting to 60 percent recall (13
+alerts per 100 cases, about one in four real). An alert that was barely better than chance on validation (image alone) is not
+shown, and the page says why.
+
+**Honest limits.** The alert levels and the 2.0 lift cut-off are choices. The hard validation case that prompted this still does
+not trigger the default alert (fused cancer probability 0.22 against 0.30), and is headlined Uncertain instead. The rules are
+fitted on one dataset with 774 training cancers.
+
 ## Not in scope
 
 Authentication and multi-user accounts (this is a demonstration, not a clinical service), a

@@ -65,7 +65,12 @@ upload. It takes a chest X-ray (PNG or JPEG), a clinical indication and lab valu
 optional but at least one, and answers at once with a case id. `GET /api/cases/{id}` shows whatever stage results
 exist so far (the prediction arrives first, then explanations, then the cited evidence), and
 `GET /api/cases/{id}/stream` follows it live. Cases are deleted after 30 days, or at once with
-`DELETE /api/cases/{id}`. There is no login: this is a local demonstration and must not be given real patient
+`DELETE /api/cases/{id}`. The prediction also says how sure it is: a low-confidence case is headlined "Uncertain", a
+prediction set lists every class that cannot be ruled out, and a possible lung cancer signal is flagged separately
+when the models' combined probability is high enough, because averaging the three models alone misses cancers the text
+model finds. The rules come from `app/data/decision_rules.json` (rebuild with `python scripts/build_decision_rules.py`),
+and `MEDREASON_CANCER_ALERT_RECALL` (0.5 to 0.8) sets how many false alarms are accepted to catch more cancers.
+There is no login: this is a local demonstration and must not be given real patient
 data.
 
 To look at a real case without typing 13 lab values, send a validation case to the running server and open the address it
@@ -107,7 +112,7 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   rag/                  corpus builder, hybrid retrieval, evidence planner, writer, faithfulness check, evaluations
   database/             Phase 7 storage: tables, sessions, repository
   config.py             settings from MEDREASON_* environment variables
-tests/                 189 tests (plus 26 slow ones: browser and Postgres), no models or services needed (python -m pytest)
+tests/                 211 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

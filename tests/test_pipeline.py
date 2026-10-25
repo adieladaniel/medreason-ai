@@ -272,3 +272,33 @@ def test_the_worker_runs_submitted_cases_in_order_and_survives_a_bad_one(url):
     assert ran == [a, b]
     assert read(url, a).status == "done" and read(url, b).status == "done"
     assert w.pending() == 0
+
+
+# ------------------------------------------------------------------ how sure the system is
+def test_the_prediction_stage_adds_how_sure_it_is_and_leaves_the_belief_alone():
+    from app.agent.reasoning import reason
+    ctx = {"deps": {"predictors": fake_predictors()}, "inputs": {"text": "fever", "blood": {"wbc": 1.0}, "image": "x.png"}}
+    out = staged.stage_predict(ctx)
+    plain = reason({m: PNEUMONIA[m] for m in PNEUMONIA})
+    assert out["belief"] == plain["belief"] and out["consistency"] == plain["consistency"]       # exactly what it was before
+    d = out["decision"]
+    assert d["prediction_set"] == ["Pneumonia"] and d["low_confidence"] is False and d["cancer_alert"]["flag"] is False
+
+
+def test_the_rules_follow_the_inputs_that_actually_ran():
+    out = staged.stage_predict({"deps": {"predictors": fake_predictors({m: PNEUMONIA[m] for m in ("text", "image")})},
+                                "inputs": {"text": "fever", "image": "x.png"}})
+    assert out["decision"]["confidence"]["threshold"] != 0.5535 and out["modalities_used"] == ["text", "image"]
+
+
+def test_without_the_rules_file_the_prediction_is_still_made(monkeypatch, tmp_path):
+    from app.agent import decision
+    monkeypatch.setattr(decision, "RULES_PATH", tmp_path / "not_there.json")
+    out = staged.stage_predict({"deps": {"predictors": fake_predictors()}, "inputs": {"text": "fever", "blood": {"wbc": 1.0}, "image": "x.png"}})
+    assert out["decision"] is None and out["belief"]["predicted_class"] == "Pneumonia"
+
+
+def test_the_stored_case_carries_the_decision(url, tmp_path, evidence_stubs):
+    cid = new_case(url)
+    runner.run_job(cid, url, deps=deps(tmp_path), figure_dir=tmp_path)
+    assert read(url, cid).prediction["decision"]["prediction_set"] == ["Pneumonia"]
