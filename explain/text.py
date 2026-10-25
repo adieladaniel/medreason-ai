@@ -84,10 +84,46 @@ def predict_proba_texts(texts) -> np.ndarray:
     return head.predict_proba(_embed(texts))
 
 
+def predict_text(indication_text: str) -> dict:
+    """Class probabilities only, with no SHAP (the slow part for long indications). Same cleaning, encoder
+    and classifier as explain_text, so the numbers are identical to explain_text's."""
+    proba = predict_proba_texts([clean(indication_text)])[0]
+    return {"modality": "text", "predicted_class": LABEL_NAMES[int(proba.argmax())],
+            "probabilities": {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)}}
+
+
+def _explain_short(text: str, words: list[str], proba, pred: int) -> dict:
+    """SHAP's text masker builds a word-pair clustering and fails with fewer than two words (a one-word
+    indication such as "cough", or one with no words at all). For one word the exact answer is simple: its
+    effect is how far the prediction moves from an empty indication, which is what SHAP would return for a
+    single feature. With no words there is nothing to attribute."""
+    probs_out = {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)}
+    if not words:
+        return {"modality": "text", "predicted_class": LABEL_NAMES[pred], "probabilities": probs_out,
+                "attributions": {"method": "none (the indication has no words)", "items": []},
+                "summary": f"Text model predicts {LABEL_NAMES[pred]} (p={proba[pred]:.2f}), but the indication has no "
+                           "words, so there is nothing to attribute.",
+                "_raw": {"tokens": [], "effect_per_class": [], "input_text": text}}
+    baseline = predict_proba_texts([""])[0]
+    effect_per_class = (proba - baseline).tolist()
+    effect = float(proba[pred] - baseline[pred])
+    items = [{"feature": words[0], "value": None, "effect": round(effect, 4),
+              "direction": "supports" if effect > 0 else "against"}]
+    return {"modality": "text", "predicted_class": LABEL_NAMES[pred], "probabilities": probs_out,
+            "attributions": {"method": "exact single-word effect (change from an empty indication)", "items": items},
+            "summary": f"Text model predicts {LABEL_NAMES[pred]} (p={proba[pred]:.2f}) from the indication. "
+                       + (f"Most influential words: {words[0]!r}." if effect > 0 else ""),
+            "_raw": {"tokens": [words[0]], "effect_per_class": [effect_per_class], "input_text": text}}
+
+
 def explain_text(indication_text: str, top_k: int = 10) -> dict:
     text = clean(indication_text)
     proba = predict_proba_texts([text])[0]
     pred = int(proba.argmax())
+
+    words = [w for w in re.split(r"\W+", text) if w]
+    if len(words) < 2:
+        return _explain_short(text, words, proba, pred)
 
     # word-level masker (\W+ split) -> clean whole-word attributions, not BERT subwords
     explainer = shap.Explainer(predict_proba_texts, shap.maskers.Text(r"\W+"),
@@ -134,8 +170,8 @@ def plot_text(res: dict, out_path: str | Path) -> Path:
 
     tokens = res["_raw"]["tokens"]
     pred_i = LABEL_NAMES.index(res["predicted_class"])
-    eff = np.asarray(res["_raw"]["effect_per_class"])[:, pred_i]
-    vmax = max(np.abs(eff).max(), 1e-6)
+    eff = np.asarray(res["_raw"]["effect_per_class"], dtype=float).reshape(-1, len(LABEL_NAMES))[:, pred_i]
+    vmax = max(np.abs(eff).max() if eff.size else 0.0, 1e-6)
 
     fig, ax = plt.subplots(figsize=(9, 1.6))
     ax.axis("off")
