@@ -49,6 +49,23 @@ It reads the real result files under `experiments/` and rebuilds its data file
 without editing the UI. The gallery needs `experiments/explain_samples/`, which is
 git-ignored.
 
+## Case API
+
+The same server runs a case through the pipeline in the background. Start Ollama first if you want the written
+note (`ollama serve`), then:
+
+```bash
+python -m uvicorn app.main:app --port 8000
+```
+
+Open http://localhost:8000/docs for interactive documentation, where `POST /api/cases` can be tried with a file
+upload. It takes a chest X-ray (PNG or JPEG), a clinical indication and lab values as a JSON object, any of them
+optional but at least one, and answers at once with a case id. `GET /api/cases/{id}` shows whatever stage results
+exist so far (the prediction arrives first, then explanations, then the cited evidence), and
+`GET /api/cases/{id}/stream` follows it live. Cases are deleted after 30 days, or at once with
+`DELETE /api/cases/{id}`. There is no login: this is a local demonstration and must not be given real patient
+data.
+
 ## Data is not included in this repo
 
 The dataset is built from MIMIC-CXR and MIMIC-IV v3.1 (PhysioNet credentialed data). The
@@ -75,7 +92,7 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   rag/                  corpus builder, hybrid retrieval, evidence planner, writer, faithfulness check, evaluations
   database/             Phase 7 storage: tables, sessions, repository
   config.py             settings from MEDREASON_* environment variables
-tests/                 126 tests, no models or services needed (python -m pytest)
+tests/                 181 tests, no models or services needed (python -m pytest)
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

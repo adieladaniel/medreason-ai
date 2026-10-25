@@ -256,7 +256,10 @@ Steps, built and reported one at a time:
    warm, nearly all the language model and the entailment checker). One in-process worker, results saved
    stage by stage, a late failure leaves a "partial" case, a retrieval cache, and a belief identical to
    `run_case` on real cases.
-3. API: upload validation, `POST /api/cases` returning 202, status and results, progress stream.
+3. API (done 2026-10-25): `app/api/`. `POST /api/cases` answers 202, then status, results, an audit trail,
+   a live event stream, figures and the uploaded image are readable; upload and input checks, a queue limit,
+   startup recovery and expiry. Run against the real server and models. No login, and no check that an image is
+   a chest X-ray.
 4. Analyze page in the dashboard.
 5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
 6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that

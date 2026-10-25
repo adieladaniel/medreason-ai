@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | in progress | storage layer done; staged pipeline, API, Analyze page, containers next |
+| 7. Backend and API | in progress | storage, staged pipeline and case API done; Analyze page, observability, containers next |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -525,6 +525,29 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   different albumin sentence the second time, and the checker passed the first (entailment 0.57) and dropped
   the second (0.01), so the shown text can differ between runs of the same case. And the text explainer
   crashed on one-word or empty indications; fixed (see the text explainer bullet), with tests.
+- Step 3, the case API (done 2026-10-25): `app/api/{validation,views,cases}.py`, and `app/main.py` is now a
+  `create_app(settings, runner)` factory (the module still exposes `app`, so `uvicorn app.main:app` is
+  unchanged). Endpoints: `POST /api/cases` (multipart: image, indication, labs as a JSON object) answers 202 with
+  the case id; `GET /api/cases`, `GET /api/cases/{id}`, `/events`, `/stream` (server-sent events: `stage`, `case`,
+  `done`), `/llm-calls`, `/figures/{blood|image|text}.png`, `/image`, and `DELETE /api/cases/{id}`. Interactive
+  docs at `/docs`. At startup it creates the tables, fails any case a dead process left unfinished, deletes cases
+  past `retention_days` with their files, and starts the worker (`MEDREASON_WARM_UP_MODELS=true` loads every
+  model first, about 2 GB). Input rules, all enforced before anything is stored: image PNG or JPEG decided from
+  the bytes, at most 10 MB (413), at most 50 million pixels checked before decoding, each side at least 64, fully
+  decoded once so a truncated file is refused; labs only the 17 known names, numbers from 0 to 1,000,000, null
+  means not measured; indication at most 2000 characters, refused not cut; blank text or text with no letters or
+  digits counts as absent; at least one usable input (422 naming the field); more than `max_queue` (10) cases
+  waiting gives 429 with Retry-After. Server file paths never appear in a response, and `/image` only serves a
+  file inside the upload folder. No login, deliberately (local demo, no real patients). Not checked: that the
+  image is a chest X-ray, so any valid PNG or JPEG gets a prediction (the guard is planned for Phase 8b).
+  Tested with a fake worker (32 API tests, 23 input tests; six deliberate breakages were each caught, and the
+  first round of that check was invalid because of my own script and was redone; it also exposed that no test
+  covered serving a path outside the upload folder, now added). Run for real: the server on port 8001 with the
+  real models and a scratch database, a validation case sent over HTTP with its X-ray, and the live stream
+  followed: prediction stored 0.5 s after the case started, explanations readable at 2 s, whole case done in 60
+  s with the model warm-up already finished (explaining 5.9 s, retrieving 11.7, writing 18.8, verifying 21.1),
+  the figures and the uploaded image served back byte for byte, a bad lab name refused before any model ran, and
+  delete returned 204 then 404.
 - Docker Desktop 4.49.0 was installed on 2026-10-25 with its data on D: (`D:\DockerData`), and
   checked: hello-world ran, a Postgres 16 container answered on host port 5433, and a container
   reached the host's Ollama through `host.docker.internal:11434` with no change to `OLLAMA_HOST`.
@@ -693,7 +716,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 15 s, 126 tests, plus 10 Postgres runs of the storage tests that are skipped unless a throwaway
+- Tests: `python -m pytest` from the repo root (about 15 s, 181 tests, plus 10 Postgres runs of the storage tests that are skipped unless a throwaway
   database URL is given). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray

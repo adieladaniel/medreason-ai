@@ -121,8 +121,11 @@ _STOP = object()
 class JobRunner:
     """One worker thread that runs submitted case ids in order."""
 
-    def __init__(self, url: str | None = None, stages=None, deps: dict | None = None, warm_up: bool = False):
-        self.url, self.stages, self.deps, self._warm_up = url, stages, deps, warm_up
+    def __init__(self, url: str | None = None, stages=None, deps: dict | None = None, warm_up: bool = False,
+                 figure_dir: Path | None = None):
+        # figure_dir is where each case's explanation figures go (one sub-folder per case). The API serves
+        # them from the same place, so the app passes its upload folder to both.
+        self.url, self.stages, self.deps, self._warm_up, self.figure_dir = url, stages, deps, warm_up, figure_dir
         self._queue: queue.Queue = queue.Queue()
         self._thread: threading.Thread | None = None
         self.warm_timings: dict | None = None
@@ -158,7 +161,7 @@ class JobRunner:
             if item is _STOP:
                 return
             try:
-                run_job(item, self.url, self.stages, self.deps)
+                run_job(item, self.url, self.stages, self.deps, self.figure_dir)
             except Exception:                                  # noqa: BLE001  (run_job records its own failures; this is the last guard)
                 log.exception("case %s: the worker could not run the job", item)
 

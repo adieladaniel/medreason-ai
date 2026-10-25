@@ -44,11 +44,17 @@ def jsonable(obj: Any) -> Any:
     raise TypeError(f"cannot store {type(obj).__name__} as JSON")
 
 
+def new_case_id() -> str:
+    return uuid.uuid4().hex
+
+
 def create_case(s: Session, *, indication: str | None = None, labs: dict | None = None,
-                image_path: str | None = None, image_sha256: str | None = None) -> Case:
+                image_path: str | None = None, image_sha256: str | None = None, case_id: str | None = None) -> Case:
+    """`case_id` lets the caller choose the id first, which the API needs: the uploaded image is saved in a
+    folder named after the case before the row exists."""
     if not (indication or labs or image_path):
         raise ValueError("a case needs at least one of indication, labs, image")
-    case = Case(id=uuid.uuid4().hex, indication=indication or None, labs=jsonable(labs) if labs else None,
+    case = Case(id=case_id or new_case_id(), indication=indication or None, labs=jsonable(labs) if labs else None,
                 image_path=image_path, image_sha256=image_sha256, status="queued", stage="queued", timings={})
     s.add(case)
     s.flush()
@@ -57,6 +63,18 @@ def create_case(s: Session, *, indication: str | None = None, labs: dict | None 
 
 def get_case(s: Session, case_id: str) -> Case | None:
     return s.get(Case, case_id)
+
+
+def delete_case(s: Session, case_id: str, case_dir: Path | None = None) -> bool:
+    """Removes the case, its events and model calls, and its folder of uploaded and saved files. Returns
+    whether there was such a case."""
+    case = s.get(Case, case_id)
+    if case is None:
+        return False
+    if case_dir is not None:
+        shutil.rmtree(Path(case_dir) / case_id, ignore_errors=True)
+    s.delete(case)
+    return True
 
 
 def list_cases(s: Session, limit: int = 50, offset: int = 0) -> list[Case]:

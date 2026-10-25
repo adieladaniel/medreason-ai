@@ -23,6 +23,16 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{(ROOT / 'data' / 'app.db').as_posix()}"
     upload_dir: Path = ROOT / "data" / "uploads"
     max_upload_mb: int = 10
+    max_image_pixels: int = 50_000_000      # width times height; guards against a small file that unpacks to gigabytes
+    max_indication_chars: int = 2000        # the text encoder reads about 512 tokens, so more is never used
+    # Jobs waiting for the worker. One runs at a time, so a long queue only means a long wait; past this
+    # the API answers 429 and the caller retries, instead of promising work it cannot start soon.
+    max_queue: int = 10
+    # Load every model when the server starts (about 2 GB of RAM, a minute or more) so the first case
+    # does not pay for it. Off by default so a plain `uvicorn` start is quick and tests stay light.
+    warm_up_models: bool = False
+    run_worker: bool = True
+
     # Cases hold clinical text, labs and an X-ray, so they are not kept forever.
     retention_days: int = 30
 

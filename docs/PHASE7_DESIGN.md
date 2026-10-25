@@ -66,6 +66,32 @@ container differ by configuration, not code.
    the model), and the API reaches it through a setting instead of the hardcoded localhost address.
 7. End-to-end run on real cases and a timing budget.
 
+## The case API (step 3, built 2026-10-25)
+
+**Endpoints.** `POST /api/cases` (multipart form with an optional image, indication and labs) returns 202 and the
+id. `GET /api/cases/{id}` is the case as stored right now, so a client can poll. `GET /api/cases/{id}/stream` is
+the same thing as server-sent events, for a page that wants to update as stages finish. The audit trail
+(`/events`), every language-model prompt and answer (`/llm-calls`), the explanation figures, the uploaded image,
+a list of recent cases and a delete complete it. FastAPI generates the interactive documentation at `/docs`.
+
+**Polling a database, not a message bus.** The stream reads the database twice a second and sends what changed.
+That is the same state the plain GET shows, so the two cannot disagree, a client that connects late gets the
+whole history first, and a server restart loses nothing but the job in flight. The cost is a read every half
+second per open stream, which is nothing for one machine.
+
+**Checks before storing.** The upload is the only input a client fully controls, so it is the strictest: the
+format is decided from the file's bytes, the size is capped while reading, the pixel count is checked before
+decoding (a small PNG can unpack to gigabytes), and the whole image is decoded once so a truncated file fails
+at the door and not halfway through a job. Lab names must be the 17 the model knows, because a typo that is
+silently ignored would give a prediction without the value the user thought they sent. An over-long indication
+is refused, not cut, because cutting changes what the model reads without saying so.
+
+**Limits stated honestly.** No login, because this is a local demonstration with no real patients; cases expire
+after 30 days and can be deleted. At most 10 cases wait for the worker, and past that the answer is 429, because
+one worker means a longer queue only means a longer wait. Nothing checks that an uploaded image is a chest
+X-ray. And the shown text for the same case can differ between runs, because the language model is not
+reproducible even at temperature 0 (the checker still decides what is shown).
+
 ## Not in scope
 
 Authentication and multi-user accounts (this is a demonstration, not a clinical service), a
