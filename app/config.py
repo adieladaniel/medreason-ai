@@ -59,10 +59,32 @@ class Settings(BaseSettings):
     # Cases hold clinical text, labs and an X-ray, so they are not kept forever.
     retention_days: int = 30
 
+    # Logging (app/observability.py). "json" writes one object per line for a log collector; "text" is for a terminal.
+    log_level: str = "INFO"
+    log_format: str = "text"
+
+    @field_validator("log_level")
+    @classmethod
+    def _level(cls, v: str) -> str:
+        v = v.upper()
+        if v not in ("DEBUG", "INFO", "WARNING", "ERROR"):
+            raise ValueError("log_level must be DEBUG, INFO, WARNING or ERROR")
+        return v
+
+    @field_validator("log_format")
+    @classmethod
+    def _format(cls, v: str) -> str:
+        if v not in ("text", "json"):
+            raise ValueError("log_format must be text or json")
+        return v
+
     # The local language model. Ollama runs on the Windows host (it already uses the GPU), so inside a
     # container the address is http://host.docker.internal:11434. Docker Desktop forwards that to the
     # host's localhost, so Ollama does not have to listen on the network.
-    ollama_url: str = "http://localhost:11434"
+    # Locally the default is the IPv4 address, not the name "localhost". Ollama listens on IPv4 only, Python tries
+    # the IPv6 address first, and on this Windows laptop a refused loopback connection takes 2.0 s to be refused,
+    # so "localhost" added about 2 s to every call (measured: 2.05 s against 0.01 to 0.03 s).
+    ollama_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.2:latest"
 
     # Evidence index. Unset means embedded mode: one folder per embedding model under qdrant_path, nothing

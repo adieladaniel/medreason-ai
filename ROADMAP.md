@@ -270,7 +270,11 @@ Steps, built and reported one at a time:
    spec, a live stage tracker, the prediction with a low-confidence flag, per-input explanations, the cited evidence
    with each passage one click away, an audit view, recent cases and delete. Tested in a real browser (14 tests)
    and run once with the real models.
-5. Observability: structured logs with case ids, a readiness check for database, Qdrant and Ollama.
+5. Observability (done 2026-10-26): `app/observability.py`, `app/health.py`. Logs tagged with the case id and a request
+   id on every line (text or JSON), a request log with an `X-Request-ID` header, `/api/ready` probing the database, the
+   worker, the evidence index and Ollama (`ok`, `degraded` or `down`), and `/api/stats` with seconds per stage. Run for
+   real, it found that `localhost` added about 2 s to every Ollama call on this Windows laptop; the default is now
+   `127.0.0.1` and the writing stage on a real case went from 15.1 s to 4.2 s.
 6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that
    runs the tests. Docker Desktop 4.49.0 is installed and verified (2026-10-25, notes in
    `docs/ENVIRONMENT_AND_HANDOFF.md`). Ollama stays on the Windows host and the container's

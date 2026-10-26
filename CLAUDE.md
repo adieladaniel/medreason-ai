@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | in progress | storage, staged pipeline, case API and Analyze page done; observability, containers next |
+| 7. Backend and API | in progress | storage, staged pipeline, case API, Analyze page and observability done; containers next |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -379,7 +379,8 @@ Explanation chain, built 2026-10-11 (`planner.py`, `evidence.py`, `writer.py`,
 - Writer model comparison (`eval_writer.py`, `writer_eval.json`, 41 passages retrieved for the 24
   terse evaluation queries, checker as judge): llama3.2 3B passed 73% of its sentences, Qwen2.5
   3B passed 63%. Qwen's lower entailment (0.56 against 0.69) is the gap. Both write about 28
-  words and take 3 to 4 s per item. llama3.2 stays. Limits: 41 items, so the gap is about four
+  words and take 3 to 4 s per item (about 2 s of that was a connection delay, see Phase 7 step 5, the same for
+  both models). llama3.2 stays. Limits: 41 items, so the gap is about four
   sentences, and the judge is the checker, validated on 35 hand-made sentences, not on these.
 - Parent-child expansion tested and not adopted: showing the writer the next 150 words of the
   same paper, while still checking against the cited passage, lowered the pass rate for both
@@ -562,8 +563,8 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   retrieving 19.3, writing 31.5, verifying 24.4, total 89; warm, same case again, 0.3, 1.0, 0.0 (lookups
   cached), 15.2, 20.3, total 37; a conflict case with one new lookup, 0.2, 0.9, 1.0, 12.9, 3.3, total 18. So
   the answer is ready in under a second when warm, and nearly all the waiting is the language model (about 3
-  s per passage) and the entailment checker. Staging matters for those stages, not for SHAP, which turned out
-  to be quick.
+  s per passage, of which about 2 s was a connection delay found and fixed in step 5) and the entailment
+  checker. Staging matters for those stages, not for SHAP, which turned out to be quick.
 - Two findings from that run. The writer is not reproducible even at temperature 0: the same case wrote a
   different albumin sentence the second time, and the checker passed the first (entailment 0.57) and dropped
   the second (0.01), so the shown text can differ between runs of the same case. And the text explainer
@@ -639,6 +640,41 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
 - `requirements.txt` now pins `torchxrayvision==1.5.4` and `psycopg[binary]==3.3.6`.
 - Commands run from the tool here sometimes left a new container in the "Created" state instead of
   starting it (seen twice, not with the user's own terminal). `docker start <name>` fixed it.
+- Step 5, observability (done 2026-10-26): `app/observability.py`, `app/health.py`, `app/rag/names.py`, and changes to
+  `app/main.py`, `app/api/cases.py` and `app/pipelines/runner.py`. Design and reasons in `docs/PHASE7_DESIGN.md`.
+  - Logs: the case id and a request id travel in context variables (`bind`), and a filter on the handler copies them onto
+    every record, so helpers that know nothing about cases are tagged too. The worker thread and the request threads have
+    separate contexts (tested). `MEDREASON_LOG_FORMAT` is `text` or `json`, `MEDREASON_LOG_LEVEL` filters. Only the
+    `medreason` logger tree is configured; before this its INFO lines were invisible under uvicorn because no handler
+    existed. The runner logs job and stage start and finish with seconds, a plain-ASGI middleware logs one line per request
+    and returns `X-Request-ID` (the caller's value is kept only if it is 1 to 64 characters of letters, digits, dot,
+    underscore, hyphen). A successful GET is DEBUG because the page polls; POST, DELETE and 4xx are INFO; 5xx is WARNING. A
+    500 from an unhandled error does not carry the header, because the outer error middleware sends it. Logs never contain
+    typed text or lab values (tested by searching the whole log). Start uvicorn with `--no-access-log` or its own request lines
+    duplicate the app's. `create_app(setup_logging=False)` by default so tests do not change global logging; the module-level
+    `app` turns it on.
+  - `/api/health` is liveness only. `/api/ready` probes the database (a query), the worker thread, the evidence index and Ollama
+    (reachable and the configured model pulled) at the same time, with a hard 5 s deadline. `down` (503) is database or worker
+    missing, `degraded` (200) is Qdrant or Ollama missing, because the case then ends "partial" with the prediction and
+    explanations intact. Details never contain a URL, connection string or path. Embedded Qdrant is checked by file presence only,
+    since opening it would lock the retriever out, so an empty index would pass; a Qdrant server is asked for its point count.
+    `/api/stats` gives cases by status and p50, p95 and worst seconds per stage from the events table (retention window only).
+  - Tests: 37 new in `tests/test_observability.py`, against real local HTTP servers for Ollama and Qdrant rather than patched
+    functions. 26 deliberate breakages were each caught by a test. The first round let one through (a file path in the embedded
+    index's success message, where my test only looked at the failure message), and the test was strengthened. The 17 browser tests
+    still pass with the middleware in front of the event stream.
+  - Run for real (scratch database, real models, Ollama started and then stopped): with Ollama stopped, `/api/ready` took 4.0 s
+    against a 2 s timeout, which led to the overall deadline. Chasing it found that on this laptop a connection to a closed
+    loopback port takes 2.0 s to be refused, and Python tries `::1` before `127.0.0.1`, so every call to `localhost:11434` paid about
+    2 s (2.05 s measured against 0.01 to 0.03 s). The default Ollama address is now `http://127.0.0.1:11434`. On the same
+    validation case after warm-up, the mean time of a language-model call went from 2.97 s to 0.84 s (five calls each) and the writing
+    stage from 15.1 s to 4.2 s; the total went from 94.8 s to 50.7 s, but part of that is the verifying stage (70.3 s then 23.2 s),
+    which I have not explained and which is not network time. The retrieving stage is not comparable, because the lookup cache
+    started empty after the restart. One case each, and the written text differs between runs, so read the call times as the
+    measurement and the totals as indicative. With Ollama stopped, a case finished "partial" in 5 s: prediction and explanations kept, the
+    writing failure logged as an ERROR with the case id and stage, and `/api/ready` reported `degraded` with HTTP 200.
+  - A leftover to know about: `data/app.db` (last written 2026-10-25 by the user's own Analyze-page testing) holds those test
+    cases. It is git-ignored and was not touched this session.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -790,9 +826,9 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (about 25 s, 211 tests, plus 30 slow-marked ones that are skipped by default: 14 browser tests of the Analyze page
-  and 12 Postgres runs of the storage tests, which need Playwright or a throwaway
-  database URL is given). They use synthetic agent
+- Tests: `python -m pytest` from the repo root (40 to 70 s depending on load, 248 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
+  of the Analyze page, 12 Postgres runs of the storage tests and the decision-rules rebuild check, which need Playwright, a throwaway
+  database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray
   `tests` package in site-packages otherwise shadows the folder. Mark anything needing a model
@@ -892,5 +928,6 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   later runs). Stop all three names: `Get-Process ollama, "ollama app", llama-server | Stop-Process`, then check
   `nvidia-smi` shows about 100 MiB used.
 - Ollama has to be running on the host for the writer (`ollama serve` in its own PowerShell window;
-  it listens on 127.0.0.1 only, and containers still reach it). Do not set `OLLAMA_HOST=0.0.0.0`,
+  it listens on 127.0.0.1 only, and containers still reach it). The default address is `http://127.0.0.1:11434`, not
+  `localhost`: on this laptop `localhost` costs 2 s per call (see Phase 7 step 5). Do not set `OLLAMA_HOST=0.0.0.0`,
   which would expose it to the network.

@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 import time
 from pathlib import Path
 
@@ -37,8 +38,10 @@ from app.api import validation
 from app.api.views import FIGURE_NAMES, TERMINAL, case_summary, event_dict, iso_utc, load_view
 from app.database import repository as repo
 from app.database.session import session_scope
+from app.observability import bind
 from app.pipelines.staged import provided_inputs
 
+log = logging.getLogger("medreason.api")
 router = APIRouter(prefix="/api/cases", tags=["cases"])
 CaseId = PathParam(pattern=r"^[0-9a-f]{32}$", description="a case id as returned by POST /api/cases")
 
@@ -91,7 +94,12 @@ def submit_case(request: Request, image: UploadFile | None = File(None), indicat
                 f.unlink(missing_ok=True)
             (st.upload_dir / case_id).rmdir()
         raise
+    ahead = st.runner.pending()                            # counted before this case joins the queue
     st.runner.submit(case_id)
+    request.state.case_id = case_id                        # the request log line is written after this returns
+    with bind(case_id=case_id):
+        log.info("case submitted (image: %s, labs: %d, indication: %s, %d ahead in the queue)", "yes" if data else "no",
+                 len(lab_values or {}), "yes" if text else "no", ahead)     # what was sent, never its content
     return JSONResponse({"id": case_id, "status": "queued", "links": _links(case_id)}, status_code=202,
                         headers={"Location": f"/api/cases/{case_id}"})
 

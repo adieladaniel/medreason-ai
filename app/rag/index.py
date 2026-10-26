@@ -19,7 +19,6 @@ from __future__ import annotations
 import torch  # noqa: F401  (import before sklearn/shap-adjacent code on Windows, see CLAUDE.md section 4)
 
 import atexit
-import re
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
@@ -28,8 +27,9 @@ from sentence_transformers import SentenceTransformer
 from app.config import get_settings
 from app.rag.chunker import Chunk, load_chunks
 
-COLLECTION = "evidence"
-DEFAULT_MODEL = "NeuML/pubmedbert-base-embeddings"
+from app.rag.names import COLLECTION, DEFAULT_MODEL, collection_name  # noqa: F401  (re-exported)
+from app.rag.names import slug as _slug
+
 # Passages scoring below this are treated as "no supporting evidence". Chosen from
 # app/rag/eval_retrieval.py: for this model and chunking, every answerable test query's best
 # passage scored >= 0.409 and every off-corpus query's best passage scored <= 0.276, and 0.34
@@ -49,10 +49,6 @@ _clients: dict[str, QdrantClient] = {}
 atexit.register(lambda: [c.close() for c in _clients.values()])  # avoids a noisy __del__ at interpreter exit
 
 
-def _slug(model_name: str) -> str:
-    return re.sub(r"[^A-Za-z0-9]+", "_", model_name).strip("_")
-
-
 def _model(name: str) -> SentenceTransformer:
     if name not in _models:
         _models[name] = SentenceTransformer(name, device="cpu")
@@ -60,10 +56,7 @@ def _model(name: str) -> SentenceTransformer:
 
 
 def collection(name: str) -> str:
-    """Embedded mode keeps one folder per model, so the collection name is the same in each. A server
-    holds every model in one place, so there the model is part of the name and two models' vectors
-    (which can have different sizes) never land in the same collection."""
-    return f"{COLLECTION}_{_slug(name)}" if get_settings().qdrant_url else COLLECTION
+    return collection_name(name, get_settings())
 
 
 def _client(name: str) -> QdrantClient:

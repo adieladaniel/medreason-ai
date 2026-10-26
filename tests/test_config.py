@@ -21,7 +21,8 @@ def env(monkeypatch):
 
 # ------------------------------------------------------------------ Ollama
 def test_ollama_defaults_match_the_laptop_setup(env):
-    assert writer.chat_url() == "http://localhost:11434/api/chat"
+    # The address is the IPv4 number, not "localhost": on Windows, Python tries ::1 first and waits 2 s for it to be refused.
+    assert writer.chat_url() == "http://127.0.0.1:11434/api/chat"
     assert get_settings().ollama_model == "llama3.2:latest"
 
 

@@ -15,8 +15,9 @@ entailment checker that takes seconds per sentence. It runs on one laptop.
 check and the missing-information plan, from the models' probabilities alone. The explanations, evidence
 and written note follow as they finish. This was designed on the belief that the text SHAP step took 60
 to 90 seconds. Measured later, it takes under a second for a typical indication, so the explanations are
-quick; the slow part is the language model (about 3 seconds per passage) and the entailment checker (3
-to 20 seconds a case), roughly 35 seconds warm and 89 seconds cold. The staged design still holds, with
+quick; the slow part is the language model (measured as about 3 seconds per passage, of which about 2
+seconds turned out to be a connection delay fixed in step 5) and the entailment checker (3
+to 20 seconds a case), roughly 35 seconds warm and 89 seconds cold when measured. The staged design still holds, with
 the prediction ready in under a second warm, but the reason is the evidence stages, not SHAP. This needs a staged pipeline, which `app/agent/orchestrator.run_case` is not, because
 it computes prediction and explanation together per modality.
 
@@ -60,7 +61,7 @@ container differ by configuration, not code.
 3. API: upload validation (size, real image, type), endpoints, progress stream.
 4. Analyze page in the existing dashboard. (done)
 5. Observability: structured logs with case ids, a readiness check that probes the database,
-   Qdrant and Ollama.
+   Qdrant and Ollama. (done 2026-10-26)
 6. Containers: Dockerfile, compose with the API, Postgres and Qdrant, Qdrant server mode, a CI
    workflow that runs the tests. Ollama stays on the Windows host (it already uses the GPU and holds
    the model), and the API reaches it through a setting instead of the hardcoded localhost address.
@@ -138,6 +139,49 @@ shown, and the page says why.
 **Honest limits.** The alert levels and the 2.0 lift cut-off are choices. The hard validation case that prompted this still does
 not trigger the default alert (fused cancer probability 0.22 against 0.30), and is headlined Uncertain instead. The rules are
 fitted on one dataset with 774 training cancers.
+
+## Seeing what the service is doing (step 5, built 2026-10-26)
+
+**The case id travels with the code, not through its arguments.** The worker runs one case while the API answers
+requests on other threads, so a plain log mixes their lines. `app/observability.bind` puts the case id (and a request
+id) in a context variable, and a filter on the log handler copies it onto every record. The pipeline's helpers, which know
+nothing about cases, are tagged anyway, and a thread started elsewhere starts with no id, so the worker's case never
+appears on a request's lines (both tested). Without this, every function that logs would need a case id parameter.
+
+**Two formats, one switch.** Text for a terminal, one JSON object per line for a log collector (time, level, logger,
+message, case id, request id, and fields such as stage and seconds). Only the `medreason` logger is configured. Before
+this the runner's INFO lines were not visible at all under uvicorn, because nothing had installed a handler for them.
+
+**Logs say what happened, the database says what was said.** A line records that a stage finished in so many seconds and
+which inputs a case had. It never contains the typed indication, lab values or model output (tested by submitting a
+case with distinctive text and searching the whole log). The prompts and answers of every language-model call are already
+stored per case in the `llm_calls` table, behind the same retention rule as the case.
+
+**Liveness and readiness are different questions.** `/api/health` answers whether the process is up, and never fails
+because a dependency is down, so a supervisor does not restart a healthy process that is merely waiting for Ollama.
+`/api/ready` answers whether a case can run: it probes the database (a query), the worker thread, the evidence index and
+Ollama (reachable, and the configured model pulled). The result has three levels. `down` (HTTP 503) means the database or
+the worker is gone, so no case can run. `degraded` (HTTP 200) means Qdrant or Ollama is missing: the prediction and the
+explanations still work and only the written evidence note is lost, which the pipeline already handles by ending the case
+as "partial". A load balancer should keep sending traffic to a degraded instance.
+
+**What a probe is allowed to say.** The endpoint has no login, so a failure says what failed ("not reachable", "model not
+pulled") and never the address, connection string or file path; the full reason goes to the log. Embedded Qdrant allows one
+client per folder, so the probe checks that the index file exists and does not open it, and it says so in its answer; a
+Qdrant server is asked for its collection and point count. The probes run at the same time and the whole call is cut off at 5
+seconds, because a socket timeout covers one connection attempt and not name lookup.
+
+**Usage numbers come from the database, not a metrics server.** `/api/stats` gives cases by status and the median, 95th
+percentile and worst seconds of each stage, from the events table. A Prometheus server and a dashboard for it would be two
+more services for one machine. The cost is stated: the numbers cover only the retention window and are not a time series.
+
+**Two things measured by running it for real.** With Ollama stopped, the readiness call took 4.0 s against a 2 s timeout,
+which is why it has the overall deadline. Chasing that showed that on this Windows laptop a connection to a closed loopback
+port takes 2.0 s to be refused, and Python tries the IPv6 address (`::1`) before the IPv4 one, so every call to
+`http://localhost:11434` paid about 2 s before reaching Ollama (measured 2.05 s, against 0.01 to 0.03 s for `127.0.0.1`).
+The writer makes one such call per passage. The default address is now `127.0.0.1`, and on the same real case the mean time of
+a language-model call went from 2.97 s to 0.84 s (five calls each, after warm-up) and the writing stage from 15.1 s to 4.2 s.
+The earlier "about 3 seconds per passage" in these notes included that delay.
 
 ## Not in scope
 

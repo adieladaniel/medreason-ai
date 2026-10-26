@@ -35,6 +35,7 @@ from pathlib import Path
 from app.config import get_settings
 from app.database import repository as repo
 from app.database.session import init_db, session_scope
+from app.observability import bind, configure_logging
 from app.pipelines.staged import default_plotters, default_stages, provided_inputs
 
 log = logging.getLogger("medreason.runner")
@@ -56,7 +57,18 @@ def _make_progress(case_id: str, field: str, url: str | None):
 
 def run_job(case_id: str, url: str | None = None, stages=None, deps: dict | None = None,
             figure_dir: Path | None = None) -> str:
-    """Runs every stage for the stored case and returns its final status."""
+    """Runs every stage for the stored case and returns its final status. Every log line written while it
+    runs carries the case id (app/observability.py), including lines from code that knows nothing about it."""
+    with bind(case_id=case_id):
+        t0 = time.perf_counter()
+        log.info("job started")
+        status = _run_stages(case_id, url, stages, deps, figure_dir)
+        seconds = round(time.perf_counter() - t0, 2)
+        log.info("job finished: %s in %.1f s", status, seconds, extra={"status": status, "seconds": seconds})
+        return status
+
+
+def _run_stages(case_id: str, url: str | None, stages, deps: dict | None, figure_dir: Path | None) -> str:
     stages = stages if stages is not None else default_stages()
     deps = dict(deps or {})
     figure_root = Path(figure_dir) if figure_dir is not None else get_settings().upload_dir
@@ -69,6 +81,7 @@ def run_job(case_id: str, url: str | None = None, stages=None, deps: dict | None
         if not inputs:
             repo.fail_case(s, case, "the case has no usable input (no image, no lab values, no indication)")
             repo.add_event(s, case, "queued", "failed", detail={"error": "no usable input"})
+            log.warning("the case has no usable input")
             return "failed"
         repo.set_stage(s, case, stages[0].name)
 
@@ -85,6 +98,7 @@ def run_job(case_id: str, url: str | None = None, stages=None, deps: dict | None
             case = repo.get_case(s, case_id)
             repo.set_stage(s, case, stage.name)
             repo.add_event(s, case, stage.name, "started")
+        log.info("stage %s started", stage.name, extra={"stage": stage.name})
         ctx["progress"] = _make_progress(case_id, stage.field, url)
         t0 = time.perf_counter()
         try:
@@ -92,7 +106,8 @@ def run_job(case_id: str, url: str | None = None, stages=None, deps: dict | None
         except Exception as exc:                               # noqa: BLE001  (any stage failure is recorded, not raised)
             seconds = time.perf_counter() - t0
             message = f"{type(exc).__name__}: {exc}"
-            log.exception("case %s: stage %s failed", case_id, stage.name)
+            log.exception("stage %s failed after %.1f s", stage.name, seconds,
+                          extra={"stage": stage.name, "seconds": round(seconds, 2)})
             with session_scope(url) as s:
                 case = repo.get_case(s, case_id)
                 repo.record_timing(s, case, stage.name, seconds)
@@ -109,6 +124,8 @@ def run_job(case_id: str, url: str | None = None, stages=None, deps: dict | None
             repo.save_result(s, case, stage.field, data)
             repo.record_timing(s, case, stage.name, seconds)
             repo.add_event(s, case, stage.name, "finished", seconds)
+        log.info("stage %s finished in %.1f s", stage.name, seconds,
+                 extra={"stage": stage.name, "seconds": round(seconds, 2)})
 
     with session_scope(url) as s:
         repo.finish_case(s, repo.get_case(s, case_id))
@@ -129,6 +146,8 @@ class JobRunner:
         self._queue: queue.Queue = queue.Queue()
         self._thread: threading.Thread | None = None
         self.warm_timings: dict | None = None
+        # "off" (models load on first use), "loading", "loaded" or "failed". Shown by the readiness check.
+        self.warm_state = "loading" if warm_up else "off"
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -142,6 +161,9 @@ class JobRunner:
     def pending(self) -> int:
         return self._queue.qsize()
 
+    def alive(self) -> bool:
+        return self._thread is not None and self._thread.is_alive()
+
     def stop(self, timeout: float | None = None) -> None:
         """Lets the job in progress finish, then ends the worker."""
         self._queue.put(_STOP)
@@ -153,8 +175,10 @@ class JobRunner:
             from app.pipelines.staged import warm_up
             try:
                 self.warm_timings = warm_up()
+                self.warm_state = "loaded"
                 log.info("models loaded: %s", self.warm_timings)
             except Exception:                                  # noqa: BLE001
+                self.warm_state = "failed"
                 log.exception("warm-up failed; models will load on first use")
         while True:
             item = self._queue.get()
@@ -163,7 +187,8 @@ class JobRunner:
             try:
                 run_job(item, self.url, self.stages, self.deps, self.figure_dir)
             except Exception:                                  # noqa: BLE001  (run_job records its own failures; this is the last guard)
-                log.exception("case %s: the worker could not run the job", item)
+                with bind(case_id=item):
+                    log.exception("the worker could not run the job")
 
 
 # ------------------------------------------------------------------ CLI
@@ -179,6 +204,8 @@ def _main() -> None:
     ap.add_argument("--drop", action="append", default=[], choices=["image", "blood", "text"])
     ap.add_argument("--db", default=None, help="database URL; default is the configured one")
     args = ap.parse_args()
+    cfg = get_settings()
+    configure_logging(cfg.log_level, cfg.log_format)
 
     from app.agent.orchestrator import _case_from_split
     case = _case_from_split(args.study_id, args.split, set(args.drop))

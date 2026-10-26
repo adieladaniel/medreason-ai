@@ -73,6 +73,15 @@ and `MEDREASON_CANCER_ALERT_RECALL` (0.5 to 0.8) sets how many false alarms are 
 There is no login: this is a local demonstration and must not be given real patient
 data.
 
+Running it: three endpoints say how the service is doing. `GET /api/health` only says the process answers.
+`GET /api/ready` probes the database, the worker thread, the evidence index and Ollama (with the configured model
+pulled) and answers `ok`, `degraded` (the prediction would still work, only the written evidence note would be
+missing; HTTP 200) or `down` (no case could run; HTTP 503). `GET /api/stats` gives cases by status and the median,
+95th percentile and worst seconds of each stage. Logs carry the case id and a request id on every line, from any code
+that runs for that case; set `MEDREASON_LOG_FORMAT=json` for one JSON object per line, and start uvicorn with
+`--no-access-log` so its own request lines do not duplicate the app's. Logs record which inputs were sent, never the
+typed text or the lab values.
+
 To look at a real case without typing 13 lab values, send a validation case to the running server and open the address it
 prints. Everything comes from the same study, which is what the models were built for:
 
@@ -112,7 +121,9 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   rag/                  corpus builder, hybrid retrieval, evidence planner, writer, faithfulness check, evaluations
   database/             Phase 7 storage: tables, sessions, repository
   config.py             settings from MEDREASON_* environment variables
-tests/                 211 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
+  observability.py      logs tagged with the case id and request id (text or JSON)
+  health.py             readiness probes (database, worker, evidence index, Ollama) and usage numbers
+tests/                 248 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored
@@ -152,11 +163,11 @@ Build the evidence library and its index, then run the tests:
 ```bash
 python -m app.rag.build_corpus      # downloads the open-access papers listed in app/rag/corpus_sources.json
 python -m app.rag.index --build     # embeds them into the local Qdrant folder
-python -m pytest                    # about 15 seconds
+python -m pytest                    # under a minute
 ```
 
-Run one case through the agent and the evidence chain (the text explanation step takes one to two
-minutes on CPU, and the writer needs Ollama running with `llama3.2`):
+Run one case through the agent and the evidence chain (the text explanation step takes under a second for a typical
+indication and up to about 15 seconds for a very long one, and the writer needs Ollama running with `llama3.2`):
 
 ```bash
 python -m app.agent.orchestrator --study-id 53383543

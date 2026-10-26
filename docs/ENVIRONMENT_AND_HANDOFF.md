@@ -9,7 +9,7 @@ CLAUDE.md first, then this file before touching Windows, WSL, Docker or the disk
 
 Phases 0 to 6 are done. Phase 7 (backend) has step 1 done (storage layer, commit 99e9e7f) and the
 staged pipeline is next. Since Phase 6 these were also built, one at a time, with a report after
-each: a test suite (`python -m pytest`, 211 tests), reliability checks on validation (intervals,
+each: a test suite (`python -m pytest`, 248 tests as of 2026-10-26), reliability checks on validation (intervals,
 calibration, abstention, conformal sets, subgroups), a claim-checker comparison (the current NLI
 checker stays), and corpus growth from 27 to 44 papers driven by a measured gap list. Details are
 in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
@@ -43,6 +43,10 @@ in CLAUDE.md section 2 and ROADMAP.md. The test split has never been touched.
   3.9 of the 4 GB of GPU memory for hours). Stop `ollama`, `ollama app` and `llama-server` together and check
   `nvidia-smi`. Measured memory of the app: 1.2 GB with every model loaded, 2.3 GB after one case, plus 1.2 GB of RAM
   and 2.4 GB of GPU memory for the language model.
+- Use `127.0.0.1`, not `localhost`, for local services (measured 2026-10-26). A connection to a closed loopback port takes
+  2.0 s to be refused on this laptop, and Python tries the IPv6 address (`::1`) before the IPv4 one, so a service that
+  listens on IPv4 only (Ollama does) costs 2.05 s per connection through `localhost` against 0.01 to 0.03 s through
+  `127.0.0.1`. The app's Ollama default was fixed; check any new local address the same way.
 - Tool quirks seen here: a `sleep` as its own command is blocked, use a bounded wait loop or the
   Monitor tool; a background job piped through `grep` shows nothing until it exits; `ollama` typed in
   Git Bash hit the app launcher, use PowerShell; Hugging Face downloads over 3 GB stalled twice, use
