@@ -275,12 +275,12 @@ Steps, built and reported one at a time:
    worker, the evidence index and Ollama (`ok`, `degraded` or `down`), and `/api/stats` with seconds per stage. Run for
    real, it found that `localhost` added about 2 s to every Ollama call on this Windows laptop; the default is now
    `127.0.0.1` and the writing stage on a real case went from 15.1 s to 4.2 s.
-6. Containers: Dockerfile, compose (API, Postgres, Qdrant), Qdrant server mode, a CI workflow that
-   runs the tests. Docker Desktop 4.49.0 is installed and verified (2026-10-25, notes in
-   `docs/ENVIRONMENT_AND_HANDOFF.md`). Ollama stays on the Windows host and the container's
-   Postgres uses host port 5433. Done ahead of the compose file: the Ollama and Qdrant addresses are
-   settings (`app/config.py`), Qdrant server mode and the storage layer on Postgres were each run
-   against a real container, and `requirements.txt` has the missing packages.
+6. Containers (done 2026-10-27, `docs/DOCKER.md`): a three-stage Dockerfile (base, test, runtime), `docker-compose.yml`
+   with the API, Postgres 16 and a Qdrant server (Ollama stays on the Windows host), a one-time `setup` service for the model
+   download and the index build, and a CI workflow that builds the test stage. The image holds code only: the trained models
+   are mounted read-only and the pretrained downloads live in volumes. Run for real: `/api/ready` reported `ok` for all four
+   dependencies, two validation cases finished through the containers, data survived a restart, and the 269 tests pass inside a
+   clean build. The GitHub Actions workflow itself has not been run.
 7. End-to-end run on real cases and a timing budget.
 
 ## Phase 8, integration, testing, documentation

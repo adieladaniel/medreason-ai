@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | in progress | storage, staged pipeline, case API, Analyze page and observability done; containers next |
+| 7. Backend and API | in progress | storage, staged pipeline, case API, Analyze page, observability and containers done; end-to-end timing next |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -675,6 +675,32 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
     writing failure logged as an ERROR with the case id and stage, and `/api/ready` reported `degraded` with HTTP 200.
   - A leftover to know about: `data/app.db` (last written 2026-10-25 by the user's own Analyze-page testing) holds those test
     cases. It is git-ignored and was not touched this session.
+- Step 6, containers (done 2026-10-27): `Dockerfile` (stages base, test, runtime), `docker-compose.yml` (postgres 16, qdrant
+  v1.19.1, api, and an opt-in `setup` service), `requirements-api.txt`, `.dockerignore`, `.env.example`, `.github/workflows/tests.yml`,
+  `app/prefetch.py`, and the setting `MEDREASON_REBUILD_DASHBOARD`. Full notes, commands and measurements in `docs/DOCKER.md`.
+  - The image holds code only. `experiments/` (trained models, result files) is mounted read-only, the pretrained downloads live in
+    the `hf` and `xrv` volumes, the container runs with `HF_HUB_OFFLINE=1`, and the build context leaves out `data/` and every model
+    or prediction file. All ports are published on 127.0.0.1 (no login). The database password comes from `.env` (git and docker
+    ignore it) and has no default. The process runs as user `app`.
+  - First-time setup is `docker compose up -d postgres qdrant`, then `docker compose run --rm -e HF_HUB_OFFLINE=0 setup python -m
+    app.prefetch` (9.4 minutes when measured), then `docker compose run --rm setup python -m app.rag.index --build` (811 passages),
+    then `docker compose up -d api`. A relative `-v ./data/corpus` on `docker compose run` silently mounted nothing, which is why
+    the corpus mount lives in the `setup` service.
+  - `docker build --target test .` runs the suite inside the image build (269 passed, 1 skipped, 13 deselected) against a context that
+    excludes everything git ignores, so it doubles as a clean-checkout check and is the CI job. The GitHub Actions workflow itself
+    has not been run. `tests/test_packaging.py` (21 tests) checks pin agreement between the two requirements files, that every
+    import in `app/` and `explain/` is installed by the runtime file, loopback-only ports, no password default, read-only model
+    mount, non-root user, and that `.dockerignore` covers what `.gitignore` does. 16 deliberate breakages were each caught.
+  - Run for real: `/api/ready` was `ok` with the API reaching Ollama through `host.docker.internal` (13 ms) and Qdrant holding 811
+    passages; a pneumonia validation case finished in 52.5 s (20 s of it the first language-model call while Ollama loaded its
+    model) and a normal case in 6.5 s; the API used 1.77 GiB of 5 GiB; both cases and the uploaded image survived an API restart;
+    stopping Ollama and Qdrant gave `degraded` (HTTP 200) in 3.8 s. Test cases were deleted through the API and the stack stopped
+    with `docker compose down`, which keeps the volumes (models, index, empty uploads, Postgres).
+  - Postgres `jsonb` does not keep key order, so `timings` comes back as writing, verifying, explaining, predicting, retrieving.
+    The Analyze page looks stages up by name and is unaffected.
+  - My own mistake worth keeping: I started a breakage-check script that edits source files while a docker build was running.
+    BuildKit reads context files when each `COPY` runs, so that build could have baked in a broken file. I stopped the script before
+    it mutated anything and rebuilt cleanly afterwards. Do not edit tracked files while a build is running.
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -794,7 +820,7 @@ Next:
 1. Phase 6 is done (the chain, its measurements and the dashboard page are in section 2).
    Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
    the predicted label. Open item carried to Phase 7: a faster checker (GPU or a smaller model).
-2. Phase 7, backend and API. Wire `app/agent/orchestrator.run_case` into a FastAPI
+2. Phase 7, backend and API (steps 1 to 6 done; step 7, an end-to-end run on real cases and a timing budget, is next). Original plan: wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
    the dashboard's placeholder "Analyze a case" page against that endpoint. The staged
@@ -826,7 +852,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (40 to 70 s depending on load, 248 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
+- Tests: `python -m pytest` from the repo root (40 to 70 s depending on load, 269 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
   of the Analyze page, 12 Postgres runs of the storage tests and the decision-rules rebuild check, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # does not pay for it. Off by default so a plain `uvicorn` start is quick and tests stay light.
     warm_up_models: bool = False
     run_worker: bool = True
+    # Rebuild app/data/dashboard.json from the result files at startup when a source is newer. A container has only some of
+    # those sources (no logs, no split files), so a rebuild there would overwrite the full committed file with a partial one;
+    # compose turns this off and the dashboard shows the file the image was built with.
+    rebuild_dashboard: bool = True
 
     # How the page expresses uncertainty (rules in app/data/decision_rules.json, built by scripts/build_decision_rules.py).
     # prediction_set_coverage: 0.8 or 0.9. A higher value gives larger sets, "not sure between these" more often.

@@ -1,0 +1,28 @@
+# Keep the build context to what git would hold. The first block is the clinical data and anything derived from it;
+# it must never enter an image layer.
+.git
+.github
+.env
+/data
+/kaggle_upload
+/demo
+experiments/explain_samples
+experiments/**/*.joblib
+experiments/**/*.pth
+experiments/**/*.pt
+experiments/**/*.npy
+experiments/**/val_predictions.csv
+experiments/**/oof_train_predictions.csv
+
+# not needed in an image
+docs
+README.md
+CLAUDE.md
+ROADMAP.md
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.idea

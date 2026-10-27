@@ -97,12 +97,13 @@ reachable from Windows on port 5433, and a container reaching the host's Ollama 
   `D:\DockerData`.
 - `C:\Users\HP\.wslconfig`: `memory=8GB`, `processors=8`, `swap=2GB`, `swapFile=D:\\WSL\\swap.vhdx`.
   RAM is tight (16 GB, about 4 GB free at times).
-- Compose design: API, Postgres and Qdrant in containers. Ollama stays on the Windows host (it
-  already uses the GPU and holds the model); the API reaches it at `host.docker.internal:11434`,
-  which needs the user environment variable `OLLAMA_HOST=0.0.0.0` and a firewall rule for private
-  networks. Map the container's Postgres to host port 5433 because native PostgreSQL holds 5432.
-  Use named volumes, not bind mounts from D:, for Postgres (bind mounts through `/mnt/d` are slow).
-  Qdrant is embedded today (`app/rag/index.py`, `_client`); server mode is a small code change.
+- Compose design (built and run 2026-10-27, see docs/DOCKER.md): API, Postgres and Qdrant in containers. Ollama stays on the
+  Windows host (it already uses the GPU and holds the model); the API reaches it at `host.docker.internal:11434`. The original
+  plan here said that needs `OLLAMA_HOST=0.0.0.0` and a firewall rule. That was wrong: Docker Desktop forwards the name to the
+  host's localhost, and the stack worked with `OLLAMA_HOST` unset (keep it unset, 0.0.0.0 would expose Ollama to Wi-Fi). The
+  container's Postgres is on host port 5433 because native PostgreSQL holds 5432. Postgres, Qdrant, uploads and the model
+  downloads use named volumes, not bind mounts from D: (bind mounts through `/mnt/d` are slow); only `experiments/` is bind
+  mounted, read-only. Qdrant runs as a server in compose and stays embedded for local runs.
 - Expected sizes on C: about 18 to 27 GB if everything is on C:, about 3 GB with data on D:.
 
 ## 5. Windows safety commands

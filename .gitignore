@@ -24,6 +24,9 @@ demo/cases/
 *.onnx
 *.h5
 
+# ── Secrets (docker compose reads the database password from here) ──
+.env
+
 # ── Python ──
 __pycache__/
 *.py[cod]

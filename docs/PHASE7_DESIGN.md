@@ -64,7 +64,7 @@ container differ by configuration, not code.
    Qdrant and Ollama. (done 2026-10-26)
 6. Containers: Dockerfile, compose with the API, Postgres and Qdrant, Qdrant server mode, a CI
    workflow that runs the tests. Ollama stays on the Windows host (it already uses the GPU and holds
-   the model), and the API reaches it through a setting instead of the hardcoded localhost address.
+   the model), and the API reaches it through a setting instead of the hardcoded localhost address. (done 2026-10-27)
 7. End-to-end run on real cases and a timing budget.
 
 ## The case API (step 3, built 2026-10-25)
@@ -182,6 +182,15 @@ port takes 2.0 s to be refused, and Python tries the IPv6 address (`::1`) before
 The writer makes one such call per passage. The default address is now `127.0.0.1`, and on the same real case the mean time of
 a language-model call went from 2.97 s to 0.84 s (five calls each, after warm-up) and the writing stage from 15.1 s to 4.2 s.
 The earlier "about 3 seconds per passage" in these notes included that delay.
+
+## Containers (step 6, built 2026-10-27)
+
+The choices, the commands and what was measured are in `docs/DOCKER.md`. The ones that shape the design: the image holds code
+and nothing derived from the clinical data (trained models are mounted read-only, pretrained downloads live in volumes, the
+container runs offline); the test suite runs inside the image build, so CI and a clean-checkout check are one command; the
+requirements the service needs are a pinned subset of the full list, with a test that fails if they drift or if the code imports
+something the subset does not install; every port is published on 127.0.0.1 because there is no login; and the database
+password has no default.
 
 ## Not in scope
 

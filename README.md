@@ -25,7 +25,7 @@ accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
 | 4. Explainability | core done (SHAP + Grad-CAM per modality) |
 | 5. Agentic layer | core done (belief state, consistency checker, missing-information planner) |
 | 6. RAG evidence retrieval | done (44-paper library, hybrid search with reranking, constrained writer, faithfulness check) |
-| 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | in progress, storage layer done |
+| 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | in progress: storage, pipeline, API, Analyze page, observability and containers done; end-to-end timing next |
 | 8. Integration, testing, writeup | not started |
 
 The test split (2,099 studies) has not been used. All numbers above are validation numbers.
@@ -82,6 +82,14 @@ that runs for that case; set `MEDREASON_LOG_FORMAT=json` for one JSON object per
 `--no-access-log` so its own request lines do not duplicate the app's. Logs record which inputs were sent, never the
 typed text or the lab values.
 
+## Running in containers
+
+`docker compose up -d` runs the API, PostgreSQL and a Qdrant server (Ollama stays on the Windows host). The image holds code
+only; the trained models are mounted read-only and the pretrained downloads live in volumes, so a one-time setup fetches them
+and fills the evidence index. Every port is bound to 127.0.0.1 because there is no login. The commands, the reasons for each
+choice and what was measured are in [docs/DOCKER.md](docs/DOCKER.md). `docker build --target test .` runs the whole test
+suite in a clean image and is what the CI workflow does.
+
 To look at a real case without typing 13 lab values, send a validation case to the running server and open the address it
 prints. Everything comes from the same study, which is what the models were built for:
 
@@ -123,7 +131,9 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   config.py             settings from MEDREASON_* environment variables
   observability.py      logs tagged with the case id and request id (text or JSON)
   health.py             readiness probes (database, worker, evidence index, Ollama) and usage numbers
-tests/                 248 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
+  prefetch.py           one-time download of the pretrained models for the offline container
+tests/                 269 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
+Dockerfile, docker-compose.yml, requirements-api.txt, .dockerignore, .github/workflows/tests.yml    container build, stack and CI
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

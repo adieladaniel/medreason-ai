@@ -1,0 +1,24 @@
+# Runs the test suite on every push and pull request, inside the image's test stage. The Dockerfile installs the same pinned
+# dependencies the service runs with and the build context leaves out everything git ignores, so a pass here means the tests
+# do not depend on data, models or packages that exist only on one laptop. The same command works locally:
+#   docker build --target test .
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the test stage (this runs pytest)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: test
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

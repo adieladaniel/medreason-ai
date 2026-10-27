@@ -1,0 +1,26 @@
+# What the running service imports, nothing else. Used by the Dockerfile. The versions are the same as in
+# requirements.txt (tests/test_packaging.py fails if they drift). Left out on purpose: the data pipeline (duckdb, spacy,
+# negspacy), the Kaggle CLI, pytest and playwright. torch and torchvision are installed by the Dockerfile from the CPU-only
+# wheel index (the default PyPI wheel bundles CUDA libraries the container cannot use), at the versions in requirements.txt.
+
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.0
+joblib==1.4.2
+transformers==5.14.1
+tokenizers==0.22.2
+huggingface-hub==1.25.1
+pillow==12.2.0
+shap==0.45.1
+matplotlib==3.9.0
+torchxrayvision==1.5.4
+qdrant-client==1.19.1
+sentence-transformers==5.6.1
+nltk==3.10.0
+fastapi==0.141.1
+uvicorn==0.53.0
+SQLAlchemy==2.0.30
+pydantic-settings==2.14.2
+python-multipart==0.0.32
+sse-starlette==3.4.11
+psycopg[binary]==3.3.6

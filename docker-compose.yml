@@ -1,0 +1,85 @@
+# The full stack on one machine: the API, PostgreSQL and a Qdrant server. Ollama stays on the Windows host (it already
+# uses the GPU and holds the model), and the API reaches it through host.docker.internal.
+# First-time setup and the reasons for each choice are in docs/DOCKER.md.
+#
+# Every published port is bound to 127.0.0.1. The API has no login, so it must not be reachable from the network.
+
+name: medreason
+
+# What the api and the one-time setup service share: the same image, settings and mounts.
+x-app: &app
+  build:
+    context: .
+    target: runtime
+  image: medreason-api
+  environment:
+    MEDREASON_DATABASE_URL: postgresql+psycopg://medreason:${POSTGRES_PASSWORD}@postgres:5432/medreason
+    MEDREASON_QDRANT_URL: http://qdrant:6333
+    MEDREASON_OLLAMA_URL: http://host.docker.internal:11434
+    MEDREASON_WARM_UP_MODELS: "true"
+    MEDREASON_REBUILD_DASHBOARD: "false"
+    HF_HUB_OFFLINE: "1"              # models come from the hf volume (python -m app.prefetch), never from the internet
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  mem_limit: 5g                      # measured: about 2.3 GB after one case; WSL is capped at 8 GB for everything
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: medreason
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env and set POSTGRES_PASSWORD}
+      POSTGRES_DB: medreason
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"          # 5432 belongs to the PostgreSQL installed on Windows
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medreason -d medreason"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.19.1
+    volumes:
+      - qdrant:/qdrant/storage
+    ports:
+      - "127.0.0.1:6333:6333"
+
+  api:
+    <<: *app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    volumes:
+      - ./experiments:/app/experiments:ro     # trained models and result files, read-only
+      - uploads:/app/data/uploads
+      - hf:/models/huggingface
+      - xrv:/home/app/.torchxrayvision
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+
+  # Not started by `up`. Run once, by hand, for the two setup steps (docs/DOCKER.md):
+  #   docker compose run --rm -e HF_HUB_OFFLINE=0 setup python -m app.prefetch     (downloads the pretrained models)
+  #   docker compose run --rm setup python -m app.rag.index --build                (fills Qdrant from data/corpus)
+  setup:
+    <<: *app
+    profiles: ["setup"]
+    depends_on:
+      qdrant:
+        condition: service_started
+    volumes:
+      - ./experiments:/app/experiments:ro
+      - ./data/corpus:/app/data/corpus:ro     # open-access papers only; no patient data
+      - hf:/models/huggingface
+      - xrv:/home/app/.torchxrayvision
+
+volumes:
+  pgdata:
+  qdrant:
+  uploads:
+  hf:
+  xrv:

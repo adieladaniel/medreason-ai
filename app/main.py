@@ -115,7 +115,7 @@ def create_app(settings: Settings | None = None, runner: JobRunner | None = None
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        if build_dashboard:
+        if build_dashboard and settings.rebuild_dashboard:
             dashboard_data.ensure_built()
         settings.upload_dir.mkdir(parents=True, exist_ok=True)
         init_db(settings.database_url)
