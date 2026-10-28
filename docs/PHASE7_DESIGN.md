@@ -65,7 +65,7 @@ container differ by configuration, not code.
 6. Containers: Dockerfile, compose with the API, Postgres and Qdrant, Qdrant server mode, a CI
    workflow that runs the tests. Ollama stays on the Windows host (it already uses the GPU and holds
    the model), and the API reaches it through a setting instead of the hardcoded localhost address. (done 2026-10-27)
-7. End-to-end run on real cases and a timing budget.
+7. End-to-end run on real cases and a timing budget. (done 2026-10-28)
 
 ## The case API (step 3, built 2026-10-25)
 
@@ -191,6 +191,16 @@ container runs offline); the test suite runs inside the image build, so CI and a
 requirements the service needs are a pinned subset of the full list, with a test that fails if they drift or if the code imports
 something the subset does not install; every port is published on 127.0.0.1 because there is no login; and the database
 password has no default.
+
+## The end-to-end run (step 7, 2026-10-28)
+
+The method and numbers are in `experiments/e2e/RESULTS.md`. The design point worth keeping: each case is checked against an offline twin,
+the stored per-modality probabilities pooled with the app's own rule for the inputs that were really sent. That turns "it ran" into
+"the deployed pipeline reproduces the evaluated models", and it would have caught a preprocessing difference between the container and
+the training runs. It did not: 32 of 32 runs matched, with a largest probability difference of 0.0001. The cases are chosen by rule
+and a fixed seed so nobody can say they were picked to look good, and each is deleted from the server after it is read, because it holds
+a real X-ray. The measured budget: the prediction is on screen in about half a second, a verified note takes about 15 to 20 seconds,
+and verifying (about 3.4 seconds per drafted sentence) is the largest stage.
 
 ## Not in scope
 

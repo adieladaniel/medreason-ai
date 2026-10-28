@@ -35,7 +35,7 @@ are kept; `docker compose down -v` deletes them). Send a real validation case wi
 **One image, three stages (`Dockerfile`).** `base` holds the dependencies and the code. `runtime` adds a non-root user and the
 start command. `test` adds the test suite and runs it during the build. `docker build --target test .` is the CI job
 (`.github/workflows/tests.yml`), and because the build context leaves out everything git ignores (`.dockerignore`), it is also a
-check that no test needs a file that exists only on this laptop. It runs the same 269 tests as `python -m pytest`.
+check that no test needs a file that exists only on this laptop. It runs the same tests as `python -m pytest`.
 
 **CPU-only torch, installed first.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image
 several gigabytes larger. The versions are the ones in `requirements.txt`; `requirements-api.txt` holds only what the service
@@ -74,6 +74,9 @@ because Ollama is down. `/api/ready` is the check for whether a case can run.
   container's logs were JSON with the request id on the API lines and the case id on every line of the job.
 - A restart of the API kept both cases and the uploaded image (served from the volume). Stopping Ollama gave `degraded`
   (HTTP 200); stopping Qdrant as well gave `degraded` in 3.8 s, inside the 5 s deadline; starting Qdrant again restored its data.
+
+The same stack was then run on 16 validation cases twice (2026-10-28): every case matched its offline twin and the timing budget is
+in `experiments/e2e/RESULTS.md`.
 
 ## Limits to know
 

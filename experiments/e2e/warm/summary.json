@@ -1,0 +1,295 @@
+{
+ "seed": 42,
+ "passes": 1,
+ "cases_per_pass": 16,
+ "categories": [
+  "agree, normal",
+  "agree, pneumonia",
+  "cancer found by fusion",
+  "cancer missed by fusion",
+  "image only",
+  "no X-ray",
+  "no indication",
+  "no labs on record",
+  "text only",
+  "wrong, not cancer"
+ ],
+ "all_passes": {
+  "cases_run": 16,
+  "statuses": {
+   "done": 16
+  },
+  "stage_seconds": {
+   "predicting": {
+    "n": 16,
+    "p50": 0.09,
+    "p95": 0.13,
+    "max": 0.14
+   },
+   "explaining": {
+    "n": 16,
+    "p50": 1.06,
+    "p95": 3.16,
+    "max": 6.4
+   },
+   "retrieving": {
+    "n": 16,
+    "p50": 0.0,
+    "p95": 0.0,
+    "max": 0.0
+   },
+   "writing": {
+    "n": 16,
+    "p50": 3.2,
+    "p95": 4.8,
+    "max": 5.04
+   },
+   "verifying": {
+    "n": 16,
+    "p50": 6.21,
+    "p95": 18.01,
+    "max": 18.54
+   }
+  },
+  "wall_seconds": {
+   "n": 16,
+   "p50": 9.66,
+   "p95": 25.39,
+   "max": 26.93
+  },
+  "time_to_prediction": {
+   "n": 16,
+   "p50": 0.52,
+   "p95": 0.62,
+   "max": 0.63
+  },
+  "same_class_as_offline": {
+   "n": 16,
+   "same": 16
+  },
+  "max_probability_difference_vs_offline": {
+   "n": 16,
+   "p50": 0.0,
+   "p95": 0.0,
+   "max": 0.0
+  },
+  "explainers_match_stored_prediction": {
+   "n": 16,
+   "all_match": 16
+  },
+  "agrees_with_true_label_in_this_selected_set": {
+   "n": 16,
+   "agree": 11
+  },
+  "evidence": {
+   "cases_with_evidence": 16,
+   "cases_with_a_verified_sentence": 11,
+   "verified_sentences": 23,
+   "dropped_sentences": 9
+  },
+  "verifying_seconds_per_drafted_sentence": {
+   "n": 11,
+   "p50": 3.35,
+   "p95": 6.21,
+   "max": 7.01
+  },
+  "language_model_call_seconds": {
+   "n": 46,
+   "p50": 0.83,
+   "p95": 1.35,
+   "max": 1.49
+  },
+  "by_category": {
+   "agree, pneumonia": {
+    "n": 2,
+    "correct": 2,
+    "matches_offline": 2
+   },
+   "agree, normal": {
+    "n": 2,
+    "correct": 2,
+    "matches_offline": 2
+   },
+   "cancer found by fusion": {
+    "n": 2,
+    "correct": 2,
+    "matches_offline": 2
+   },
+   "cancer missed by fusion": {
+    "n": 2,
+    "correct": 0,
+    "matches_offline": 2
+   },
+   "wrong, not cancer": {
+    "n": 2,
+    "correct": 0,
+    "matches_offline": 2
+   },
+   "no labs on record": {
+    "n": 2,
+    "correct": 1,
+    "matches_offline": 2
+   },
+   "text only": {
+    "n": 1,
+    "correct": 1,
+    "matches_offline": 1
+   },
+   "image only": {
+    "n": 1,
+    "correct": 1,
+    "matches_offline": 1
+   },
+   "no X-ray": {
+    "n": 1,
+    "correct": 1,
+    "matches_offline": 1
+   },
+   "no indication": {
+    "n": 1,
+    "correct": 1,
+    "matches_offline": 1
+   }
+  }
+ },
+ "by_pass": {
+  "1": {
+   "cases_run": 16,
+   "statuses": {
+    "done": 16
+   },
+   "stage_seconds": {
+    "predicting": {
+     "n": 16,
+     "p50": 0.09,
+     "p95": 0.13,
+     "max": 0.14
+    },
+    "explaining": {
+     "n": 16,
+     "p50": 1.06,
+     "p95": 3.16,
+     "max": 6.4
+    },
+    "retrieving": {
+     "n": 16,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "writing": {
+     "n": 16,
+     "p50": 3.2,
+     "p95": 4.8,
+     "max": 5.04
+    },
+    "verifying": {
+     "n": 16,
+     "p50": 6.21,
+     "p95": 18.01,
+     "max": 18.54
+    }
+   },
+   "wall_seconds": {
+    "n": 16,
+    "p50": 9.66,
+    "p95": 25.39,
+    "max": 26.93
+   },
+   "time_to_prediction": {
+    "n": 16,
+    "p50": 0.52,
+    "p95": 0.62,
+    "max": 0.63
+   },
+   "same_class_as_offline": {
+    "n": 16,
+    "same": 16
+   },
+   "max_probability_difference_vs_offline": {
+    "n": 16,
+    "p50": 0.0,
+    "p95": 0.0,
+    "max": 0.0
+   },
+   "explainers_match_stored_prediction": {
+    "n": 16,
+    "all_match": 16
+   },
+   "agrees_with_true_label_in_this_selected_set": {
+    "n": 16,
+    "agree": 11
+   },
+   "evidence": {
+    "cases_with_evidence": 16,
+    "cases_with_a_verified_sentence": 11,
+    "verified_sentences": 23,
+    "dropped_sentences": 9
+   },
+   "verifying_seconds_per_drafted_sentence": {
+    "n": 11,
+    "p50": 3.35,
+    "p95": 6.21,
+    "max": 7.01
+   },
+   "language_model_call_seconds": {
+    "n": 46,
+    "p50": 0.83,
+    "p95": 1.35,
+    "max": 1.49
+   },
+   "by_category": {
+    "agree, pneumonia": {
+     "n": 2,
+     "correct": 2,
+     "matches_offline": 2
+    },
+    "agree, normal": {
+     "n": 2,
+     "correct": 2,
+     "matches_offline": 2
+    },
+    "cancer found by fusion": {
+     "n": 2,
+     "correct": 2,
+     "matches_offline": 2
+    },
+    "cancer missed by fusion": {
+     "n": 2,
+     "correct": 0,
+     "matches_offline": 2
+    },
+    "wrong, not cancer": {
+     "n": 2,
+     "correct": 0,
+     "matches_offline": 2
+    },
+    "no labs on record": {
+     "n": 2,
+     "correct": 1,
+     "matches_offline": 2
+    },
+    "text only": {
+     "n": 1,
+     "correct": 1,
+     "matches_offline": 1
+    },
+    "image only": {
+     "n": 1,
+     "correct": 1,
+     "matches_offline": 1
+    },
+    "no X-ray": {
+     "n": 1,
+     "correct": 1,
+     "matches_offline": 1
+    },
+    "no indication": {
+     "n": 1,
+     "correct": 1,
+     "matches_offline": 1
+    }
+   }
+  }
+ }
+}

@@ -249,8 +249,8 @@ Status: done. Corpus and retrieval core done 2026-10-11.
 
 ## Phase 7, backend and API
 
-Status: in progress. The design and its reasons are in `docs/PHASE7_DESIGN.md`. The progress
-dashboard (`app/`) already exists and the Analyze page will be added to it.
+Status: done (2026-10-28). The design and its reasons are in `docs/PHASE7_DESIGN.md`. The progress
+dashboard (`app/`) now also holds the Analyze page, and the service runs as a container stack.
 
 Steps, built and reported one at a time:
 
@@ -281,7 +281,11 @@ Steps, built and reported one at a time:
    are mounted read-only and the pretrained downloads live in volumes. Run for real: `/api/ready` reported `ok` for all four
    dependencies, two validation cases finished through the containers, data survived a restart, and the 269 tests pass inside a
    clean build. The GitHub Actions workflow itself has not been run.
-7. End-to-end run on real cases and a timing budget.
+7. End-to-end run on real cases and a timing budget (done 2026-10-28, `experiments/e2e/RESULTS.md`, `scripts/run_e2e.py`).
+   Sixteen validation studies chosen by rule (right and wrong, a missed cancer, no labs, inputs taken away) went through the
+   containers twice. All 32 runs gave the same class as the offline evaluation (largest probability difference 0.0001) and the
+   two passes gave identical predictions. The prediction is on screen in about 0.5 s; a full verified note takes about 15 to 20 s
+   (up to 48 s for the first case after a start), and verifying is the largest stage at about 3.4 s per drafted sentence.
 
 ## Phase 8, integration, testing, documentation
 

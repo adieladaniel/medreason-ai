@@ -62,7 +62,7 @@ not, cut it.
 | 4. Explainability | core done | SHAP + Grad-CAM per modality, `explain/` package |
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
-| 7. Backend and API | in progress | storage, staged pipeline, case API, Analyze page, observability and containers done; end-to-end timing next |
+| 7. Backend and API | done | storage, staged pipeline, case API, Analyze page, observability, containers and the end-to-end run |
 | 8. Integration, testing, writeup | not started | |
 
 ### Image baseline results (val set, n=2,315)
@@ -534,7 +534,7 @@ found the cancer. Measured, with 95 percent intervals that resample patients:
   (see the Phase 7 notes). Still open: try image weights that have Nodule and Mass channels (their training data is not
   stated, so check for overlap with this dataset first).
 
-### Phase 7, backend and API (in progress, started 2026-10-14)
+### Phase 7, backend and API (done 2026-10-28, started 2026-10-14)
 
 Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a report after each.
 
@@ -701,6 +701,25 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   - My own mistake worth keeping: I started a breakage-check script that edits source files while a docker build was running.
     BuildKit reads context files when each `COPY` runs, so that build could have baked in a broken file. I stopped the script before
     it mutated anything and rebuilt cleanly afterwards. Do not edit tracked files while a build is running.
+- Step 7, end-to-end run and timing budget (done 2026-10-28): `scripts/run_e2e.py`, `tests/test_e2e_script.py` (12 tests, 10 deliberate
+  breakages caught after one test was made asymmetric), results in `experiments/e2e/RESULTS.md` with aggregates in
+  `experiments/e2e/{cold_start,warm}/summary.json` (the per-case `cases.json` holds study ids and is git-ignored).
+  - Protocol: 16 validation studies chosen by rule and seed 42 (two agreeing pneumonia, two agreeing normal, two cancers fusion finds,
+    two it misses, two wrong non-cancers, two with no labs on record, and one each with text only, image only, no X-ray, no
+    indication), sent over HTTP to the compose stack, compared with the offline twin (stored per-modality probabilities pooled with the
+    app's own rule for the inputs sent), then deleted from the server. Two passes: the first right after the containers and Ollama
+    were started, the second straight after. The laptop was in ordinary use (3.6 GB free before Docker, 0.4 GB after the stack was up).
+  - Result: 32 of 32 runs gave the same class as the offline twin (largest probability difference 0.0001), all explainers matched the
+    stored prediction, all cases finished "done", and both passes gave identical probabilities, flags, sets and alerts. Prediction on
+    screen at p50 0.53 s (p95 2.25 s). Whole case: Normal predictions need no evidence and take 1.5 to 2 s; with evidence the median
+    was 19.2 s cold and 14.5 s warm, max 48.3 s and 26.9 s. Verifying is the largest stage, about 3.4 s per drafted sentence (p95
+    about 7 s), which explains the earlier 70 s against 23 s. Language-model calls take about 0.9 s; only the first one after Ollama
+    starts is slow (17.7 s). Retrieval is 1 to 8 s uncached and free when repeated.
+  - The one thing that varies is the evidence note: same passages both times, but verified and dropped sentence counts changed in 2
+    of 16 cases (25 verified and 7 dropped in the first pass, 23 and 9 in the second), the writer's non-reproducibility measured on a
+    set. The "11 of 16 agree with the true label" figure is not an accuracy, because the set is stratified on purpose.
+  - Limits: 16 studies, one laptop under load, percentiles on 16 values are rough, the warm pass is warm in three ways at once, and
+    the NLI checker still runs on the CPU (a GPU build or a smaller model is the obvious speed-up and is untried).
 
 The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
 that way until final evaluation.
@@ -820,7 +839,7 @@ Next:
 1. Phase 6 is done (the chain, its measurements and the dashboard page are in section 2).
    Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
    the predicted label. Open item carried to Phase 7: a faster checker (GPU or a smaller model).
-2. Phase 7, backend and API (steps 1 to 6 done; step 7, an end-to-end run on real cases and a timing budget, is next). Original plan: wire `app/agent/orchestrator.run_case` into a FastAPI
+2. Phase 7, backend and API is done (all seven steps). Next is Phase 8 (section 2 table and ROADMAP.md). Original plan: wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
    the dashboard's placeholder "Analyze a case" page against that endpoint. The staged
@@ -852,7 +871,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (40 to 70 s depending on load, 269 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 281 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
   of the Analyze page, 12 Postgres runs of the storage tests and the decision-rules rebuild check, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

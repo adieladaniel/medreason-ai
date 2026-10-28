@@ -7,6 +7,7 @@
 /kaggle_upload
 /demo
 experiments/explain_samples
+experiments/e2e/**/cases.json
 experiments/**/*.joblib
 experiments/**/*.pth
 experiments/**/*.pt
@@ -26,3 +27,4 @@ __pycache__
 .pytest_cache
 .mypy_cache
 .idea
+experiments/image_backbones/_chunks
