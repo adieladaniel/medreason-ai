@@ -210,6 +210,12 @@ def test_settings_reject_unknown_log_options():
 
 
 # ------------------------------------------------------------------ the pipeline's log lines
+def job_lines(logs):
+    """The log lines written while a job ran. Creating the database (init_db, inside new_case) logs its own line, from the
+    startup path and so without a case id, before any job starts."""
+    return [x for x in logs() if x["logger"] != "medreason.database"]
+
+
 def test_every_line_of_a_job_carries_its_case_id_even_from_code_that_knows_nothing_about_it(logs, tmp_path):
     url = f"sqlite:///{(tmp_path / 'j.db').as_posix()}"
     cid = new_case(url, indication="fever and cough")
@@ -220,7 +226,7 @@ def test_every_line_of_a_job_carries_its_case_id_even_from_code_that_knows_nothi
 
     stages = [staged.Stage("predicting", "prediction", predict)]
     assert run_job(cid, url, stages, {"no_figures": True}, tmp_path) == "done"
-    lines = logs()
+    lines = job_lines(logs)
     assert lines and all(x["case_id"] == cid for x in lines)
     messages = [x["message"] for x in lines]
     assert "helper doing work" in messages
@@ -237,7 +243,7 @@ def test_two_jobs_in_a_row_do_not_share_a_case_id(logs, tmp_path):
     stages = [staged.Stage("predicting", "prediction", lambda ctx: {"x": 1})]
     run_job(a, url, stages, {"no_figures": True}, tmp_path)
     run_job(b, url, stages, {"no_figures": True}, tmp_path)
-    ids = [x["case_id"] for x in logs()]
+    ids = [x["case_id"] for x in job_lines(logs)]
     assert ids.count(a) == ids.count(b) > 0 and set(ids) == {a, b}
     assert ids.index(b) > max(i for i, v in enumerate(ids) if v == a)
 

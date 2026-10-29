@@ -51,6 +51,12 @@ Dockerfile lacks `--require-hashes`. Limits: the lock is for the container and C
 nothing refreshes it by itself, so it ages until someone runs the script; and it freezes today's versions of the dependencies of
 dependencies, which were not necessarily the ones the earlier images had.
 
+**The database schema is migrated at startup (added 2026-10-30).** The image carries `alembic.ini` and `migrations/`, and the API runs
+them before it takes requests (`app/database/migrate.py`). A new Postgres volume gets the tables from the baseline; a volume made before this
+change (tables, no version record) is checked against the baseline and marked, so no data is lost; one that does not match is refused with a
+message and the API does not start. To change a table, edit `app/database/models.py` and run `alembic revision --autogenerate -m "..."` from
+the repo root against any database; `tests/test_migrations.py` fails until the migration exists. One API container migrates at a time.
+
 **CPU-only torch.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image several gigabytes
 larger. The lock names `torch==2.11.0+cpu` and `torchvision==0.26.0+cpu`, which exist only on the PyTorch CPU index, so the Dockerfile
 adds that index next to PyPI and nothing from the CUDA stack is installed. The versions are the ones in `requirements.txt`, and

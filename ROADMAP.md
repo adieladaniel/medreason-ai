@@ -316,7 +316,9 @@ What was done, in the order it was done:
    motion and a reduced-motion fallback. Details in `CLAUDE.md`.
 8. Engineering hardening, step 3a (2026-10-29): every dependency of the container is pinned with file hashes (`requirements-api.lock`, made by
    `scripts/lock_dependencies.py`), the CPU-only torch wheel is part of the lock, and the image build installs it with `--require-hashes`.
-   Still to do in this step: a database migration baseline (Alembic) and a smoke test of the service in CI. Details in `CLAUDE.md`.
+   Step 3b (2026-10-30): the database schema is created and changed by Alembic migrations (a baseline, takeover of databases made
+   before migrations, and a test that fails when the models and migrations disagree). Still to do in this step: a smoke test of the service
+   in CI. Details in `CLAUDE.md`.
 
 The plan below is kept as the record of what was intended. Items marked here as done are the ones above; the rest of Phase 8b (a full screen
 recording, PhysioNet credentials, rehearsing the cold start in front of an audience) are for the person presenting.

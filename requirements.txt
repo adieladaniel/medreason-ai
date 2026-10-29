@@ -41,6 +41,7 @@ uvicorn==0.53.0
 
 # Phase 7 backend: storage, settings, uploads, progress stream
 SQLAlchemy==2.0.30
+alembic==1.20.1   # schema migrations (migrations/, app/database/migrate.py)
 pydantic-settings==2.14.2
 python-multipart==0.0.32
 sse-starlette==3.4.11

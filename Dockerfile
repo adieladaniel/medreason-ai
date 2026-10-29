@@ -25,6 +25,8 @@ RUN pip install --require-hashes --extra-index-url https://download.pytorch.org/
 
 COPY app app
 COPY explain explain
+COPY alembic.ini .
+COPY migrations migrations
 
 
 FROM base AS test

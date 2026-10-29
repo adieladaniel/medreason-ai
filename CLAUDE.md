@@ -835,6 +835,22 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   Dockerfile, not on every `pip install`), which is now strengthened. Not done: GitHub's own run on the lock (needs a push), a rerun of the
   end-to-end timing with real models on the rebuilt `runtime` image (the lock freezes today's versions of dependencies, which are not necessarily
   the ones the Phase 7 step 7 run used, so model outputs on the new image are not re-checked), and any automatic refresh of the lock.
+- Engineering hardening, step 3b: schema migrations (2026-10-30, `alembic.ini`, `migrations/`, `app/database/migrate.py`,
+  `tests/test_migrations.py`). `init_db` used to call `create_all`, which makes missing tables but never changes an existing one, so any
+  later column would have meant deleting the database. It now runs Alembic: an empty database gets every migration, one with a version record
+  gets the ones it lacks, and one made by the old `create_all` (the Postgres volume and `data/app.db` on a real install) has its columns
+  compared with the baseline and is marked as at revision 0001 if they match, or refused with a message if not. The baseline
+  (`migrations/versions/0001_baseline.py`) is written out by hand, not read from the models, and a test checks that it imports nothing from
+  `app`. Autogenerate wrote it with a bug (`astext_type=Text()` with `Text` never imported, which would crash on Postgres). To change a table: edit
+  `models.py`, run `alembic revision --autogenerate -m "what changed"`, read the file it writes. A test builds the schema from the migrations and
+  fails if it differs from the models, so a model change cannot ship without a migration. SQLite migrations use batch mode because it cannot alter
+  most things in place. `alembic` 1.20.1 is pinned in both requirements files and the lock (2 packages added: alembic, mako), and the image copies
+  `alembic.ini` and `migrations/`. Verified: 13 new tests (430 normal in all), 6 of them also run on a real Postgres 16 container with the old
+  storage tests (18 slow runs, all passed; the baseline renders `JSONB`, `SERIAL` and `ON DELETE CASCADE` for Postgres), and 10 deliberate
+  breakages were each caught. The `localhost` penalty hit again: a first Postgres run through `localhost:5433` did not finish in 400 s and the
+  same run through `127.0.0.1` took 2.4 s. Limits: one process migrates at a time (two API containers starting together on one Postgres are
+  not handled; a lock around the upgrade would be the fix), a pre-Alembic database is compared by column names only, not types, and
+  `init_db` costs about 0.16 s on a fresh SQLite file, paid by every test that makes a database.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -991,7 +1007,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 417 tests, plus 60 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 430 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

@@ -17,7 +17,6 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import get_settings
-from app.database.models import Base
 
 _engines: dict[str, Engine] = {}
 _factories: dict[str, sessionmaker] = {}
@@ -49,13 +48,14 @@ def session_factory(url: str | None = None) -> sessionmaker:
 
 
 def init_db(url: str | None = None) -> None:
-    """Create the tables if they are missing. Schema changes need a migration tool (Alembic) once
-    real data exists, which is added with the container work."""
+    """Bring the database to the current schema (app/database/migrate.py). Creates it when empty, applies pending migrations, and
+    takes over a database made before migrations existed. Raises SchemaMismatch for one it cannot take over."""
+    from app.database.migrate import upgrade
     url = url or get_settings().database_url
     if url.startswith("sqlite:///"):
         from pathlib import Path
         Path(url.removeprefix("sqlite:///")).parent.mkdir(parents=True, exist_ok=True)
-    Base.metadata.create_all(make_engine(url))
+    upgrade(make_engine(url), url)
 
 
 @contextmanager

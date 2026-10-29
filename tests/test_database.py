@@ -31,11 +31,18 @@ def url(request, tmp_path):
         yield u
         return
     engine = make_engine(POSTGRES_URL)
-    Base.metadata.drop_all(engine)
+    wipe(engine)
     init_db(POSTGRES_URL)
     yield POSTGRES_URL
-    Base.metadata.drop_all(engine)
+    wipe(engine)
     engine.dispose()
+
+
+def wipe(engine):
+    """Drop the tables and the migration record, so init_db starts from an empty database again."""
+    Base.metadata.drop_all(engine)
+    with engine.begin() as conn:
+        conn.exec_driver_sql("DROP TABLE IF EXISTS alembic_version")
 
 
 def test_jsonable_handles_what_the_pipeline_produces():

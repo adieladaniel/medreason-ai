@@ -11,6 +11,9 @@ can read the prediction while the slow explanations are still being computed.
 
 Types are portable: JSON is JSONB on Postgres and plain JSON on SQLite, so the same models run in
 both. Timestamps are timezone-aware UTC.
+
+Changing a table here also needs a migration: `alembic revision --autogenerate -m "what changed"`, then read the file it
+writes (migrations/versions/). tests/test_migrations.py fails while the models and the migrations disagree.
 """
 from __future__ import annotations
 
