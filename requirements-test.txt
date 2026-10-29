@@ -1,0 +1,5 @@
+# What the container's test stage adds on top of the service (requirements-api.txt). Input of requirements-test.lock, which is
+# resolved against requirements-api.lock so a shared dependency can never be two different versions. Same versions as requirements.txt.
+pytest==9.1.1
+httpx==0.28.1
+PyYAML==6.0.3

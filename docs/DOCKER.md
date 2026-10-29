@@ -37,10 +37,24 @@ start command. `test` adds the test suite and runs it during the build. `docker 
 (`.github/workflows/tests.yml`), and because the build context leaves out everything git ignores (`.dockerignore`), it is also a
 check that no test needs a file that exists only on this laptop. It runs the same tests as `python -m pytest`.
 
-**CPU-only torch, installed first.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image
-several gigabytes larger. The versions are the ones in `requirements.txt`; `requirements-api.txt` holds only what the service
-imports, and `tests/test_packaging.py` fails if the two files disagree on a version or if the code imports a package the runtime
-file does not install.
+**A lock file, installed with hashes (added 2026-10-29).** `requirements-api.txt` pins only the packages the service imports. Everything
+those depend on (starlette, pydantic, scipy, sympy, urllib3 and about 60 more) used to be left to whatever pip found on build day, so one
+commit could build a different image next month. `python scripts/lock_dependencies.py` now resolves the two input files into
+`requirements-api.lock` (89 packages) and `requirements-test.lock` (13 more, resolved against the first so a shared package has one
+version), each with the SHA-256 of every file, and the Dockerfile installs them with `pip install --require-hashes`, which refuses any
+file whose hash is not listed (checked: a wrong hash stops the install with "THE PACKAGES DO NOT MATCH THE HASHES"). The script needs
+`uv` (`pip install uv`, a tool for the script and not a project dependency) and resolves for Linux x86-64 and Python 3.11, so it runs on
+the Windows laptop. After changing a pin in `requirements-api.txt` or `requirements-test.txt`, run it and rebuild.
+`tests/test_packaging.py` fails if the lock lacks a pin of its input or holds an older version, if any package has no hash, if a CUDA
+package appears, if torch is not the `+cpu` wheel, if the two locks disagree on a shared package, or if a `pip install` in the
+Dockerfile lacks `--require-hashes`. Limits: the lock is for the container and CI only (the laptop keeps using `requirements.txt`);
+nothing refreshes it by itself, so it ages until someone runs the script; and it freezes today's versions of the dependencies of
+dependencies, which were not necessarily the ones the earlier images had.
+
+**CPU-only torch.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image several gigabytes
+larger. The lock names `torch==2.11.0+cpu` and `torchvision==0.26.0+cpu`, which exist only on the PyTorch CPU index, so the Dockerfile
+adds that index next to PyPI and nothing from the CUDA stack is installed. The versions are the ones in `requirements.txt`, and
+`tests/test_packaging.py` fails if the two files disagree or if the code imports a package the runtime file does not install.
 
 **The image holds code only.** The trained models and result files (`experiments/`) are mounted read-only; the pretrained
 downloads live in two named volumes. Nothing derived from the MIMIC data is copied into an image layer, so the image can be

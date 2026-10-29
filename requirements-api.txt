@@ -1,8 +1,12 @@
-# What the running service imports, nothing else. Used by the Dockerfile. The versions are the same as in
-# requirements.txt (tests/test_packaging.py fails if they drift). Left out on purpose: the data pipeline (duckdb, spacy,
-# negspacy), the Kaggle CLI, pytest and playwright. torch and torchvision are installed by the Dockerfile from the CPU-only
-# wheel index (the default PyPI wheel bundles CUDA libraries the container cannot use), at the versions in requirements.txt.
+# What the running service imports, nothing else. This file is the INPUT of the lock: `python scripts/lock_dependencies.py` resolves
+# it, with every dependency of a dependency, into requirements-api.lock, and the Dockerfile installs that lock with hashes. The
+# versions here are the same as in requirements.txt (tests/test_packaging.py fails if they drift or if the lock is out of date).
+# Left out on purpose: the data pipeline (duckdb, spacy, negspacy), the Kaggle CLI, pytest and playwright. Do not `pip install -r`
+# this file on its own for the container: torch from the default index bundles CUDA libraries the container cannot use, and the
+# lock takes the CPU-only wheels instead (`2.11.0+cpu`).
 
+torch==2.11.0
+torchvision==0.26.0
 numpy==1.26.4
 pandas==2.2.2
 scikit-learn==1.5.0

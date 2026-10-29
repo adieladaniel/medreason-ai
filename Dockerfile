@@ -16,18 +16,21 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 
-# CPU-only torch first: it is the largest layer and changes least. Versions must match requirements.txt.
-RUN pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cpu
-COPY requirements-api.txt .
-RUN pip install -r requirements-api.txt
+# Every package, with every dependency of a dependency, at one version and with the SHA-256 of its files: --require-hashes makes pip
+# refuse anything else. The lock is made from requirements-api.txt by scripts/lock_dependencies.py. torch and torchvision are in it
+# as the CPU-only wheels (2.11.0+cpu, from the second index), because the default wheel bundles about 3 GB of CUDA libraries the
+# container cannot use. PyPI stays the first index; a name pinned as "+cpu" exists only on the PyTorch one.
+COPY requirements-api.lock .
+RUN pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-api.lock
 
 COPY app app
 COPY explain explain
 
 
 FROM base AS test
-RUN pip install pytest==9.1.1 httpx==0.28.1 PyYAML==6.0.3
-COPY pytest.ini requirements.txt Dockerfile docker-compose.yml .gitignore .dockerignore .env.example ./
+COPY requirements-test.lock .
+RUN pip install --require-hashes -r requirements-test.lock
+COPY pytest.ini requirements.txt requirements-api.txt requirements-test.txt Dockerfile docker-compose.yml .gitignore .dockerignore .env.example ./
 COPY scripts scripts
 COPY experiments experiments
 COPY tests tests

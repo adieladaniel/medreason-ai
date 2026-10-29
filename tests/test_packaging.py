@@ -40,16 +40,59 @@ def test_every_runtime_pin_is_the_same_version_as_in_the_full_requirements():
     assert not wrong, f"requirements-api.txt differs from requirements.txt: {wrong}"
 
 
-def test_the_dockerfile_installs_the_same_torch_and_test_tools_as_the_requirements():
-    for name in ("torch", "torchvision", "pytest", "httpx"):
-        assert f"{name}=={FULL[name]}" in DOCKERFILE, f"Dockerfile does not install {name}=={FULL[name]}"
+API_LOCK = pins(ROOT / "requirements-api.lock")
+TEST_LOCK = pins(ROOT / "requirements-test.lock")
+TEST_INPUT = pins(ROOT / "requirements-test.txt")
+
+
+def test_the_test_stage_installs_the_same_test_tools_as_the_requirements():
+    assert TEST_INPUT and all(FULL.get(k) == v for k, v in TEST_INPUT.items()), (TEST_INPUT, {k: FULL.get(k) for k in TEST_INPUT})
+
+
+def test_the_dockerfile_installs_the_locks_with_hashes_and_the_cpu_wheel_index():
+    installs = [ln for ln in DOCKERFILE.splitlines() if "pip install" in ln and not ln.lstrip().startswith("#")]
+    assert len(installs) == 2 and all("--require-hashes" in ln for ln in installs), installs    # every install, not just one
+    assert "-r requirements-api.lock" in DOCKERFILE and "-r requirements-test.lock" in DOCKERFILE
     assert "download.pytorch.org/whl/cpu" in DOCKERFILE                  # the default wheel carries CUDA libraries
+    assert not re.search(r"pip install.*==", DOCKERFILE), "a package is pinned in the Dockerfile instead of the lock"
+
+
+def test_the_service_lock_has_every_pin_of_its_input_at_the_same_version():
+    missing = {k: (v, API_LOCK.get(k)) for k, v in RUNTIME.items() if API_LOCK.get(k, "").split("+")[0] != v}
+    assert not missing, f"requirements-api.lock is out of date, run python scripts/lock_dependencies.py: {missing}"
+    assert len(API_LOCK) > 2 * len(RUNTIME), "the lock holds no dependencies of dependencies"
+
+
+def test_torch_is_locked_as_the_cpu_wheel_and_no_cuda_package_is_in_either_lock():
+    assert API_LOCK["torch"] == f"{FULL['torch']}+cpu" and API_LOCK["torchvision"] == f"{FULL['torchvision']}+cpu"
+    cuda = sorted(k for k in API_LOCK | TEST_LOCK if k.startswith(("nvidia-", "cuda-", "triton")))
+    assert not cuda, f"CUDA packages in a lock for a container that has no GPU: {cuda}"
+
+
+def locked_entries(path: Path) -> list[str]:
+    """One text block per package: its pin line and the indented hash lines under it."""
+    blocks = re.split(r"^(?=[A-Za-z0-9_.\-]+==)", path.read_text(encoding="utf-8"), flags=re.M)
+    return [b for b in blocks if re.match(r"[A-Za-z0-9_.\-]+==", b)]
+
+
+def test_every_locked_package_carries_hashes_because_pip_needs_all_or_none():
+    for lock in ("requirements-api.lock", "requirements-test.lock"):
+        entries = locked_entries(ROOT / lock)
+        assert entries, lock
+        bare = [e.split("==")[0] for e in entries if not re.search(r"--hash=sha256:[0-9a-f]{64}", e)]
+        assert not bare, f"{lock}: pip refuses the whole file if any package has no hash: {bare}"
+
+
+def test_the_two_locks_agree_on_every_package_they_share():
+    clash = {k: (API_LOCK[k], v) for k, v in TEST_LOCK.items() if k in API_LOCK and API_LOCK[k] != v}
+    assert not clash, f"a package would be installed twice at different versions: {clash}"
+    assert all(k in TEST_LOCK for k in TEST_INPUT)
 
 
 IMPORT_TO_DIST = {"PIL": "pillow", "sklearn": "scikit-learn", "sse_starlette": "sse-starlette", "qdrant_client": "qdrant-client",
                   "sentence_transformers": "sentence-transformers", "pydantic_settings": "pydantic-settings",
                   "sqlalchemy": "sqlalchemy", "xrv": "torchxrayvision", "torchxrayvision": "torchxrayvision"}
-INSTALLED_AS_DEPENDENCY = {"pydantic", "starlette", "torch", "torchvision"}      # torch and torchvision: the Dockerfile's first RUN
+INSTALLED_AS_DEPENDENCY = {"pydantic", "starlette"}                              # installed with fastapi; locked as dependencies
 LOCAL = {"app", "explain", "experiments", "scripts", "tests"}
 
 

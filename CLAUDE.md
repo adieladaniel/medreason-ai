@@ -822,6 +822,19 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   version one escaped, and it showed that the palette's "new case" branch was dead code (a hash change from `#/analyze/<id>` to `#/analyze`
   already draws an empty form), so the branch was removed; all nine breakages of the pill version were caught. Not done on purpose: a dark theme
   (the matplotlib figures and Chart.js colours would all need a second set), and a fixed phone pill.
+- Engineering hardening, step 3a: dependency lock (2026-10-29, `scripts/lock_dependencies.py`, `requirements-api.lock`, `requirements-test.lock`,
+  `requirements-test.txt`, `docs/DOCKER.md`). Before this only the packages we import were pinned; their dependencies (about 60) were whatever
+  pip found on build day. `uv pip compile` (a tool, installed in a throwaway venv, not a project dependency) resolves for Linux x86-64 and Python
+  3.11 and writes 89 packages with SHA-256 hashes for the service and 13 more for the test stage; the Dockerfile installs both with `pip install
+  --require-hashes`. `requirements-api.txt` now also holds the torch and torchvision pins, and the lock names them `+cpu`, so the CPU index is added
+  to the install and no CUDA package is in either lock. The PyTorch index also mirrors urllib3, requests and others at old versions, which made
+  the first resolution fail; `--index-strategy unsafe-best-match` fixes that, and the hashes are what make it safe. Measured: `docker build --target
+  test .` from the lock passed, 417 passed, 3 skipped, 17 deselected in 44 s (the third skip is `test_shell_ui.py`, which needs Playwright), the
+  dependency install took 198 s from an empty cache, and a deliberately wrong hash is refused by pip. 5 new tests in `tests/test_packaging.py`
+  (27 in all); 8 deliberate breakages, and the first round let one through (a test that checked `--require-hashes` appeared anywhere in the
+  Dockerfile, not on every `pip install`), which is now strengthened. Not done: GitHub's own run on the lock (needs a push), a rerun of the
+  end-to-end timing with real models on the rebuilt `runtime` image (the lock freezes today's versions of dependencies, which are not necessarily
+  the ones the Phase 7 step 7 run used, so model outputs on the new image are not re-checked), and any automatic refresh of the lock.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -978,7 +991,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 412 tests, plus 60 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 417 tests, plus 60 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
