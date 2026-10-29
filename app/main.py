@@ -31,7 +31,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import dashboard_data, health
-from app.api import cases, validation
+from app.api import cases, examples, validation
 from app.config import Settings, get_settings
 from app.database import repository as repo
 from app.database.session import init_db, session_scope
@@ -196,6 +196,7 @@ def create_app(settings: Settings | None = None, runner: JobRunner | None = None
         return {"items": items}
 
     app.include_router(cases.router)
+    app.include_router(examples.router)
     app.add_middleware(RequestLogMiddleware)
 
     @app.get("/")

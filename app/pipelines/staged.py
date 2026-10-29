@@ -29,7 +29,10 @@ import time
 from collections import namedtuple
 from pathlib import Path
 
+import numpy as np
+
 from app.agent import MODALITY_PRIORITY
+from app.agent import scope as scope_check
 from app.agent.decision import decide
 from app.agent.reasoning import reason
 from app.config import get_settings
@@ -68,6 +71,34 @@ def _tools():
 
 
 # ------------------------------------------------------------------ stage 1
+_MISSING_INPUT: dict = {}
+_CLASS_ORDER = ["Normal", "Pneumonia", "Lung Cancer"]
+
+
+def _vector(result: dict) -> np.ndarray:
+    return np.array([result["probabilities"][c] for c in _CLASS_ORDER], dtype=float)
+
+
+def _missing_input_probs(modality: str, predictors: dict) -> np.ndarray:
+    """What the blood or text model says when it is given nothing. The scope detector was trained with every model's probabilities present
+    and a flag for whether the input was real (so an absent input is a constant, not a gap); this reproduces that constant."""
+    if modality not in _MISSING_INPUT:
+        from explain.blood import RAW_LABS
+        _MISSING_INPUT[modality] = _vector(predictors[modality]({k: None for k in RAW_LABS} if modality == "blood" else ""))
+    return _MISSING_INPUT[modality]
+
+
+def scope_of(preds: dict, predictors: dict) -> dict | None:
+    """The scope check for this case, or None: it needs a film (the backbone's outputs come from it) and a fitted detector. It describes the
+    case and never touches the prediction."""
+    img = preds.get("image")
+    if img is None or img.get("_backbone_outputs") is None or not scope_check.available():
+        return None
+    blood = _vector(preds["blood"]) if "blood" in preds else _missing_input_probs("blood", predictors)
+    text = _vector(preds["text"]) if "text" in preds else _missing_input_probs("text", predictors)
+    return scope_check.assess(img["_backbone_outputs"], _vector(img), blood, text, "blood" in preds, "text" in preds)
+
+
 def stage_predict(ctx: dict) -> dict:
     predictors = ctx["deps"].get("predictors") or _tools().PREDICTORS
     preds, seconds = {}, {}
@@ -81,7 +112,7 @@ def stage_predict(ctx: dict) -> dict:
     # how sure the system is; read from the pooled probabilities and never changes the predicted class
     decision = decide(reasoned["belief"]["probabilities"], list(preds), set_coverage=cfg.prediction_set_coverage,
                       alert_recall=cfg.cancer_alert_recall)
-    return {**reasoned, "decision": decision,
+    return {**reasoned, "decision": decision, "scope": scope_of(preds, predictors),
             "modalities": {m: {"predicted_class": p["predicted_class"], "probabilities": p["probabilities"]}
                            for m, p in preds.items()},
             "modalities_used": [m for m in MODALITY_PRIORITY if m in preds], "seconds": seconds}

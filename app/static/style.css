@@ -313,3 +313,8 @@ summary { cursor: pointer; font-size: 13px; color: var(--accent); }
   .form-cols, .pred { grid-template-columns: 1fr; }
   .pred-class { font-size: 30px; }
 }
+
+/* the example-case menu above the form */
+.example-row { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.example-row select { width: 100%; max-width: 520px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card, #fff); color: inherit; font: inherit; }
+.example-row .muted { margin: 8px 0 0; font-size: 13px; }

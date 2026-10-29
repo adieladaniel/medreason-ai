@@ -56,3 +56,7 @@ Thumbs.db
 # scratch logs from evaluation reruns
 experiments/**/*_rerun*.log
 experiments/image_backbones/_chunks/
+experiments/other_pathology/studies.csv
+experiments/test_evaluation/predictions.csv
+experiments/out_of_scope/_chunks/
+experiments/out_of_scope/feats_*.npz

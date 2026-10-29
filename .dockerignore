@@ -28,3 +28,9 @@ __pycache__
 .mypy_cache
 .idea
 experiments/image_backbones/_chunks
+experiments/other_pathology/studies.csv
+data/processed/excluded.csv
+experiments/test_evaluation/predictions.csv
+experiments/out_of_scope/_chunks
+experiments/out_of_scope/feats_*.npz
+data/processed/excluded_*.csv

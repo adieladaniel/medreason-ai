@@ -1,0 +1,61 @@
+{
+ "fit_films": 3000,
+ "calibration_films": 1000,
+ "max_distance": 5.3515694572408155,
+ "min_spread": 33.96349899815032,
+ "max_colourfulness": 12.0,
+ "validation_false_reject_rate": 0.003455723542116651,
+ "validation_films": 2315,
+ "altered_films_pass_rate": {
+  "resized to 512": 1.0,
+  "resized to 2000": 1.0,
+  "recompressed JPEG q30": 1.0,
+  "saved as RGB": 1.0,
+  "rotated 3 degrees": 1.0,
+  "blurred": 1.0
+ },
+ "hard_cases_pass_rate_not_required": {
+  "inverted film": 0.4,
+  "upside down": 0.9733333333333334,
+  "3 by 3 mosaic of one film": 0.0
+ },
+ "not_an_xray_reject_rate": {
+  "gaussian noise": 1.0,
+  "uniform noise": 1.0,
+  "flat gray": 1.0,
+  "black": 1.0,
+  "white": 1.0,
+  "horizontal gradient": 1.0,
+  "vertical gradient": 1.0,
+  "checkerboard": 1.0,
+  "page of text": 1.0,
+  "shapes on white": 1.0,
+  "smooth blobs": 1.0,
+  "colour noise": 1.0,
+  "colour gradient": 1.0,
+  "natural colour photograph": 1.0,
+  "natural grayscale photograph (not required)": 0.5
+ },
+ "not_an_xray_counts": {
+  "gaussian noise": 30,
+  "uniform noise": 30,
+  "flat gray": 30,
+  "black": 30,
+  "white": 30,
+  "horizontal gradient": 30,
+  "vertical gradient": 30,
+  "checkerboard": 30,
+  "page of text": 30,
+  "shapes on white": 30,
+  "smooth blobs": 30,
+  "colour noise": 30,
+  "colour gradient": 30,
+  "natural colour photograph": 10,
+  "natural grayscale photograph (not required)": 10
+ },
+ "criteria_met": {
+  "validation_false_reject_at_most_1_percent": true,
+  "every_negative_kind_rejected_at_least_95_percent": true,
+  "every_alteration_passes_at_least_95_percent": true
+ }
+}

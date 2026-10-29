@@ -1,0 +1,124 @@
+{
+ "cv_auroc": {
+  "A": 0.609873600246715,
+  "B": 0.6199429473292095,
+  "C": 0.7384692289014562
+ },
+ "chosen_arm": "C",
+ "threshold": 0.46520921215706756,
+ "flag_share_in_scope_training": 0.1,
+ "training_rows": {
+  "in_scope": 11039,
+  "excluded": 5369,
+  "patients": 3362
+ },
+ "first_check_validation_patients": {
+  "point": {
+   "auroc": 0.6042562948286665,
+   "catch_rate": 0.38087520259319285,
+   "false_flag_rate": 0.2734341252699784,
+   "f1_all": 0.6128201698337464,
+   "f1_unflagged": 0.6302629471896827,
+   "cancers_flagged": 0.2564102564102564,
+   "auroc_existing_confidence": 0.5628737253693934
+  },
+  "interval": {
+   "auroc": [
+    0.5751695731352198,
+    0.6316753879977953
+   ],
+   "catch_rate": [
+    0.34050557077369187,
+    0.42170770041315825
+   ],
+   "false_flag_rate": [
+    0.24834342361137163,
+    0.30029390565721287
+   ],
+   "f1_all": [
+    0.5668788903381007,
+    0.6499900821656946
+   ],
+   "f1_unflagged": [
+    0.5775798506857212,
+    0.6710585842269009
+   ],
+   "cancers_flagged": [
+    0.17720958888764424,
+    0.3496255883611466
+   ],
+   "auroc_existing_confidence": [
+    0.5289051274537587,
+    0.5963346791644989
+   ]
+  }
+ },
+ "final_held_out_patients": {
+  "point": {
+   "auroc": 0.5731495215322533,
+   "catch_rate": 0.34493529674252565,
+   "false_flag_rate": 0.2734341252699784,
+   "f1_all": 0.6128201698337464,
+   "f1_unflagged": 0.6302629471896827,
+   "cancers_flagged": 0.2564102564102564,
+   "auroc_existing_confidence": 0.6301676106875305
+  },
+  "interval": {
+   "auroc": [
+    0.5509993398676637,
+    0.59765950981412
+   ],
+   "catch_rate": [
+    0.32270948654323345,
+    0.368192744659385
+   ],
+   "false_flag_rate": [
+    0.24616819648750082,
+    0.2999549379924487
+   ],
+   "f1_all": [
+    0.5688903651515984,
+    0.6500675108401446
+   ],
+   "f1_unflagged": [
+    0.5810609490183427,
+    0.6690595279095675
+   ],
+   "cancers_flagged": [
+    0.1756697486960645,
+    0.3561683199496142
+   ],
+   "auroc_existing_confidence": [
+    0.6064685548983261,
+    0.6534628502776944
+   ]
+  }
+ },
+ "adopted": false,
+ "failed_because": [
+  "AUROC below 0.75, or its lower bound below 0.70",
+  "flags fewer than 35 percent of the held-out Excluded studies",
+  "flags more than 13 percent of in-scope validation studies",
+  "flags more than 20 percent of true Lung Cancer validation studies"
+ ],
+ "n": {
+  "in_scope_validation": 2315,
+  "excluded_validation_patients": 1234,
+  "excluded_held_out": 2241
+ },
+ "post_hoc_clean_diagnostic": {
+  "in_scope_validation": 2315,
+  "excluded_validation_patients": 1234,
+  "patients": 720,
+  "cv_auroc": {
+   "A": 0.5995774859891273,
+   "B": 0.602222136653703,
+   "C": 0.6035414865352101
+  },
+  "in_scope_oof_vs_no_split_excluded_auroc": {
+   "A": 0.5434368142114896,
+   "B": 0.564105233027141,
+   "C": 0.5935879828408909
+  }
+ }
+}

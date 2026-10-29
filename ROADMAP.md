@@ -289,7 +289,28 @@ Steps, built and reported one at a time:
 
 ## Phase 8, integration, testing, documentation
 
-Status: not started.
+Status: done (2026-10-29). The summary to quote from is `docs/RESULTS.md`.
+
+What was done, in the order it was done:
+
+1. Image backbone experiment (`experiments/image_backbones/`, pre-registered): NIH and PadChest weights did not meet the adoption rule, so the
+   image model stays. A negative result, and the caveat about the backbone's pretraining stays open.
+2. Other-pathology measurement (`experiments/other_pathology/`): the unchanged system cannot say "none of these" (72 percent of 1,500 studies of
+   other disease answered without a low-confidence flag; confidence separates them from in-scope studies with AUROC 0.62). Documented as the
+   largest limitation; not fixed, because a fix changes the models.
+   Follow-up (`experiments/out_of_scope/`): a gate trained to flag such studies from the system's own outputs was tried, pre-registered, and not
+   adopted (held-out AUROC 0.57; its cross-validated 0.74 was an artifact of the training rows). The information is not in those outputs.
+3. Non-X-ray guard (`app/xray_guard.py`): refuses colour photographs, blank or flat images, gradients, pages of text and noise at the upload
+   door; 0.35 percent of real validation films wrongly refused.
+4. Sealed test evaluation (`experiments/test_evaluation/`), run once: macro F1 0.609 (0.559 to 0.654) against 0.613 on validation; the calibration,
+   prediction-set coverage and low-confidence behaviour all held on unseen patients; the gain from combining inputs was about half the validation
+   figure and the image's contribution was indistinguishable from zero.
+5. Demo preparation: nine validation cases chosen by fixed rules (including cases the system gets wrong), an example-case menu on the Analyze page,
+   two built-in non-X-ray pictures, and a demo guide in the README.
+6. Write-up: `docs/RESULTS.md` and a README that leads with the result and its caveats.
+
+The plan below is kept as the record of what was intended. Items marked here as done are the ones above; the rest of Phase 8b (a full screen
+recording, PhysioNet credentials, rehearsing the cold start in front of an audience) are for the person presenting.
 
 - End-to-end testing across the full pipeline.
 - Write up the methodology and empirical findings (dataset linking rate, label validation

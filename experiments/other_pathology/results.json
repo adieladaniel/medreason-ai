@@ -1,0 +1,174 @@
+{
+ "n_in_scope": 2315,
+ "n_excluded": 1500,
+ "patients_in_scope": 720,
+ "patients_excluded": 952,
+ "point": {
+  "in_names_normal": 0.32699784017278616,
+  "in_names_pneumonia": 0.6038876889848812,
+  "in_names_lung_cancer": 0.06911447084233262,
+  "in_not_low_confidence": 0.8146868250539957,
+  "in_at_least_85": 0.009935205183585313,
+  "in_single_class_set": 0.5628509719222462,
+  "in_alert": 0.099577266322217,
+  "in_mean_max_prob": 0.5775795248380129,
+  "out_names_normal": 0.38133333333333336,
+  "out_names_pneumonia": 0.524,
+  "out_names_lung_cancer": 0.09466666666666666,
+  "out_not_low_confidence": 0.724,
+  "out_at_least_85": 0.004,
+  "out_single_class_set": 0.45,
+  "out_alert": 0.18169209431345354,
+  "out_mean_max_prob": 0.5332156666666666,
+  "auroc_confidence_detects_out_of_scope": 0.6155566594672426
+ },
+ "interval": {
+  "in_names_normal": [
+   0.2923412478592126,
+   0.36567507133450394
+  ],
+  "in_names_pneumonia": [
+   0.5607088562693198,
+   0.6431920154663995
+  ],
+  "in_names_lung_cancer": [
+   0.05167512215712046,
+   0.0893018536641529
+  ],
+  "in_not_low_confidence": [
+   0.7953079239143105,
+   0.833272035709795
+  ],
+  "in_at_least_85": [
+   0.005765975133528863,
+   0.014377146104098272
+  ],
+  "in_single_class_set": [
+   0.5382653924829052,
+   0.5876980461811723
+  ],
+  "in_alert": [
+   0.07962172141969724,
+   0.12173299744325321
+  ],
+  "in_mean_max_prob": [
+   0.5698287504140086,
+   0.5851282721481715
+  ],
+  "out_names_normal": [
+   0.35100935828877006,
+   0.41217124629735247
+  ],
+  "out_names_pneumonia": [
+   0.49206083237584575,
+   0.5552635804160061
+  ],
+  "out_names_lung_cancer": [
+   0.07736355397365424,
+   0.1125010593220339
+  ],
+  "out_not_low_confidence": [
+   0.6999316473000684,
+   0.748806967738379
+  ],
+  "out_at_least_85": [
+   0.00130718954248366,
+   0.007407657151419794
+  ],
+  "out_single_class_set": [
+   0.42210385158752045,
+   0.47651254004317145
+  ],
+  "out_alert": [
+   0.1566265060240964,
+   0.20810177641785552
+  ],
+  "out_mean_max_prob": [
+   0.5270661948608256,
+   0.5396438085075651
+  ],
+  "auroc_confidence_detects_out_of_scope": [
+   0.5885663312206826,
+   0.6400634831548364
+  ]
+ },
+ "excluded_modalities": {
+  "blood+image+text": 1386,
+  "blood+image": 58,
+  "image+text": 56
+ },
+ "subgroups_of_excluded": {
+  "effusion": {
+   "n": 1153,
+   "names_normal": 0.36,
+   "names_pneumonia": 0.556,
+   "names_lung_cancer": 0.084,
+   "not_low_confidence": 0.728,
+   "at_least_85": 0.004,
+   "single_class_set": 0.441,
+   "mean_max_prob": 0.535
+  },
+  "edema": {
+   "n": 704,
+   "names_normal": 0.347,
+   "names_pneumonia": 0.621,
+   "names_lung_cancer": 0.033,
+   "not_low_confidence": 0.743,
+   "at_least_85": 0.004,
+   "single_class_set": 0.46,
+   "mean_max_prob": 0.54
+  },
+  "atelectasis": {
+   "n": 798,
+   "names_normal": 0.382,
+   "names_pneumonia": 0.528,
+   "names_lung_cancer": 0.09,
+   "not_low_confidence": 0.718,
+   "at_least_85": 0.004,
+   "single_class_set": 0.437,
+   "mean_max_prob": 0.528
+  },
+  "pneumothorax": {
+   "n": 965,
+   "names_normal": 0.393,
+   "names_pneumonia": 0.487,
+   "names_lung_cancer": 0.12,
+   "not_low_confidence": 0.699,
+   "at_least_85": 0.004,
+   "single_class_set": 0.433,
+   "mean_max_prob": 0.527
+  },
+  "cardiomegaly": {
+   "n": 402,
+   "names_normal": 0.333,
+   "names_pneumonia": 0.619,
+   "names_lung_cancer": 0.047,
+   "not_low_confidence": 0.731,
+   "at_least_85": 0.007,
+   "single_class_set": 0.41,
+   "mean_max_prob": 0.538
+  },
+  "fracture": {
+   "n": 132,
+   "names_normal": 0.379,
+   "names_pneumonia": 0.432,
+   "names_lung_cancer": 0.189,
+   "not_low_confidence": 0.644,
+   "at_least_85": 0.0,
+   "single_class_set": 0.424,
+   "mean_max_prob": 0.508
+  },
+  "tuberculosis_coded": {
+   "n": 2,
+   "names_normal": 1.0,
+   "names_pneumonia": 0.0,
+   "names_lung_cancer": 0.0,
+   "not_low_confidence": 0.0,
+   "at_least_85": 0.0,
+   "single_class_set": 0.0,
+   "mean_max_prob": 0.455
+  }
+ },
+ "seed": 42,
+ "sample_requested": 1500
+}

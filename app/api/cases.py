@@ -68,7 +68,7 @@ def submit_case(request: Request, image: UploadFile | None = File(None), indicat
         data = image.file.read(limit + 1)                  # one byte over the limit is enough to know it is too big
         if len(data) > limit:
             raise validation.InputError("image", f"the file is larger than {cfg.max_upload_mb} MB", status=413)
-    info = validation.check_image(data, cfg.max_image_pixels) if data else None
+    info = validation.check_image(data, cfg.max_image_pixels, guard=cfg.xray_guard) if data else None
 
     if not provided_inputs(text, lab_values, "image" if data else None):
         raise validation.InputError("form", "give at least one of: a chest X-ray, lab values, or a clinical indication")

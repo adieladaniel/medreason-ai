@@ -22,12 +22,6 @@
     ['verifying', 'Checking', 'Each sentence is checked against its passage.'],
   ];
   const TERMINAL = ['done', 'partial', 'failed'];
-  // made-up values, not a patient: they only show what the fields expect
-  const EXAMPLE = {
-    indication: 'Fever, productive cough and shortness of breath for three days. Evaluate for pneumonia.',
-    labs: { wbc: 18.5, rbc: 4.1, hemoglobin: 12.0, hematocrit: 36, platelets: 320, neutrophils: 86, lymphocytes: 8,
-            monocytes: 5, crp: 120, albumin: 2.9, ldh: 310, sodium: 133, potassium: 4.1, glucose: 128, creatinine: 0.9, urea: 24 },
-  };
 
   /* ------------------------------------------------------------ state */
   let spec = null;
@@ -82,6 +76,11 @@
       return `<fieldset class="lab-group"><legend>${esc(g)}</legend><div class="lab-grid">${labs}</div></fieldset>`;
     }).join('');
     return `<form id="case-form" class="card form" novalidate>
+      <div class="example-row" id="example-row">
+        <label class="field"><span>Example case <em>fills the whole form, X-ray included</em></span>
+          <select id="f-example"><option value="">Loading examples...</option></select></label>
+        <p class="muted" id="example-note"></p>
+      </div>
       <div class="form-cols">
         <div>
           <label class="field"><span>Chest X-ray <em>${spec.image.formats.join(' or ')}, up to ${spec.image.max_mb} MB, optional</em></span>
@@ -100,7 +99,6 @@
       </div>
       <div class="form-actions">
         <button type="submit" class="btn primary" id="f-go">Analyze</button>
-        <button type="button" class="btn" id="f-example">Fill example values</button>
         <button type="button" class="btn ghost" id="f-clear">Clear</button>
         <span class="muted" id="form-note">At least one input is needed. More inputs give a better-supported answer.</span>
       </div>
@@ -137,16 +135,12 @@
     });
     $('#clear-image').addEventListener('click', () => { file.value = ''; setPreview(); });
     ta.addEventListener('input', () => { $('#count').textContent = `${ta.value.length} / ${spec.indication.max_chars}`; });
-    $('#f-example').addEventListener('click', () => {
-      ta.value = EXAMPLE.indication;
-      ta.dispatchEvent(new Event('input'));
-      main.querySelectorAll('[data-lab]').forEach((i) => { i.value = EXAMPLE.labs[i.dataset.lab] != null ? EXAMPLE.labs[i.dataset.lab] : ''; });
-      $('#form-note').textContent = 'These are made-up values, not a patient. Add a chest X-ray of your own if you have one.';
-    });
+    loadExamples(file, ta);
     $('#f-clear').addEventListener('click', () => {
       // not form.reset(): a control whose id or name is "reset" would shadow that method
       HTMLFormElement.prototype.reset.call(form); setPreview(); clearErr();
       $('#count').textContent = `0 / ${spec.indication.max_chars}`;
+      $('#example-note').textContent = '';
     });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -176,6 +170,53 @@
         showErr('form', 'Could not reach the server. Check that it is still running.');
       } finally {
         go.disabled = false; go.textContent = 'Analyze';
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------ example cases */
+  // A complete example (X-ray, indication, labs) from the server, so the inputs always belong together. The old single
+  // "fill example values" button put made-up pneumonia-like values next to whatever X-ray the visitor had chosen, and the
+  // result said Pneumonia for every film.
+  async function loadExamples(file, ta) {
+    const sel = $('#f-example'), note = $('#example-note');
+    const notes = {};
+    try {
+      const r = await fetch('/api/examples');
+      if (!r.ok) throw new Error(r.status);
+      const { examples } = await r.json();
+      const groups = {};
+      examples.forEach((e) => { notes[e.id] = e.note; (groups[e.kind] = groups[e.kind] || []).push(e); });
+      const label = (kind) => (kind === 'built-in' ? 'Not an X-ray (to see the refusal)' : 'Validation cases');
+      sel.innerHTML = '<option value="">Choose an example case...</option>' + Object.entries(groups).map(([kind, list]) =>
+        `<optgroup label="${esc(label(kind))}">${list.map((e) => `<option value="${esc(e.id)}">${esc(e.title)}</option>`).join('')}</optgroup>`).join('');
+    } catch (e) {
+      $('#example-row').hidden = true;
+      return;
+    }
+    sel.addEventListener('change', async () => {
+      const id = sel.value;
+      note.textContent = '';
+      if (!id) return;
+      clearErr();
+      note.textContent = 'Loading the example...';
+      try {
+        const [d, img] = await Promise.all([fetch(`/api/examples/${encodeURIComponent(id)}`).then((r) => r.json()),
+                                            fetch(`/api/examples/${encodeURIComponent(id)}/image`)]);
+        ta.value = d.indication || '';
+        ta.dispatchEvent(new Event('input'));
+        main.querySelectorAll('[data-lab]').forEach((i) => { i.value = d.labs && d.labs[i.dataset.lab] != null ? d.labs[i.dataset.lab] : ''; });
+        if (img.ok) {
+          const blob = await img.blob();
+          const f = new File([blob], `${id}.${blob.type === 'image/jpeg' ? 'jpg' : 'png'}`, { type: blob.type });
+          const dt = new DataTransfer();
+          dt.items.add(f);
+          file.files = dt.files;
+          file.dispatchEvent(new Event('change'));
+        }
+        note.textContent = notes[id] || '';
+      } catch (e) {
+        note.textContent = 'Could not load that example.';
       }
     });
   }
@@ -293,13 +334,21 @@
     const rec = plan.recommendation ? `<div class="callout">${esc(plan.recommendation)}</div>` : '';
     const d = p.decision;                      // how sure the system is; null for a case stored before this existed
     const low = !!(d && d.low_confidence);
+    const sc = p.scope;                         // the scope check; null when there is no X-ray or no fitted detector
+    const outside = !!(sc && sc.out_of_scope);
     const al = d && d.cancer_alert;
     const alertBanner = al && al.informative && al.flag && cls !== 'Lung Cancer'
       ? alertBox('warn', 'Lung Cancer signal.', `The combined probability for Lung Cancer is ${pct(al.probability)}, at or above this tool's alert level of ${pct(al.threshold)}. This is the models' signal, not a diagnosis. At this level on validation cases the alert caught ${pct(al.validation.recall)} of the Lung Cancer cases, and about ${pct(al.validation.share_of_alerts_real)} of its alerts were real Lung Cancer (${al.validation.alerts_per_100} alerts per 100 cases).`)
       : '';
     const noAlert = al && !al.informative
       ? '<p class="note">No cancer alert is offered for this combination of inputs: on validation cases its alerts were barely better than chance.</p>' : '';
-    const headline = low
+    const lowNote = low ? ` After calibration its confidence is ${d.confidence.calibrated.toFixed(2)}, below the cut-off of ${d.confidence.threshold.toFixed(2)} at which the reliability analysis declines to answer, so treat the best guess as weak.` : '';
+    const headline = outside
+      ? `<span class="k-label">Predicted by the trained models</span><span class="pred-class unsure">Possibly outside what this system can assess</span>
+          <span class="k-sub">Best guess among the three classes it knows: <b style="color:${CCOL[cls]}">${esc(cls)}</b> ${pct(b.confidence)}. Combining ${esc(used)}.</span>
+          <span class="pill no">May not be one of the three classes</span>
+          <span class="k-sub">A separate check, trained on studies of other chest conditions, scored this case ${sc.score.toFixed(2)}, at or above its cut-off of ${sc.threshold.toFixed(2)}. At that cut-off it flagged about ${pct(sc.flag_rate_in_scope)} of ordinary Normal, Pneumonia and Lung Cancer studies and about ${pct(sc.catch_rate_other)} of studies of other chest conditions. A flag does not say what the condition is: this system only knows Normal, Pneumonia and Lung Cancer.${lowNote}</span>`
+      : low
       ? `<span class="k-label">Predicted by the trained models</span><span class="pred-class unsure">Uncertain</span>
           <span class="k-sub">Best guess by probability: <b style="color:${CCOL[cls]}">${esc(cls)}</b> ${pct(b.confidence)}. Combining ${esc(used)}.</span>
           <span class="pill no">Low confidence</span>
@@ -320,7 +369,7 @@
           <span class="set-badges">${d.prediction_set.map(badge).join(' ') || '<span class="muted">none</span>'}</span>
           <span class="k-sub">${meaning}${outside} On validation cases a set like this held the true class: ${held}.</span></div>`;
     }
-    return `${alertBanner}<section class="card pred${low ? ' weak' : ''}">
+    return `${alertBanner}<section class="card pred${low || outside ? ' weak' : ''}">
         <div class="pred-main">${headline}</div>
         <div class="pred-probs">${probRows(b.probabilities)}</div>${setLine}${noAlert}
       </section>

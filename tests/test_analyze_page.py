@@ -12,6 +12,7 @@ the form's own reset method (so Clear did nothing), and a display rule overrode 
 empty X-ray placeholder showed before any file was chosen). Both have a test below.
 """
 import io
+import json
 import socket
 import threading
 import time
@@ -25,6 +26,7 @@ from PIL import Image                                   # noqa: E402
 from playwright.sync_api import sync_playwright         # noqa: E402
 
 import app.rag.retrieve as R                            # noqa: E402
+from app.agent import scope as scope_check               # noqa: E402
 from app.config import Settings                         # noqa: E402
 from app.main import create_app                         # noqa: E402
 from app.pipelines.runner import JobRunner              # noqa: E402
@@ -59,7 +61,10 @@ ACTIVE = {"P": P}       # a test may swap in other probabilities for the next ca
 
 def prediction(m):
     p = ACTIVE["P"][m]
-    return {"modality": m, "predicted_class": max(p, key=p.get), "probabilities": p}
+    out = {"modality": m, "predicted_class": max(p, key=p.get), "probabilities": p}
+    if m == "image":
+        out["_backbone_outputs"] = np.zeros(18)           # what the real image predictor also returns, for the scope check
+    return out
 
 
 def explainer(m):
@@ -95,9 +100,18 @@ def site(tmp_path_factory):
         return "Low albumin is associated with increased mortality in pneumonia." if "albumin" in passage["text"].lower() else "Leukocytosis is common in pneumonia."
     mp.setattr(writer, "_ask", ask)
     mp.setattr(faithfulness, "entailment", lambda s, p: 0.9)
+    state["scope"] = None                                 # a test sets this to what the (fake) scope check returns for the next case
+    mp.setattr(scope_check, "assess", lambda *a, **k: state["scope"])
 
+    demo = tmp / "demo"
+    (demo / "fake-case").mkdir(parents=True)
+    Image.effect_noise((300, 300), 40).convert("L").save(demo / "fake-case" / "image.jpg", "JPEG")
+    (demo / "manifest.json").write_text(json.dumps({"cases": [{
+        "id": "fake-case", "title": "A fake validation case", "note": "Why this one: it is made up for the test.",
+        "indication": "Cough for two days. Evaluate for pneumonia.", "labs": {"wbc": 14.2, "albumin": 3.1},
+        "study_id": 123456, "expected": {"true_label": "Normal"}}]}), encoding="utf-8")
     url = "sqlite:///" + (tmp / "page.db").as_posix()
-    cfg = Settings(database_url=url, upload_dir=tmp / "uploads")
+    cfg = Settings(database_url=url, upload_dir=tmp / "uploads", demo_dir=demo)
     deps = {"predictors": {m: (lambda _i, m=m: prediction(m)) for m in P}, "explainers": {m: explainer(m) for m in P},
             "plotters": {m: plot for m in P}}
     app = create_app(cfg, JobRunner(url, deps=deps, figure_dir=cfg.upload_dir), build_dashboard=False)
@@ -143,6 +157,20 @@ def page(browser, site):
     ctx.close()
 
 
+EXAMPLE_TEXT = "Fever, productive cough and shortness of breath for three days. Evaluate for pneumonia."
+EXAMPLE_LABS = {"wbc": 18.5, "rbc": 4.1, "hemoglobin": 12.0, "hematocrit": 36, "platelets": 320, "neutrophils": 86, "lymphocytes": 8,
+                "monocytes": 5, "crp": 120, "albumin": 2.9, "ldh": 310, "sodium": 133, "potassium": 4.1, "glucose": 128, "creatinine": 0.9,
+                "urea": 24}
+
+
+def fill_example(pg):
+    """Type a pneumonia-like indication and a full set of labs, as a person would. (The page used to have a button for this; it was
+    replaced by a menu of complete example cases, because made-up values next to someone's own X-ray gave Pneumonia every time.)"""
+    pg.fill("#f-ind", EXAMPLE_TEXT)
+    for name, value in EXAMPLE_LABS.items():
+        pg.fill(f'[data-lab="{name}"]', str(value))
+
+
 def finish(pg, timeout=60000):
     pg.wait_for_function("document.querySelector('#r-audit #del')", timeout=timeout)
 
@@ -171,7 +199,7 @@ def test_choosing_a_file_shows_a_preview_and_remove_hides_it(page, site):
 
 def test_the_clear_button_empties_the_form(page):
     """A control with the id "reset" used to shadow form.reset(), so Clear threw and did nothing."""
-    page.click("#f-example")
+    fill_example(page)
     assert page.input_value('[data-lab="albumin"]') == "2.9" and "pneumonia" in page.input_value("#f-ind")
     page.click("#f-clear")
     assert page.input_value('[data-lab="albumin"]') == "" and page.input_value("#f-ind") == ""
@@ -201,7 +229,7 @@ def test_the_servers_reasons_appear_next_to_the_field(page):
 
 # ------------------------------------------------------------------ a case, live
 def test_a_case_is_followed_live_and_every_section_arrives(page, site):
-    page.click("#f-example")
+    fill_example(page)
     page.set_input_files("#f-image", str(site.film))
     page.click("#f-go")
     page.wait_for_selector("#r-pred .pred-class")
@@ -221,7 +249,7 @@ def test_a_case_is_followed_live_and_every_section_arrives(page, site):
 
 
 def test_a_past_case_can_be_reopened_from_the_list_and_deleted(page, site):
-    page.click("#f-example")
+    fill_example(page)
     page.click("#f-go")
     finish(page)
     page.goto(f"{site.base}/#/analyze")
@@ -241,7 +269,7 @@ def test_a_past_case_can_be_reopened_from_the_list_and_deleted(page, site):
 def test_a_case_with_the_language_model_down_says_which_stage_failed(page, site):
     site.state["llm_down"] = True
     try:
-        page.click("#f-example")
+        fill_example(page)
         page.click("#f-go")
         finish(page)
     finally:
@@ -264,7 +292,7 @@ def test_nothing_scrolls_sideways_at_phone_width(page, site):
     page.reload()
     page.wait_for_selector("#case-form")
     assert page.evaluate("document.documentElement.scrollWidth") <= page.evaluate("document.documentElement.clientWidth") + 2
-    page.click("#f-example")
+    fill_example(page)
     page.click("#f-go")
     finish(page)
     assert page.evaluate("document.documentElement.scrollWidth") <= page.evaluate("document.documentElement.clientWidth") + 2
@@ -273,7 +301,7 @@ def test_nothing_scrolls_sideways_at_phone_width(page, site):
 def test_markup_in_paper_text_or_model_output_is_shown_as_text_and_never_runs(page, site):
     site.state["markup"] = True
     try:
-        page.click("#f-example")
+        fill_example(page)
         page.click("#f-go")
         finish(page)
     finally:
@@ -289,7 +317,7 @@ def run_with(page, probabilities, click_example=True, image=None):
     ACTIVE["P"] = probabilities
     try:
         if click_example:
-            page.click("#f-example")
+            fill_example(page)
         if image:
             page.set_input_files("#f-image", str(image))
         page.click("#f-go")

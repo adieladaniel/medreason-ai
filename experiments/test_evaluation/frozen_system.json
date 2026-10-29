@@ -1,0 +1,18 @@
+{
+ "git_head": "5f234363f19218af83b45358f40d233e63dc76c8",
+ "files": {
+  "experiments/blood_baseline/hgb_model.joblib": "707cace7b3f7aec65e7be0147b74265b2cf43ef3280bb16947b5e742df95e814",
+  "experiments/text_baseline/logreg_indication.joblib": "428405259ef08fa22a3cd8e5e775518d0e0c9ce2c417d81042041b8eb4e31a73",
+  "experiments/image_baseline/image_head_final.pth": "acbae75432c296ab67c17c68e9b9bed6c2901f8e00e604be2c94d28bc44d9de0",
+  "app/data/decision_rules.json": "ebca08cd30fe689b53ee6e9783684a92e0fe75695f3e6f297557a71ca23dddd1",
+  "explain/image.py": "c975a29c0fb3da304aa5e2802af5481e7f9669f7ecd9dfb1413a782bf9337bfd",
+  "explain/blood.py": "cbb4ec0cdcb09430552c2a406e0ca89e55d141534651cfa12f2c8178e7d04cb6",
+  "explain/text.py": "4cf7f5c6099837068bc55b63c49485084778b3f318140fef5ee71c8b1a17beda",
+  "app/agent/belief.py": "5380cf094a585e2509098d776364abc3d8ea75181113e9d07c883f2d80201ff1",
+  "app/agent/reasoning.py": "e0a46e46c3fe5d30fd07f04d995a7323db973340214e5556a2f42efbce8d0ca2",
+  "app/agent/decision.py": "d7ae0a46cd449fe5b2391fa93794948131fea688627af1e19998cd6f96f0a300",
+  "app/agent/consistency.py": "10c8fae51ff8a9624aabcab8d5be0b4fcd1fc845ca3caf2cf4d5e64d93b34169",
+  "app/pipelines/staged.py": "3da321c2cdbc1948079e59c7080abaa7804b7a0fee015584bfc930583582bdc5"
+ },
+ "backbone_weights": "23b13a04459684ffa41247d068207a7657b4e1b4dec2b02431f5026bd75b1189"
+}

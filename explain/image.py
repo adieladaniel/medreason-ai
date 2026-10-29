@@ -94,9 +94,13 @@ def predict_image(image_path: str) -> dict:
     st = _load()
     x = _preprocess(image_path)
     with torch.no_grad():
-        proba = F.softmax(st["head"](st["backbone"](x)), dim=1)[0]
+        outputs = st["backbone"](x)
+        proba = F.softmax(st["head"](outputs), dim=1)[0]
+    # "_backbone_outputs" is private (the leading underscore keeps it out of stored results): the scope check reads the backbone's 18
+    # pathology outputs, which the three-class head discards (app/agent/scope.py)
     return {"modality": "image", "predicted_class": LABEL_NAMES[int(proba.argmax())],
-            "probabilities": {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)}}
+            "probabilities": {n: round(float(p), 4) for n, p in zip(LABEL_NAMES, proba)},
+            "_backbone_outputs": outputs[0].numpy()}
 
 
 def explain_image(image_path: str, top_k: int = 6) -> dict:

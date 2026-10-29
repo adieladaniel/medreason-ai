@@ -78,6 +78,10 @@ because Ollama is down. `/api/ready` is the check for whether a case can run.
 The same stack was then run on 16 validation cases twice (2026-10-28): every case matched its offline twin and the timing budget is
 in `experiments/e2e/RESULTS.md`.
 
+The stack also mounts `demo/cases/` read-only (the example cases for the Analyze page's menu, built by `scripts/build_demo_cases.py`; git-ignored and
+kept out of every image, because it holds MIMIC images and text), and the upload door runs the non-X-ray guard (`app/xray_guard.py`, its fitted numbers
+are in the image). Without a `demo/cases/` folder the menu still offers the two built-in not-an-X-ray pictures.
+
 ## Limits to know
 
 - The build was checked here, but the GitHub Actions workflow could not be run from this laptop. Its steps use the standard

@@ -63,7 +63,7 @@ not, cut it.
 | 5. Agentic layer | core done | orchestrator, belief state, consistency checker, planner in `app/agent/` |
 | 6. RAG evidence retrieval | done | corpus, retrieval, planner, constrained writer, faithfulness check, topic gate and dashboard page done and run on real cases |
 | 7. Backend and API | done | storage, staged pipeline, case API, Analyze page, observability, containers and the end-to-end run |
-| 8. Integration, testing, writeup | not started | |
+| 8. Integration, testing, writeup | done | sealed test run once (macro F1 0.609), non-X-ray guard, other-pathology measurement, demo cases, results write-up |
 
 ### Image baseline results (val set, n=2,315)
 
@@ -489,7 +489,8 @@ reproduces the saved fusion score (0.6133) before doing anything else.
 - Limits: out-of-fold train predictions come from fold models and val predictions from the
   full-train models, so calibration transfers approximately (val coverage shows how well).
   Conformal guarantees assume exchangeability and patients repeat. The test set is untouched.
-  These checks should be repeated once, unchanged, on the test split at the end.
+  These checks were repeated once, unchanged, on the test split on 2026-10-29 (Phase 8 below): the calibration, the prediction-set coverage and
+  the answered-only accuracy all held on unseen patients.
 
 ### Does the text input carry the project? (2026-10-25, `scripts/eval_dominance.py`, validation only)
 
@@ -531,8 +532,9 @@ found the cancer. Measured, with 95 percent intervals that resample patients:
 - What to say about the project honestly: the engineering (staged pipeline, explanations, evidence with verified
   sentences, calibration and abstention measured) is the substance. The model quality is modest, the text input is
   mostly clinician context, and Lung Cancer is hard. Done on 2026-10-26: prediction sets, a low-confidence headline and the cancer alert
-  (see the Phase 7 notes). Still open: try image weights that have Nodule and Mass channels (their training data is not
-  stated, so check for overlap with this dataset first).
+  (see the Phase 7 notes). The image-weights experiment was then run and came out negative (2026-10-29,
+  `experiments/image_backbones/RESULTS.md`): NIH and PadChest weights, which have trained Nodule and Mass channels and no MIMIC
+  pretraining, did not meet the pre-registered adoption rule, and the current image model stays.
 
 ### Phase 7, backend and API (done 2026-10-28, started 2026-10-14)
 
@@ -721,8 +723,74 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
   - Limits: 16 studies, one laptop under load, percentiles on 16 values are rough, the warm pass is warm in three ways at once, and
     the NLI checker still runs on the CPU (a GPU build or a smaller model is the obvious speed-up and is untried).
 
-The test set (`data/processed/test.csv`, 2,099 samples) has never been touched. Keep it
-that way until final evaluation.
+### Phase 8, integration, testing, writeup (done 2026-10-29)
+
+Public summary of everything below, written to be quoted from: `docs/RESULTS.md`. Each experiment has a `PLAN.md` written before it ran and a
+`RESULTS.md`. Test count after this phase: 412 normal plus 43 slow-marked (375 and 38 before the out-of-scope work).
+
+- The sealed test split was used ONCE, on 2026-10-29 (`scripts/eval_test_split.py`, `experiments/test_evaluation/`). Do not run `--score`
+  again: it refuses while `results.json` exists, and a second look would no longer be a test. Do not retrain or retune the models, the
+  fusion rule or the decision-rule levels and then quote a test number; any such change makes later test numbers optimistic and has to be
+  reported as post-hoc. `scripts/submit_case.py` and the demo builder still refuse or never name the test split.
+  - Protocol: plan and frozen-system hashes first; `--predict` (never loads the label column, resumable) then `--score` (labels read once). It
+    was rehearsed on 120 validation studies in a scratch folder (a slow test) and every safeguard was broken on purpose and caught. The deployed
+    system (pools only the inputs a case has) is the headline; the validation convention (all three always, blood fed all-missing) is reported
+    beside it and reproduces the old 0.6133 on validation exactly.
+  - Result (2,099 studies, 721 patients, 120 cancers): macro F1 **0.609** (0.559 to 0.654) against 0.613 on validation; F1 Normal 0.629 /
+    Pneumonia 0.775 / Lung Cancer 0.421 (0.293 to 0.542); accuracy 0.704 (majority class 0.628); Lung Cancer ROC AUC 0.841 (0.767 to 0.904);
+    calibration error 0.118 raw and 0.029 after temperature scaling; low-confidence rule answers 81.9 percent at 75.2 percent accuracy;
+    prediction-set coverage 81.4 / 79.4 / 80.8 percent against a target of 80; cancer alert at the default setting flags 56.7 percent of
+    cancers (44.0 to 69.0) at 11 alerts per 100 cases with 29 percent real; consistency verdicts agree / partial / conflict were right
+    85.5 / 64.2 / 53.7 percent of the time (68 is the number the checker quotes for the middle group).
+  - Post-hoc (not in the plan, labelled as such, `scripts/eval_test_posthoc.py`): paired gains in macro F1, validation then test. Fusion over
+    text alone +0.104 then +0.049 (+0.014 to +0.081); text added to the other two +0.105 then +0.125; blood +0.051 then +0.029 (-0.001 to
+    +0.057); image +0.026 then +0.005 (-0.013 to +0.021). So the validation estimates of the system's level were good, but the gain from
+    combining inputs was about half as large on unseen patients and the image's contribution is indistinguishable from zero.
+- Image backbone experiment (negative, `experiments/image_backbones/`): the NIH and PadChest weights (trained Nodule and Mass outputs, no MIMIC
+  pretraining) and nih+mimic did not meet the pre-registered adoption rule; the current image model stays. Image Lung Cancer AUC: control 0.534,
+  nih 0.515, pc 0.604 (paired +0.070, -0.003 to +0.144), nih+mimic 0.530. The leakage control was inconclusive (every non-MIMIC backbone scored
+  lower on image Pneumonia F1, which inflation and domain shift both predict), so the caveat that the backbone may have seen our patients stays.
+  Retraining the same recipe gives image macro F1 about 0.03 different (0.472 against 0.481 stored), so smaller image-alone differences mean
+  nothing. The plan's Gate 0 compared with 0.50, the Phase 2 number; the stored out-of-fold predictions score 0.481, and the gate passed either way.
+  Features are extracted locally on the CPU by `scripts/extract_image_backbone_features.py` (about an hour, resumable, git-ignored).
+- Other-pathology measurement (`experiments/other_pathology/`, `scripts/eval_other_pathology.py`, and `scripts/build_final_dataset.py --excluded`
+  which builds `data/processed/excluded.csv` from the 3,475 Excluded studies of 1,628 patients in neither training nor the sealed split): on 1,500
+  of them the unchanged system answered 72.4 percent without a low-confidence flag, named Pneumonia 52.4 percent and Normal 38.1 percent, and
+  confidence separated them from in-scope studies with AUROC 0.616 (0.589 to 0.640); the cancer alert fired on 18.2 percent against 10.0 percent
+  of in-scope non-cancer studies. The system cannot say "none of these". Nothing was changed; the fix (an explicit other outcome or an
+  out-of-scope detector trained on Excluded studies of training patients) would change the models and is listed as future work.
+- Out-of-scope detector (negative, `experiments/out_of_scope/`, pre-registered): a gate meant to flag "possibly outside what this system can
+  assess" from the three models' probabilities and the image backbone's 18 outputs, trained on in-scope training out-of-fold predictions against
+  Excluded studies of training patients (`scripts/extract_scope_features.py`, `scripts/train_out_of_scope.py`; the Excluded tables come from
+  `scripts/build_final_dataset.py --excluded --role train|val|none|unseen`, and test patients cannot be named). Cross-validated AUROC 0.738 (arm C),
+  but on held-out patients (Excluded studies of patients in no split against in-scope validation) AUROC 0.573 (0.551 to 0.598), worse than the
+  existing confidence signal (0.630), flagging 27.3 percent of ordinary studies against a target of 10 and 25.6 percent of true cancers. Not
+  adopted, so no rules file or detector is written and the check is dormant. The post-hoc `clean_diagnostic` shows why: on rows with no seen-patient
+  mismatch every arm is about 0.60 and the backbone outputs add nothing, so the 0.738 was an artifact (Excluded studies of training patients get
+  predictions from models that saw those patients, the negatives are out-of-fold). Conclusion: the information separating other disease from the
+  three classes is not in the system's existing outputs; closing the gap needs an explicit "other" outcome in the models. The plumbing stays:
+  `app/agent/scope.py` (feature definition shared by training and serving, `available()`, `assess()`), `scope_of` in `app/pipelines/staged.py`, a
+  private `_backbone_outputs` key from `explain.image.predict_image`, and the "Possibly outside what this system can assess" headline in
+  `analyze.js`; `tests/test_out_of_scope.py` pins that nothing ships (`out_of_scope_rules.json` must not exist) and must be changed on purpose
+  when a detector is ever adopted. Test count after this: see section 6.
+- Non-X-ray guard (`app/xray_guard.py`, fitted by `scripts/build_xray_guard.py` on 3,000 training films, thresholds from 1,000 other training
+  films, parameters in `app/data/xray_guard.json`): colour, flatness, structure beyond a tilted plane, saturated-pixel share, and a distance to a
+  Gaussian model of 20 by 20 thumbnails. 0.35 percent of 2,315 validation films wrongly refused; resized, JPEG q30, RGB, rotated and blurred real
+  films all pass; every required kind of non-film (noise, flat colours, gradients, checkerboards, text pages, shapes on white, smooth blobs, colour
+  noise, colour gradients, colour photographs) is refused at least 95 percent. The first fitting failed the pre-registered criteria (gradients, 27
+  percent of shapes, grayscale photographs), two cues were added from real films only, and the final numbers use a fresh seed for the negatives.
+  Known limits: grayscale photographs are refused only half the time, a film upside down passes, it does not check chest or frontal view. The
+  setting `MEDREASON_XRAY_GUARD` is true by default; `tests/conftest.py` turns it off for the suite.
+- Demo (`scripts/build_demo_cases.py`, `app/api/examples.py`, the "Example case" menu in `app/static/analyze.js`): nine validation cases chosen
+  by fixed rules (clear Normal, clear Pneumonia, a Lung Cancer found, the models disagreeing and right, low confidence, no labs, wrong but flagged,
+  a cancer missed by the headline and caught by the alert, wrong and not flagged) frozen in `demo/cases/` (git-ignored, mounted read-only by
+  compose, never in an image), plus two built-in non-X-ray pictures. The API never sends the study id or the true label. A slow test checks the
+  live system still reproduces all nine and that the guard accepts all nine films. The old "Fill example values" button is gone: it put
+  made-up values beside whatever X-ray the visitor chose.
+- Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
+  records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
+  container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
+  three models weights each by 1/3).
 
 ---
 
@@ -839,7 +907,11 @@ Next:
 1. Phase 6 is done (the chain, its measurements and the dashboard page are in section 2).
    Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
    the predicted label. Open item carried to Phase 7: a faster checker (GPU or a smaller model).
-2. Phase 7, backend and API is done (all seven steps). Next is Phase 8 (section 2 table and ROADMAP.md). Original plan: wire `app/agent/orchestrator.run_case` into a FastAPI
+2. Phase 7, backend and API is done (all seven steps), and so is Phase 8 (section 2). What is left is future work, in the order that
+   matters: teach the models an "other" outcome (the largest honest gap; a gate on the existing outputs was tried and failed, see the
+   out-of-scope detector bullet in Phase 8), replace or fine-tune the image
+   model, test at a second site, and move the sentence checker to a GPU. All of it changes the models, so any new test number would be
+   post-hoc now that the sealed split is spent. Original Phase 7 plan: wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
    storage, Docker compose for the full stack (API, Postgres, Qdrant, Ollama), and build
    the dashboard's placeholder "Analyze a case" page against that endpoint. The staged
@@ -870,9 +942,9 @@ One component at a time, not big upfront builds.
 - Each script has a docstring explaining why, not just what. Match that style.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
-- Keep the test split sealed until final evaluation.
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 281 tests, plus 30 slow-marked ones that are skipped by default: 17 browser tests
-  of the Analyze page, 12 Postgres runs of the storage tests and the decision-rules rebuild check, which need Playwright, a throwaway
+- The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 412 tests, plus 43 slow-marked ones that are skipped by default: 26 browser tests
+  of the Analyze page, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray

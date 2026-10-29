@@ -19,6 +19,8 @@ from dataclasses import dataclass
 
 from PIL import Image
 
+from app import xray_guard
+
 # The 17 raw lab columns the blood model was trained on, in the same order as explain.blood.RAW_LABS (a test
 # keeps the two equal; this copy exists so the API does not have to import the model libraries to check input).
 LAB_NAMES = ["wbc", "rbc", "hemoglobin", "hematocrit", "platelets", "neutrophils", "lymphocytes", "monocytes",
@@ -115,8 +117,10 @@ class ImageInfo:
     height: int
 
 
-def check_image(data: bytes, max_pixels: int) -> ImageInfo:
-    """Accepts a PNG or JPEG that decodes completely and is a sensible size."""
+def check_image(data: bytes, max_pixels: int, guard: bool = False) -> ImageInfo:
+    """Accepts a PNG or JPEG that decodes completely and is a sensible size. With `guard`, also refuses what is clearly not a
+    radiograph (app/xray_guard.py): a colour photograph, a blank or flat picture, a gradient, a page of text. The guard is a gate
+    at the door and does not know whether the film is a chest or frontal."""
     try:
         img = Image.open(io.BytesIO(data))
         fmt, (width, height) = img.format, img.size       # reads the header only
@@ -132,4 +136,8 @@ def check_image(data: bytes, max_pixels: int) -> ImageInfo:
         img.load()                                          # decode everything now, so a truncated file fails here
     except Exception:                                      # noqa: BLE001
         raise InputError("image", "the image file is damaged or cut short and cannot be decoded") from None
+    if guard:
+        looks_ok, reason, _ = xray_guard.check(img)
+        if not looks_ok:
+            raise InputError("image", f"{reason}. Send a chest X-ray as a PNG or JPEG.")
     return ImageInfo(IMAGE_EXTENSIONS[fmt], width, height)

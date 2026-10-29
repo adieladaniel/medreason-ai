@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     # those sources (no logs, no split files), so a rebuild there would overwrite the full committed file with a partial one;
     # compose turns this off and the dashboard shows the file the image was built with.
     rebuild_dashboard: bool = True
+    # Refuse uploads that are clearly not a radiograph (app/xray_guard.py). On by default; the test suite turns it off
+    # because its pictures are plain synthetic images, and the guard's own tests turn it on.
+    xray_guard: bool = True
+    # Curated example cases for the Analyze page's menu (scripts/build_demo_cases.py). Holds MIMIC images and text, so it is
+    # git-ignored, outside every image, and mounted read-only by compose; the menu works without it.
+    demo_dir: Path = ROOT / "demo" / "cases"
 
     # How the page expresses uncertainty (rules in app/data/decision_rules.json, built by scripts/build_decision_rules.py).
     # prediction_set_coverage: 0.8 or 0.9. A higher value gives larger sets, "not sure between these" more often.

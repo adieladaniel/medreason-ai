@@ -94,6 +94,11 @@ def test_the_trained_models_are_mounted_read_only_and_not_baked_into_the_image()
     assert "COPY experiments" not in base and "COPY data" not in DOCKERFILE
 
 
+def test_the_demo_cases_are_mounted_read_only_and_kept_out_of_git_and_the_image():
+    assert "./demo/cases:/app/demo/cases:ro" in COMPOSE["services"]["api"]["volumes"]
+    assert "demo/cases/" in lines(".gitignore") and "/demo" in lines(".dockerignore")        # MIMIC images and clinical text
+
+
 def test_the_api_runs_offline_against_the_services_in_the_stack_and_the_host_ollama():
     env = COMPOSE["services"]["api"]["environment"]
     assert env["HF_HUB_OFFLINE"] == "1" and env["MEDREASON_REBUILD_DASHBOARD"] == "false"
@@ -142,7 +147,8 @@ def test_the_build_context_leaves_out_the_clinical_data_and_what_is_derived_from
 def test_every_pattern_git_ignores_for_clinical_data_is_also_in_dockerignore():
     git, docker = lines(".gitignore"), lines(".dockerignore")
     for pattern in ("experiments/**/val_predictions.csv", "experiments/**/oof_train_predictions.csv", "experiments/**/*.npy",
-                    "experiments/explain_samples/"):
+                    "experiments/explain_samples/", "experiments/test_evaluation/predictions.csv", "experiments/other_pathology/studies.csv",
+                    "experiments/e2e/**/cases.json"):
         assert pattern in git
         assert pattern.rstrip("/") in docker, f"{pattern} is ignored by git but not by docker"
 

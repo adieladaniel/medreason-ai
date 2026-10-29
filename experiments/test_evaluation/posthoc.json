@@ -1,0 +1,85 @@
+{
+ "note": "post-hoc, not in PLAN.md; computed from the already-scored test predictions; nothing in the system depends on it",
+ "test": {
+  "macro_f1": {
+   "all": 0.6104311965625272,
+   "text": 0.5613006537462778,
+   "image": 0.45954017327611735,
+   "blood": 0.4461055871594321,
+   "blood+text": 0.6059115007107025,
+   "image+text": 0.5814727086551311,
+   "image+blood": 0.48508100280049
+  },
+  "differences": {
+   "all three minus text alone": {
+    "point": 0.0491305428162494,
+    "interval": [
+     0.014482433536902572,
+     0.08134064226126579
+    ]
+   },
+   "all three minus blood and text (what the image adds)": {
+    "point": 0.004519695851824657,
+    "interval": [
+     -0.013142932886416409,
+     0.021047534530499297
+    ]
+   },
+   "all three minus image and text (what blood adds)": {
+    "point": 0.02895848790739608,
+    "interval": [
+     -0.0010997046023607483,
+     0.05720260054291795
+    ]
+   },
+   "all three minus image and blood (what text adds)": {
+    "point": 0.1253501937620372,
+    "interval": [
+     0.08324657588316453,
+     0.16311970030435485
+    ]
+   }
+  }
+ },
+ "validation": {
+  "macro_f1": {
+   "all": 0.6132867324150444,
+   "text": 0.5093771726459375,
+   "image": 0.48067184072168073,
+   "blood": 0.4608645369265733,
+   "blood+text": 0.5868040878066755,
+   "image+text": 0.5621118775965942,
+   "image+blood": 0.5085266726479803
+  },
+  "differences": {
+   "all three minus text alone": {
+    "point": 0.10390955976910687,
+    "interval": [
+     0.07356636516084837,
+     0.13308910206151267
+    ]
+   },
+   "all three minus blood and text (what the image adds)": {
+    "point": 0.02648264460836891,
+    "interval": [
+     0.01060589978843646,
+     0.041501131226751954
+    ]
+   },
+   "all three minus image and text (what blood adds)": {
+    "point": 0.05117485481845019,
+    "interval": [
+     0.022505441467978036,
+     0.07787436314660927
+    ]
+   },
+   "all three minus image and blood (what text adds)": {
+    "point": 0.10476005976706404,
+    "interval": [
+     0.06333640354544694,
+     0.14324353352763022
+    ]
+   }
+  }
+ }
+}

@@ -1,18 +1,51 @@
 # MedReason-AI
 
-An agentic multi-modal medical diagnostic assistant with explainable AI and evidence
-retrieval.
+A multimodal medical AI service, built end to end as a learning project: given a chest X-ray, the blood labs on record and the clinical
+indication for the exam, it predicts **Normal, Pneumonia or Lung Cancer**, shows how each input moved the answer, says how sure it is, and
+adds cited background from published papers. It is a demonstration of how to build such a system properly (models, explanations,
+uncertainty, retrieval, an API, a database, containers, tests), **not a clinical tool**. Its numbers are modest, and they are reported as they are.
 
-The system takes a chest X-ray, the linked admission's blood labs, and the clinical
-indication for the exam, and predicts one of three classes: Normal, Pneumonia, or Lung
-Cancer. An agent layer then reasons over the prediction. It tracks a belief state, checks
-whether the modalities agree, decides whether more information is needed, and retrieves
-supporting literature (RAG) to explain the result rather than to diagnose. The trained models
-diagnose, the agent orchestrates, and retrieval can never change the predicted label.
+```mermaid
+flowchart LR
+  UI["Analyze page<br/>X-ray, indication, labs"] --> API["FastAPI<br/>checks the upload"]
+  API --> DB[("PostgreSQL<br/>cases, audit trail")]
+  API --> W["worker"]
+  W --> M["image, blood and text models"]
+  M --> B["pooled belief<br/>+ consistency check<br/>+ confidence and alert"]
+  B --> X["explanations<br/>Grad-CAM, SHAP"]
+  B --> R["evidence search<br/>Qdrant + reranker"]
+  R --> L["local language model<br/>one sentence per passage"]
+  L --> V["sentence checker<br/>drops what the paper does not say"]
+  V --> DB
+```
 
-The aim of the project is to learn how to build a production-grade AI system. Benchmark
-accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
-[ROADMAP.md](ROADMAP.md) for phase-by-phase status.
+The trained models diagnose, an orchestrating layer reasons about their outputs, and retrieval only explains: it can never change the
+predicted label.
+
+## The result, honestly
+
+Scored once on a sealed test split of 2,099 studies from 721 patients who appear nowhere in training:
+
+| | Sealed test | Validation |
+|---|---|---|
+| macro F1 | **0.609** (0.559 to 0.654) | 0.613 |
+| F1 Normal / Pneumonia / Lung Cancer | 0.629 / 0.775 / 0.421 | 0.615 / 0.797 / 0.426 |
+| accuracy (always saying Pneumonia scores 0.628) | 0.704 | 0.719 |
+| calibration error after temperature scaling | 0.029 | 0.026 |
+
+The validation numbers held up on unseen patients. The caveats matter as much as the table: the text input (mostly the referring clinician's
+suspicion in words) carries the result, the image adds almost nothing on test, the system cannot say "none of these" for other lung disease,
+and it is one hospital system with noisy labels. **Read [docs/RESULTS.md](docs/RESULTS.md) before quoting any number.**
+
+## Try it
+
+```bash
+docker compose up -d          # API, PostgreSQL, Qdrant; first-time setup is in docs/DOCKER.md. Ollama runs on the host.
+# open http://localhost:8000/#/analyze and pick an example case from the menu
+```
+
+Or without Docker: `python -m uvicorn app.main:app --port 8000`. The menu offers curated validation cases (built by
+`python scripts/build_demo_cases.py`, see the demo guide below) and two pictures that are not X-rays, to show the refusal.
 
 ## Status
 
@@ -20,17 +53,17 @@ accuracy is secondary. See [CLAUDE.md](CLAUDE.md) for the full project brief and
 |-------|-------|
 | 0. Vision and scope | done |
 | 1. Data foundation | done, 15,453-sample joined dataset |
-| 2. Unimodal baselines | done, image 0.50 / blood 0.46 / text 0.51 (val macro F1) |
-| 3. Multimodal fusion | done, val macro F1 0.61 |
+| 2. Unimodal baselines | done, image 0.50 (0.48 without augmentation, as used in fusion) / blood 0.46 / text 0.51 (validation macro F1) |
+| 3. Multimodal fusion | done, validation macro F1 0.61, sealed test 0.61 |
 | 4. Explainability | core done (SHAP + Grad-CAM per modality) |
-| 5. Agentic layer | core done (belief state, consistency checker, missing-information planner) |
+| 5. Agentic layer | core done (belief state, consistency checker, missing-information planner, confidence and cancer alert) |
 | 6. RAG evidence retrieval | done (44-paper library, hybrid search with reranking, constrained writer, faithfulness check) |
 | 7. Backend and API (FastAPI, PostgreSQL, Qdrant, Docker) | done (API, Analyze page, observability, containers, end-to-end run) |
-| 8. Integration, testing, writeup | not started |
+| 8. Integration, testing, writeup | done: sealed test run once, non-X-ray guard, other-pathology measurement, demo cases, results write-up |
 
-The test split (2,099 studies) has not been used. All numbers above are validation numbers.
-Each phase is described in [ROADMAP.md](ROADMAP.md), and the Phase 7 design and its reasons are in
-[docs/PHASE7_DESIGN.md](docs/PHASE7_DESIGN.md).
+Each phase is described in [ROADMAP.md](ROADMAP.md), the project brief is [CLAUDE.md](CLAUDE.md), and the Phase 7 design and its reasons are in
+[docs/PHASE7_DESIGN.md](docs/PHASE7_DESIGN.md). The experiments, each with the plan written before it ran and its results, are under
+`experiments/` (`test_evaluation`, `image_backbones`, `other_pathology`, `e2e`, `xray_guard`).
 
 ## Progress dashboard
 
@@ -82,6 +115,29 @@ that runs for that case; set `MEDREASON_LOG_FORMAT=json` for one JSON object per
 `--no-access-log` so its own request lines do not duplicate the app's. Logs record which inputs were sent, never the
 typed text or the lab values.
 
+## Demo guide
+
+`python scripts/build_demo_cases.py` picks nine validation cases by fixed rules (never from the test split) and freezes them in `demo/cases/`
+(git-ignored: MIMIC images and clinical text). Each answers a question, and two of them show where the safeguards fail on purpose.
+They appear in the Analyze page's "Example case" menu; choosing one fills the X-ray, the indication and the labs together.
+
+| Case | The question it answers |
+|---|---|
+| A clear Normal; a clear Pneumonia | What does an easy, confident answer look like, with all three inputs agreeing? |
+| A Lung Cancer the system finds | Does it ever find the rare class with confidence? |
+| The three models disagree, and the pooled answer is right | What happens when the inputs conflict? |
+| A case the system is not sure about | How does it behave when it should not be trusted? (headlined Uncertain) |
+| No blood tests on record | Does it still work with an input missing? |
+| Wrong, but the system says it is unsure | Do the safeguards catch a mistake? |
+| A cancer the headline misses, and the alert catches | What is the separate cancer alert for? |
+| Wrong, and the system does not know it | Where do the safeguards fail? |
+| Not an X-ray: a colour picture; random noise | Does the server refuse what is not a radiograph? |
+
+Before presenting: start Ollama and send one case first, because the first language-model call after Ollama starts takes about 20 seconds
+while it loads the model; a full note then takes 15 to 20 seconds, and the prediction itself appears in under a second. Delete test cases
+afterwards from the page (each is deleted automatically after 30 days). The expected outcome of every demo case is kept beside it in
+`demo/cases/manifest.json`, and a test checks that the live system still reproduces all nine.
+
 ## Running in containers
 
 `docker compose up -d` runs the API, PostgreSQL and a Qdrant server (Ollama stays on the Windows host). The image holds code
@@ -101,9 +157,10 @@ python scripts/submit_case.py --study-id 57386788     # a normal case (this one 
 python scripts/submit_case.py --study-id 50262066     # a lung cancer case the models get wrong, flagged as a conflict
 ```
 
-The page's "Fill example values" button is one made-up pneumonia-like set. Combined with a different patient's X-ray,
-the text and blood models outvote the image, so every case comes out Pneumonia. That is the fusion working, not a bug.
-The test split is not offered by the helper: it stays sealed until the final evaluation.
+Mixing one patient's X-ray with another's typed values makes the text and blood models outvote the image, so every case comes out
+Pneumonia; that is the fusion working, not a bug, and it is why the page's example menu loads a complete case (X-ray, indication and labs from
+the same study) instead of a button that filled in made-up values. The helper offers only the training and validation splits: the test split was
+sealed until the one final evaluation and is now used up (see `docs/RESULTS.md`).
 
 ## Data is not included in this repo
 
@@ -134,7 +191,9 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   observability.py      logs tagged with the case id and request id (text or JSON)
   health.py             readiness probes (database, worker, evidence index, Ollama) and usage numbers
   prefetch.py           one-time download of the pretrained models for the offline container
-tests/                 281 tests (plus 30 slow ones: browser, Postgres, rule rebuild), no models or services needed (python -m pytest)
+  xray_guard.py         refuses uploads that are clearly not a radiograph (fitted by scripts/build_xray_guard.py)
+  api/examples.py       the Analyze page's example-case menu
+tests/                 412 tests (plus 43 slow ones: browser, Postgres, rehearsals), no models or services needed (python -m pytest)
 Dockerfile, docker-compose.yml, requirements-api.txt, .dockerignore, .github/workflows/tests.yml    container build, stack and CI
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally

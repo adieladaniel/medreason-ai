@@ -1,0 +1,384 @@
+{
+ "n_val": 2315,
+ "n_val_cancer": 117,
+ "bootstrap_draws": 2000,
+ "gate0": {
+  "fused_macro_f1": 0.6128571159631514,
+  "stored_fused_macro_f1": 0.6133,
+  "image_macro_f1": 0.4722230969168783,
+  "stored_image_macro_f1": 0.5,
+  "passed": true
+ },
+ "arms": {
+  "control": {
+   "backbones": [
+    "mimic_ch"
+   ],
+   "point": {
+    "img_macro_f1": 0.4722230969168783,
+    "img_f1_pneumonia": 0.7141292442497261,
+    "img_f1_cancer": 0.1390593047034765,
+    "img_auc_cancer": 0.533993607242015,
+    "img_auc_pneumonia": 0.7351104374260258,
+    "img_auc_normal": 0.7403317084205994,
+    "fused_macro_f1": 0.6128571159631514,
+    "fused_f1_cancer": 0.4249084249084249,
+    "fused_auc_cancer": 0.8545764214554024
+   },
+   "interval": {
+    "img_macro_f1": [
+     0.44358817558894226,
+     0.4999100612940886
+    ],
+    "img_f1_pneumonia": [
+     0.6790766982469162,
+     0.7445512249951247
+    ],
+    "img_f1_cancer": [
+     0.07079422544024314,
+     0.21031940353460968
+    ],
+    "img_auc_cancer": [
+     0.44696800445046014,
+     0.6016076657497389
+    ],
+    "img_auc_pneumonia": [
+     0.7041171824680608,
+     0.7634600623493446
+    ],
+    "img_auc_normal": [
+     0.7083488100100072,
+     0.7693543586853626
+    ],
+    "fused_macro_f1": [
+     0.5686952164317499,
+     0.6491107576015906
+    ],
+    "fused_f1_cancer": [
+     0.3024157372226989,
+     0.524478390461997
+    ],
+    "fused_auc_cancer": [
+     0.7971811681261782,
+     0.8990841853415019
+    ]
+   }
+  },
+  "nih": {
+   "backbones": [
+    "nih"
+   ],
+   "point": {
+    "img_macro_f1": 0.4052940953293012,
+    "img_f1_pneumonia": 0.60431654676259,
+    "img_f1_cancer": 0.09294871794871795,
+    "img_auc_cancer": 0.5148386645201931,
+    "img_auc_pneumonia": 0.6902238964186923,
+    "img_auc_normal": 0.7007572993366561,
+    "fused_macro_f1": 0.5997890237616266,
+    "fused_f1_cancer": 0.42142857142857143,
+    "fused_auc_cancer": 0.8572556247715484
+   },
+   "interval": {
+    "img_macro_f1": [
+     0.3811944477249394,
+     0.427761608561344
+    ],
+    "img_f1_pneumonia": [
+     0.5679010162921053,
+     0.6375494698171496
+    ],
+    "img_f1_cancer": [
+     0.05404920180503664,
+     0.13536552220312562
+    ],
+    "img_auc_cancer": [
+     0.44735982623698634,
+     0.5868823109642376
+    ],
+    "img_auc_pneumonia": [
+     0.6610912471914662,
+     0.717667581804526
+    ],
+    "img_auc_normal": [
+     0.6683634299719833,
+     0.7306392745976945
+    ],
+    "fused_macro_f1": [
+     0.5559352150001553,
+     0.6354379259767164
+    ],
+    "fused_f1_cancer": [
+     0.30088315706165913,
+     0.5171564271487665
+    ],
+    "fused_auc_cancer": [
+     0.8008068580797315,
+     0.900770211909932
+    ]
+   },
+   "paired_difference_vs_control": {
+    "img_auc_cancer": {
+     "point": -0.019154942721821833,
+     "interval": [
+      -0.10937597567458476,
+      0.08723030828010575
+     ]
+    },
+    "img_macro_f1": {
+     "point": -0.06692900158757709,
+     "interval": [
+      -0.09609037607651333,
+      -0.03656959024518552
+     ]
+    },
+    "img_f1_pneumonia": {
+     "point": -0.10981269748713618,
+     "interval": [
+      -0.14092365369372123,
+      -0.07932726587521428
+     ]
+    },
+    "fused_macro_f1": {
+     "point": -0.013068092201524828,
+     "interval": [
+      -0.026634024674766534,
+      0.0005384386706912534
+     ]
+    },
+    "fused_auc_cancer": {
+     "point": 0.002679203316146017,
+     "interval": [
+      -0.003624647484143853,
+      0.009924496882760656
+     ]
+    },
+    "fused_f1_cancer": {
+     "point": -0.0034798534798534675,
+     "interval": [
+      -0.03188583262726891,
+      0.025741089403215917
+     ]
+    }
+   },
+   "passes_adoption_rule": false,
+   "failed_because": [
+    "image Lung Cancer AUC is not clearly above the control's (paired interval includes 0)",
+    "image Lung Cancer AUC interval still includes 0.50",
+    "fused macro F1 is lower than the control's",
+    "fused macro F1 may be more than 0.02 lower (paired interval)"
+   ],
+   "leakage_readout": "consistent with inflation, but a domain shift to MIMIC images is a competing explanation"
+  },
+  "pc": {
+   "backbones": [
+    "pc"
+   ],
+   "point": {
+    "img_macro_f1": 0.4570041281312783,
+    "img_f1_pneumonia": 0.6763070077864294,
+    "img_f1_cancer": 0.15955473098330242,
+    "img_auc_cancer": 0.6037384413180592,
+    "img_auc_pneumonia": 0.7018999143611222,
+    "img_auc_normal": 0.7277088365576174,
+    "fused_macro_f1": 0.6018661888703596,
+    "fused_f1_cancer": 0.42402826855123676,
+    "fused_auc_cancer": 0.8606736504825676
+   },
+   "interval": {
+    "img_macro_f1": [
+     0.4218014822358774,
+     0.4932674927103963
+    ],
+    "img_f1_pneumonia": [
+     0.6336971425202643,
+     0.715634270386378
+    ],
+    "img_f1_cancer": [
+     0.07999619771863119,
+     0.24477522931843723
+    ],
+    "img_auc_cancer": [
+     0.5146473631088084,
+     0.6733194554798345
+    ],
+    "img_auc_pneumonia": [
+     0.6709381239141574,
+     0.7322333223446619
+    ],
+    "img_auc_normal": [
+     0.6984911609662204,
+     0.7570698417088616
+    ],
+    "fused_macro_f1": [
+     0.5583222541072377,
+     0.6376104682780676
+    ],
+    "fused_f1_cancer": [
+     0.3041418180175296,
+     0.5203336020963516
+    ],
+    "fused_auc_cancer": [
+     0.8051785993585556,
+     0.9036003657809666
+    ]
+   },
+   "paired_difference_vs_control": {
+    "img_auc_cancer": {
+     "point": 0.06974483407604426,
+     "interval": [
+      -0.003252190108021682,
+      0.1443700170834855
+     ]
+    },
+    "img_macro_f1": {
+     "point": -0.015218968785600029,
+     "interval": [
+      -0.044601473164842906,
+      0.014997772409333
+     ]
+    },
+    "img_f1_pneumonia": {
+     "point": -0.03782223646329674,
+     "interval": [
+      -0.07502557049414228,
+      -0.0024628549510736846
+     ]
+    },
+    "fused_macro_f1": {
+     "point": -0.010990927092791813,
+     "interval": [
+      -0.022721845049364735,
+      0.0005592933705466362
+     ]
+    },
+    "fused_auc_cancer": {
+     "point": 0.006097229027165252,
+     "interval": [
+      -0.0010804540745007695,
+      0.01397286158268702
+     ]
+    },
+    "fused_f1_cancer": {
+     "point": -0.0008801563571881332,
+     "interval": [
+      -0.021533527340170056,
+      0.02278267762229752
+     ]
+    }
+   },
+   "passes_adoption_rule": false,
+   "failed_because": [
+    "image Lung Cancer AUC is not clearly above the control's (paired interval includes 0)",
+    "fused macro F1 is lower than the control's",
+    "fused macro F1 may be more than 0.02 lower (paired interval)"
+   ],
+   "leakage_readout": "inconclusive"
+  },
+  "nih+mimic": {
+   "backbones": [
+    "nih",
+    "mimic_ch"
+   ],
+   "point": {
+    "img_macro_f1": 0.45190902913914915,
+    "img_f1_pneumonia": 0.6679433167368825,
+    "img_f1_cancer": 0.1195079086115993,
+    "img_auc_cancer": 0.5296773290403863,
+    "img_auc_pneumonia": 0.7373148455745735,
+    "img_auc_normal": 0.7451170520969401,
+    "fused_macro_f1": 0.6159592202749935,
+    "fused_f1_cancer": 0.4306569343065693,
+    "fused_auc_cancer": 0.8557235404369162
+   },
+   "interval": {
+    "img_macro_f1": [
+     0.42577964934774293,
+     0.4785427285876726
+    ],
+    "img_f1_pneumonia": [
+     0.6296256275922288,
+     0.701433672518238
+    ],
+    "img_f1_cancer": [
+     0.06238210830685753,
+     0.1789487272397862
+    ],
+    "img_auc_cancer": [
+     0.45741050200099764,
+     0.597868685787242
+    ],
+    "img_auc_pneumonia": [
+     0.707539989368966,
+     0.7653234977278828
+    ],
+    "img_auc_normal": [
+     0.7136609560273172,
+     0.7752682321458154
+    ],
+    "fused_macro_f1": [
+     0.5703986102469012,
+     0.6522910054586957
+    ],
+    "fused_f1_cancer": [
+     0.30637890664766365,
+     0.5276895584509591
+    ],
+    "fused_auc_cancer": [
+     0.7991853269196582,
+     0.9000363778387096
+    ]
+   },
+   "paired_difference_vs_control": {
+    "img_auc_cancer": {
+     "point": -0.004316278201628609,
+     "interval": [
+      -0.06253468809513019,
+      0.06497545660348425
+     ]
+    },
+    "img_macro_f1": {
+     "point": -0.02031406777772915,
+     "interval": [
+      -0.038226597045613986,
+      -0.0005442634738133626
+     ]
+    },
+    "img_f1_pneumonia": {
+     "point": -0.04618592751284367,
+     "interval": [
+      -0.06348426374605998,
+      -0.029209911757919267
+     ]
+    },
+    "fused_macro_f1": {
+     "point": 0.003102104311842102,
+     "interval": [
+      -0.005895196856511081,
+      0.012526362562202974
+     ]
+    },
+    "fused_auc_cancer": {
+     "point": 0.0011471189815138727,
+     "interval": [
+      -0.0022243725984347597,
+      0.005182198324921619
+     ]
+    },
+    "fused_f1_cancer": {
+     "point": 0.005748509398144419,
+     "interval": [
+      -0.015489726110633959,
+      0.029521505096505394
+     ]
+    }
+   },
+   "passes_adoption_rule": false,
+   "failed_because": [
+    "image Lung Cancer AUC is not clearly above the control's (paired interval includes 0)",
+    "image Lung Cancer AUC interval still includes 0.50"
+   ]
+  }
+ },
+ "decision": "keep the current image model"
+}

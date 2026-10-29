@@ -3,7 +3,10 @@ Assembles the final multimodal training table: one row per study, with the
 primary chest X-ray image path, radiology report path, tiered blood feature
 values (closest to study_datetime), and the validated final disease label.
 """
+import argparse
+
 import duckdb
+import pandas as pd
 
 FINAL_LABELS = "data/interim/final_study_labels.csv"
 RESOLVED_LINKS = "data/interim/resolved_study_links.csv"
@@ -20,14 +23,46 @@ TIER2 = {"crp": 50889, "esr": 51288, "albumin": 50862, "ldh": 50954}
 TIER3 = {"sodium": 50983, "potassium": 50971, "glucose": 50931, "creatinine": 50912, "urea": 51006}
 ALL_TESTS = {**TIER1, **TIER2, **TIER3}
 
+# Default (no arguments) builds the training table exactly as before. `--excluded` builds the same table for the studies
+# that were dropped for having some other pathology, for scripts/eval_other_pathology.py: how does the system behave on
+# disease it was never given a class for? Only patients who are in neither the training split nor the sealed test split are
+# kept, so the system has never seen them and the test split is not touched (its file is read for patient ids to leave out).
+ap = argparse.ArgumentParser()
+ap.add_argument("--excluded", action="store_true", help="build the table for the studies labelled Excluded instead")
+ap.add_argument("--role", choices=["unseen", "train", "val", "none"], default="unseen",
+                help="with --excluded: whose Excluded studies. unseen = patients in neither training nor the sealed split (default); "
+                     "train, val = patients of that split; none = patients in no split at all. The test patients cannot be asked for.")
+ap.add_argument("--output", default=OUTPUT)
+args = ap.parse_args()
+OUTPUT = args.output
+
+if args.excluded:
+    def split_subjects(name):
+        return set(pd.read_csv(f"data/processed/{name}.csv", usecols=["subject_id"]).subject_id)
+    everyone = set(pd.read_csv(FINAL_LABELS, usecols=["subject_id"]).subject_id)
+    if args.role == "train":
+        who = split_subjects("train")
+    elif args.role == "val":
+        who = split_subjects("val")
+    elif args.role == "none":
+        who = everyone - (split_subjects("train") | split_subjects("val") | split_subjects("test"))
+    else:
+        who = everyone - (split_subjects("train") | split_subjects("test"))
+    chosen = pd.DataFrame({"subject_id": sorted(who & everyone)})
+    label_filter = "f.final_label = 'Excluded' AND f.subject_id IN (SELECT subject_id FROM chosen)"
+else:
+    chosen = pd.DataFrame({"subject_id": []})
+    label_filter = "f.final_label != 'Excluded'"
+
 con = duckdb.connect()
+con.register("chosen", chosen)
 
 con.execute(f"""
     CREATE TEMP TABLE samples AS
     SELECT f.subject_id, f.study_id, f.hadm_id, f.final_label, r.study_datetime
     FROM read_csv_auto('{FINAL_LABELS}') f
     JOIN read_csv_auto('{RESOLVED_LINKS}') r ON f.study_id = r.study_id
-    WHERE f.final_label != 'Excluded'
+    WHERE {label_filter}
 """)
 n_samples = con.execute("SELECT COUNT(*) FROM samples").fetchone()[0]
 print(f"Samples to assemble: {n_samples}")
