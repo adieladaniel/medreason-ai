@@ -31,7 +31,7 @@ COPY pytest.ini requirements.txt Dockerfile docker-compose.yml .gitignore .docke
 COPY scripts scripts
 COPY experiments experiments
 COPY tests tests
-RUN python -m pytest -p no:warnings
+RUN python -m pytest -p no:warnings 
 
 
 FROM base AS runtime
