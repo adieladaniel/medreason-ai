@@ -689,8 +689,8 @@ Design and reasons: `docs/PHASE7_DESIGN.md`. Built one step at a time with a rep
     then `docker compose up -d api`. A relative `-v ./data/corpus` on `docker compose run` silently mounted nothing, which is why
     the corpus mount lives in the `setup` service.
   - `docker build --target test .` runs the suite inside the image build (269 passed, 1 skipped, 13 deselected) against a context that
-    excludes everything git ignores, so it doubles as a clean-checkout check and is the CI job. The GitHub Actions workflow itself
-    has not been run. `tests/test_packaging.py` (21 tests) checks pin agreement between the two requirements files, that every
+    excludes everything git ignores, so it doubles as a clean-checkout check and is the CI job. On GitHub the workflow has run
+    on every push since (green, 412 passed in the log of the 2026-10-29 run). `tests/test_packaging.py` (21 tests) checks pin agreement between the two requirements files, that every
     import in `app/` and `explain/` is installed by the runtime file, loopback-only ports, no password default, read-only model
     mount, non-root user, and that `.dockerignore` covers what `.gitignore` does. 16 deliberate breakages were each caught.
   - Run for real: `/api/ready` was `ok` with the API reaching Ollama through `host.docker.internal` (13 ms) and Qdrant holding 811

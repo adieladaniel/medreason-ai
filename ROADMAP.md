@@ -280,7 +280,8 @@ Steps, built and reported one at a time:
    download and the index build, and a CI workflow that builds the test stage. The image holds code only: the trained models
    are mounted read-only and the pretrained downloads live in volumes. Run for real: `/api/ready` reported `ok` for all four
    dependencies, two validation cases finished through the containers, data survived a restart, and the 269 tests pass inside a
-   clean build. The GitHub Actions workflow itself has not been run.
+   clean build. The GitHub Actions workflow has since run on every push (first checked 2026-10-29): green on all four runs, and the latest
+   log shows pytest inside the image build with 412 passed, 2 skipped, 17 deselected, the same as locally.
 7. End-to-end run on real cases and a timing budget (done 2026-10-28, `experiments/e2e/RESULTS.md`, `scripts/run_e2e.py`).
    Sixteen validation studies chosen by rule (right and wrong, a missed cancer, no labs, inputs taken away) went through the
    containers twice. All 32 runs gave the same class as the offline evaluation (largest probability difference 0.0001) and the

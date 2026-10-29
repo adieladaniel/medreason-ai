@@ -1,5 +1,7 @@
 # MedReason-AI
 
+[![tests](https://github.com/adieladaniel/medreason-ai/actions/workflows/tests.yml/badge.svg)](https://github.com/adieladaniel/medreason-ai/actions/workflows/tests.yml)
+
 A multimodal medical AI service, built end to end as a learning project: given a chest X-ray, the blood labs on record and the clinical
 indication for the exam, it predicts **Normal, Pneumonia or Lung Cancer**, shows how each input moved the answer, says how sure it is, and
 adds cited background from published papers. It is a demonstration of how to build such a system properly (models, explanations,
