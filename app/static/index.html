@@ -3,32 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MedReason-AI Progress</title>
+  <meta name="theme-color" content="#f4f6fb">
+  <title>MedReason-AI</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-size='18' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="/static/vendor/inter/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <aside class="side">
-    <div class="brand">
+  <header class="dock">
+    <a class="brand" href="#/overview" aria-label="MedReason-AI, project overview">
       <span class="logo">M</span>
-      <div><b>MedReason-AI</b><small>Progress dashboard</small></div>
-    </div>
-    <nav id="nav">
-      <a href="#/overview" data-page="overview">Overview</a>
-      <a href="#/data" data-page="data">Data</a>
-      <a href="#/models" data-page="models">Models</a>
-      <a href="#/fusion" data-page="fusion">Fusion</a>
-      <a href="#/explain" data-page="explain">Explainability</a>
-      <a href="#/reliability" data-page="reliability">Reliability</a>
-      <a href="#/evidence" data-page="evidence">Evidence</a>
-      <a href="#/roadmap" data-page="roadmap">Roadmap</a>
-      <a href="#/analyze" data-page="analyze" class="nav-cta">Analyze a case</a>
+      <span class="brand-text"><b>MedReason-AI</b></span>
+    </a>
+    <nav id="nav" aria-label="Pages">
+      <span class="nav-ind" aria-hidden="true"></span>
+      <a href="#/analyze" data-page="analyze" class="nav-cta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg><span>Analyze a case</span></a>
+      <span class="nav-sep" aria-hidden="true"></span>
+      <a href="#/overview" data-page="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Overview</span></a>
+      <a href="#/data" data-page="data"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg><span>Data</span></a>
+      <a href="#/models" data-page="models"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg><span>Models</span></a>
+      <a href="#/fusion" data-page="fusion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg><span>Fusion</span></a>
+      <a href="#/explain" data-page="explain"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span>Explainability</span></a>
+      <a href="#/reliability" data-page="reliability"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span>Reliability</span></a>
+      <a href="#/evidence" data-page="evidence"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>Evidence</span></a>
+      <a href="#/roadmap" data-page="roadmap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg><span>Roadmap</span></a>
     </nav>
-    <p class="side-note">All scores are validation-set results. The test split has not been used.</p>
-  </aside>
+    <button type="button" class="jump" id="jump" aria-label="Jump to a page" aria-keyshortcuts="Control+K Meta+K">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><kbd>Ctrl K</kbd>
+    </button>
+  </header>
   <main id="main"><p class="muted">Loading...</p></main>
+  <footer class="foot"><p>Dashboard scores are validation results. The sealed test split was scored once: macro F1 0.609.</p></footer>
   <script src="/static/vendor/chart.umd.min.js"></script>
   <script src="/static/app.js"></script>
   <script src="/static/analyze.js"></script>
+  <script src="/static/shell.js"></script>
 </body>
 </html>

@@ -14,12 +14,13 @@
   const { esc, pct, card, pageHead, CLASSES, CCOL, MNAME } = M;
   const main = document.getElementById('main');
 
+  // key, long name (audit table), hint, short name (the progress strip, which has to fit five across on a phone)
   const STAGES = [
-    ['predicting', 'Prediction', 'Each model reads its input and the results are combined.'],
-    ['explaining', 'Explanations', 'A heat map, lab contributions and word contributions.'],
-    ['retrieving', 'Evidence lookup', 'Searching the paper library for each finding.'],
-    ['writing', 'Writing', 'A small local model summarises each passage.'],
-    ['verifying', 'Checking', 'Each sentence is checked against its passage.'],
+    ['predicting', 'Prediction', 'Each model reads its input and the results are combined.', 'Predict'],
+    ['explaining', 'Explanations', 'A heat map, lab contributions and word contributions.', 'Explain'],
+    ['retrieving', 'Evidence lookup', 'Searching the paper library for each finding.', 'Evidence'],
+    ['writing', 'Writing', 'A small local model summarises each passage.', 'Write'],
+    ['verifying', 'Checking', 'Each sentence is checked against its passage.', 'Check'],
   ];
   const TERMINAL = ['done', 'partial', 'failed'];
 
@@ -56,7 +57,7 @@
     } catch (e) {
       return { html: html + card('', '<p class="muted">The case API is not reachable. Start the server with <code>python -m uvicorn app.main:app --port 8000</code> and reload.</p>'), after() {} };
     }
-    html += formCard() + '<div id="result"></div>' +
+    html += `<div id="form-wrap">${formCard()}</div><div id="inputs-bar"></div><div id="result"></div>` +
       card('Recent cases', '<div id="recent"><p class="muted">Loading...</p></div>', { sub: 'Cases are deleted after 30 days.' });
     return {
       html,
@@ -109,7 +110,7 @@
   /* ------------------------------------------------------------ the form */
   function showErr(field, message) {
     const p = $(`[data-err="${field}"]`) || $('[data-err="form"]');
-    p.textContent = message;
+    p.textContent = message.charAt(0).toUpperCase() + message.slice(1);       // the server's reasons start lower case
     p.classList.add('on');
   }
   function clearErr() { main.querySelectorAll('.err').forEach((p) => { p.textContent = ''; p.classList.remove('on'); }); }
@@ -135,7 +136,7 @@
     });
     $('#clear-image').addEventListener('click', () => { file.value = ''; setPreview(); });
     ta.addEventListener('input', () => { $('#count').textContent = `${ta.value.length} / ${spec.indication.max_chars}`; });
-    loadExamples(file, ta);
+    loadExamples();
     $('#f-clear').addEventListener('click', () => {
       // not form.reset(): a control whose id or name is "reset" would shadow that method
       HTMLFormElement.prototype.reset.call(form); setPreview(); clearErr();
@@ -174,11 +175,26 @@
     });
   }
 
+  // Put a case's inputs into the form. The example menu and "Edit and re-run" both use it. With no image given, the form's
+  // current file is left alone, so a caller that wants it empty clears it first.
+  function fillForm(d, blob, name) {
+    const ta = $('#f-ind'), file = $('#f-image');
+    ta.value = d.indication || '';
+    ta.dispatchEvent(new Event('input'));
+    main.querySelectorAll('[data-lab]').forEach((i) => { i.value = d.labs && d.labs[i.dataset.lab] != null ? d.labs[i.dataset.lab] : ''; });
+    if (blob) {
+      const dt = new DataTransfer();
+      dt.items.add(new File([blob], `${name}.${blob.type === 'image/jpeg' ? 'jpg' : 'png'}`, { type: blob.type }));
+      file.files = dt.files;
+      file.dispatchEvent(new Event('change'));
+    }
+  }
+
   /* ------------------------------------------------------------ example cases */
   // A complete example (X-ray, indication, labs) from the server, so the inputs always belong together. The old single
   // "fill example values" button put made-up pneumonia-like values next to whatever X-ray the visitor had chosen, and the
   // result said Pneumonia for every film.
-  async function loadExamples(file, ta) {
+  async function loadExamples() {
     const sel = $('#f-example'), note = $('#example-note');
     const notes = {};
     try {
@@ -203,17 +219,7 @@
       try {
         const [d, img] = await Promise.all([fetch(`/api/examples/${encodeURIComponent(id)}`).then((r) => r.json()),
                                             fetch(`/api/examples/${encodeURIComponent(id)}/image`)]);
-        ta.value = d.indication || '';
-        ta.dispatchEvent(new Event('input'));
-        main.querySelectorAll('[data-lab]').forEach((i) => { i.value = d.labs && d.labs[i.dataset.lab] != null ? d.labs[i.dataset.lab] : ''; });
-        if (img.ok) {
-          const blob = await img.blob();
-          const f = new File([blob], `${id}.${blob.type === 'image/jpeg' ? 'jpg' : 'png'}`, { type: blob.type });
-          const dt = new DataTransfer();
-          dt.items.add(f);
-          file.files = dt.files;
-          file.dispatchEvent(new Event('change'));
-        }
+        fillForm(d, img.ok ? await img.blob() : null, id);
         note.textContent = notes[id] || '';
       } catch (e) {
         note.textContent = 'Could not load that example.';
@@ -227,14 +233,14 @@
     const mine = token;
     current = { id, createdAt: null, status: 'queued' };
     for (const k of Object.keys(drawn)) delete drawn[k];
-    $('#result').innerHTML = `<h2 class="section">Result</h2>
-      <div id="r-status"></div><div id="r-pred"></div><div id="r-mods"></div><div id="r-evid"></div><div id="r-audit"></div>`;
-    $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#result').innerHTML = '<div id="r-status"></div><div id="r-pred"></div><div id="r-mods"></div><div id="r-evid"></div><div id="r-audit"></div>';
+    $('#form-wrap').hidden = true;          // the answer leads the page; the inputs are one line above it
     try {
       const r = await fetch(`/api/cases/${id}`);
       if (mine !== token) return;
-      if (r.status === 404) { $('#r-status').innerHTML = alertBox('warn', 'No such case', 'It may have been deleted or have expired.'); return; }
+      if (r.status === 404) { $('#form-wrap').hidden = false; $('#r-status').innerHTML = alertBox('warn', 'No such case', 'It may have been deleted or have expired.'); return; }
       render(await r.json());
+      scrollToTop($('#inputs-bar'));
     } catch (e) { /* the stream below will try again */ }
     if (mine !== token || (current && TERMINAL.includes(current.status))) return;
     connect(id, mine);
@@ -275,8 +281,53 @@
   }
   const alertBox = (kind, title, text) => `<div class="alert ${kind}"><b>${esc(title)}</b>${text ? ` ${esc(text)}` : ''}</div>`;
 
+  function scrollToTop(el) {
+    if (!el) return;
+    const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  // The inputs of the open case as one line of chips, with the two things a person does next.
+  function inputsBarHtml(v) {
+    const i = v.inputs || {};
+    const nLabs = Object.keys(i.labs || {}).length;
+    const ind = (i.indication || '').trim();
+    const chip = (on, text) => `<span class="ib-chip${on ? '' : ' off'}">${text}</span>`;
+    const chips = chip(i.image, i.image ? 'X-ray' : 'No X-ray')
+      + chip(ind, ind ? `Indication: &ldquo;${esc(ind.length > 60 ? `${ind.slice(0, 57)}...` : ind)}&rdquo;` : 'No indication')
+      + chip(nLabs, nLabs ? `${nLabs} lab value${nLabs === 1 ? '' : 's'}` : 'No labs');
+    return `<div class="inputs-bar"><div class="ib-main"><span class="k-label">Inputs</span><div class="ib-chips">${chips}</div></div>
+      <div class="ib-actions"><button type="button" class="btn" id="edit-inputs">Edit and re-run</button><button type="button" class="btn primary" id="new-case">New case</button></div></div>`;
+  }
+
+  // Back to the empty-result state with the form showing (new case, or after a delete).
+  function showForm() {
+    stop();
+    current = null;
+    for (const k of Object.keys(drawn)) delete drawn[k];
+    $('#result').innerHTML = '';
+    $('#inputs-bar').innerHTML = '';
+    $('#form-wrap').hidden = false;
+    history.replaceState(null, '', '#/analyze');
+  }
+
+  async function editInputs() {
+    if (!current) return;
+    const id = current.id;
+    const v = await fetch(`/api/cases/${id}`).then((r) => r.json());
+    const file = $('#f-image');
+    file.value = '';
+    file.dispatchEvent(new Event('change'));
+    let blob = null;
+    if (v.inputs.image_url) { const r = await fetch(v.inputs.image_url); if (r.ok) blob = await r.blob(); }
+    fillForm(v.inputs, blob, 'case');
+    $('#form-wrap').hidden = false;
+    scrollToTop($('#form-wrap'));
+  }
+
   function render(v) {
     current = { id: v.id, createdAt: Date.parse(v.created_at), status: v.status };
+    put('#inputs-bar', inputsBarHtml(v));
     put('#r-status', statusHtml(v));
     put('#r-pred', v.prediction ? predictionHtml(v) : '');
     put('#r-mods', v.prediction ? modalitiesHtml(v) : '');
@@ -297,10 +348,10 @@
   }
 
   function statusHtml(v) {
-    const items = STAGES.map(([key, name, hint]) => {
+    const items = STAGES.map(([key, name, hint, short]) => {
       const st = stageState(v, key);
       const icon = st === 'running' ? '<span class="spin"></span>' : st === 'done' ? '&#10003;' : st === 'failed' ? '!' : '';
-      return `<li class="stage ${st}" title="${esc(hint)}"><span class="st-ico">${icon}</span><span class="st-name">${name}</span><span class="st-sec">${secs(v.timings[key])}</span></li>`;
+      return `<li class="stage ${st}" title="${esc(hint)}"><span class="st-ico">${icon}</span><span class="st-name">${short}</span><span class="st-sec">${secs(v.timings[key])}</span></li>`;
     }).join('');
     const total = Object.values(v.timings).reduce((a, b) => a + b, 0);
     let line;
@@ -369,16 +420,44 @@
           <span class="set-badges">${d.prediction_set.map(badge).join(' ') || '<span class="muted">none</span>'}</span>
           <span class="k-sub">${meaning}${outside} On validation cases a set like this held the true class: ${held}.</span></div>`;
     }
-    return `${alertBanner}<section class="card pred${low || outside ? ' weak' : ''}">
+    return `${alertBanner}<section class="card pred${low || outside ? ' weak' : ''}" style="--cls:${CCOL[cls] || '#64748b'}">
         <div class="pred-main">${headline}</div>
         <div class="pred-probs">${probRows(b.probabilities)}</div>${setLine}${noAlert}
       </section>
       <section class="card"><h3>Do the inputs agree? <span class="pill ${cpill[0]}">${cpill[1]}</span></h3>
         <p>${esc(c.detail)}</p>
-        <p class="sub" style="margin-top:12px">How the answer was built, one input at a time</p>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Step</th><th>Input</th><th>On its own</th><th>Combined so far</th></tr></thead><tbody>${history}</tbody></table></div>
+        <details class="build"><summary>How the answer was built, one input at a time</summary>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Step</th><th>Input</th><th>On its own</th><th>Combined so far</th></tr></thead><tbody>${history}</tbody></table></div></details>
         ${rec}
       </section>`;
+  }
+
+  // The strongest contributions as bars drawn in the page, so they stay sharp and readable at any width (the matplotlib figure
+  // is one tap away). Red pushes toward the predicted class, blue pushes away, as in the figures.
+  function contribBars(items, limit) {
+    const rows = items.slice(0, limit);
+    if (!rows.length) return '';
+    const max = Math.max(...rows.map((t) => Math.abs(t.effect)), 1e-9);
+    return `<div class="contribs">${rows.map((t) => {
+      const up = t.effect > 0;
+      const val = t.value != null && t.value !== '' ? ` <em>${esc(t.value)}</em>` : '';
+      return `<div class="ctb ${up ? 'up' : 'down'}"><span class="ctb-name">${esc(t.feature)}${val}</span><span class="ctb-bar"><i style="width:${(Math.abs(t.effect) / max * 100).toFixed(0)}%"></i></span><span class="ctb-val">${up ? '+' : ''}${Number(t.effect).toFixed(2)}</span></div>`;
+    }).join('')}</div>`;
+  }
+
+  // The indication with its most influential words shaded. The explainer reports the ten strongest words, so every other
+  // word stays unshaded, and a word is shaded wherever it appears.
+  function shadedText(text, items) {
+    const norm = (w) => w.toLowerCase().replace(/^\W+|\W+$/g, '');
+    const eff = new Map();
+    items.forEach((t) => { const k = norm(String(t.feature)); if (k && !eff.has(k)) eff.set(k, t.effect); });
+    const max = Math.max(...items.map((t) => Math.abs(t.effect)), 1e-9);
+    return text.split(/(\s+)/).map((piece) => {
+      const k = norm(piece);
+      if (!k || !eff.has(k)) return esc(piece);
+      const e = eff.get(k), a = (0.15 + 0.6 * Math.abs(e) / max).toFixed(2);
+      return `<mark style="background:${e > 0 ? `rgba(220,60,40,${a})` : `rgba(40,100,220,${a})`}" title="${e > 0 ? '+' : ''}${Number(e).toFixed(2)}">${esc(piece)}</mark>`;
+    }).join('');
   }
 
   function modalitiesHtml(v) {
@@ -388,28 +467,31 @@
       if (!pm) {
         return `<div class="mod absent"><h4>${MNAME[m]}<span class="badge off">not provided</span></h4><p class="summary">Nothing was given for this input, so it took no part in the prediction.</p></div>`;
       }
+      const items = ex ? ex.attributions.items : [];
+      const fig = ex && ex.figure ? `<a class="fig-link" href="${esc(ex.figure)}" target="_blank" rel="noopener">Open the full figure</a>` : '';
       let body = '';
-      if (m === 'image' && v.inputs.image_url) body += `<img src="${esc(v.inputs.image_url)}" alt="The uploaded X-ray" loading="lazy">`;
-      if (ex && ex.figure) {
-        body += `<a href="${esc(ex.figure)}" target="_blank" rel="noopener"><img src="${esc(ex.figure)}" alt="${MNAME[m]} explanation" loading="lazy"></a>`;
-      } else if (ex && ex.figure_error) {
-        body += `<p class="summary">The figure could not be drawn: ${esc(ex.figure_error)}</p>`;
-      } else if (!ex && !TERMINAL.includes(v.status)) {
-        body += '<p class="waiting"><span class="spin"></span> Computing the explanation...</p>';
+      if (m === 'image') {
+        // the heat-map figure already holds the film beside its heat map, so the film alone is shown only when there is no figure
+        if (ex && ex.figure) body += `<a href="${esc(ex.figure)}" target="_blank" rel="noopener"><img src="${esc(ex.figure)}" alt="The X-ray and where the image model looked" loading="lazy"></a>`;
+        else if (v.inputs.image_url) body += `<img src="${esc(v.inputs.image_url)}" alt="The uploaded X-ray" loading="lazy">`;
       }
-      const chips = ex ? ex.attributions.items.slice(0, 5).map((t) => {
-        const val = t.value != null && t.value !== '' ? ` ${esc(t.value)}` : '';
-        return `<span class="chip ${t.effect > 0 ? 'up' : 'down'}">${esc(t.feature)}${val} ${t.effect > 0 ? '+' : ''}${Number(t.effect).toFixed(2)}</span>`;
-      }).join('') : '';
+      if (m === 'text' && v.inputs.indication && items.length) {
+        body += `<p class="shaded">${shadedText(v.inputs.indication, items)}</p>`;
+      }
+      if (ex && ex.figure_error) body += `<p class="summary">The figure could not be drawn: ${esc(ex.figure_error)}</p>`;
+      else if (!ex && !TERMINAL.includes(v.status)) body += '<p class="waiting"><span class="spin"></span> Computing the explanation...</p>';
+      const bars = ex && m !== 'text' ? contribBars(items, m === 'blood' ? 8 : 5) : '';
+      const chips = ex && m === 'text' ? items.slice(0, 5).map((t) =>
+        `<span class="chip ${t.effect > 0 ? 'up' : 'down'}">${esc(t.feature)} ${t.effect > 0 ? '+' : ''}${Number(t.effect).toFixed(2)}</span>`).join('') : '';
       const warn = ex && ex.matches_prediction === false
         ? `<p class="summary warnline">The explanation run gave different probabilities (largest difference ${esc(ex.max_probability_difference)}). The prediction above is the stored one and was not changed.</p>` : '';
       return `<div class="mod"><h4>${MNAME[m]}${badge(pm.predicted_class)}</h4>${body}
         ${ex ? `<p class="summary">${esc(ex.summary)}</p>` : ''}
         <div class="probs">${probRows(pm.probabilities)}</div>
-        ${chips ? `<div class="chips">${chips}</div>` : ''}${warn}</div>`;
+        ${bars}${chips ? `<div class="chips">${chips}</div>` : ''}${warn}${fig}</div>`;
     }).join('');
     return `<h2 class="section">What each input contributed</h2>
-      <p class="section-sub">Red marks push toward the predicted class, blue push away. The heat map shows where the image model looked, the bars show which labs counted, and the shading shows which words counted.</p>
+      <p class="section-sub">Red pushes toward the predicted class and blue pushes away. The heat map shows where the image model looked, the bars show which labs and image findings counted, and the shading shows which words of the indication counted.</p>
       <div class="grid3 mods">${cols}</div>`;
   }
 
@@ -463,15 +545,14 @@
 
   /* delete is wired by delegation because the audit section is redrawn */
   main.addEventListener('click', async (e) => {
+    if (e.target && e.target.id === 'new-case') { showForm(); $('#f-clear').click(); scrollToTop($('#form-wrap')); return; }
+    if (e.target && e.target.id === 'edit-inputs') { editInputs(); return; }
     if (!e.target || e.target.id !== 'del' || !current) return;
     if (!confirm('Delete this case and its uploaded files? This cannot be undone.')) return;
     const id = current.id;
     const r = await fetch(`/api/cases/${id}`, { method: 'DELETE' });
     if (r.status === 204 || r.status === 404) {
-      stop();
-      history.replaceState(null, '', '#/analyze');
-      const res = $('#result');
-      if (res) res.innerHTML = '';
+      showForm();
       loadRecent();
     } else {
       alert(`The server refused: ${r.status}`);

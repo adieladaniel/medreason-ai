@@ -787,6 +787,41 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   compose, never in an image), plus two built-in non-X-ray pictures. The API never sends the study id or the true label. A slow test checks the
   live system still reproduces all nine and that the guard accepts all nine films. The old "Fill example values" button is gone: it put
   made-up values beside whatever X-ray the visitor chose.
+- UI pass on the Analyze page (2026-10-29, `app/static/analyze.js`, `style.css`, `index.html`; judged by driving the real stack in Chromium at 1366 and
+  390 pixel widths with the real models). Findings before: the form filled a whole screen above the answer (on a phone the prediction sat about 2,900
+  CSS pixels down, and now sits about 800 down), the five-stage tracker wrapped to three rows on a phone, the three explanation figures were small pictures with text too small to
+  read, the X-ray was shown twice, and every card had the same weight. Changes: once a case is open the form folds into a one-line inputs bar
+  ("X-ray, indication, 15 lab values") with "Edit and re-run" (refills the form from the stored case, film included) and "New case"; the progress strip
+  uses short names and stays five across; the prediction card carries its class colour on the left edge; "how the answer was built" is folded away;
+  lab and image-finding contributions are bars drawn in the page and the indication is shown with its ten strongest words shaded (the explainer only
+  reports ten, so other words stay unshaded), with the matplotlib figure one click away; the heat map figure alone shows the film; server reasons start
+  with a capital and sit in a box; the phone nav is one scrolling row with Analyze first; lab inputs are two columns on a phone. Page height fell from
+  3,910 to 2,706 pixels on desktop and from 7,114 to 4,715 CSS pixels on a phone. The sidebar note that said the test split had not been used was stale
+  and now says it was scored once. Seven new browser tests (33 in all), seven deliberate breakages each caught. The slow browser tests had also been
+  failing one case since the out-of-scope work (the page test patched `assess` but `available()` is false now that no detector ships); fixed in the fixture.
+  One of my new tests raced the page (it waited for the preview image, which appears just before the form is revealed) and failed about one run in
+  three until it waited for the form itself.
+- Second UI pass, the look of the whole dashboard (2026-10-29, same palette): the user found the first pass still generic. The cause was partly
+  plain: `Inter` was named in the CSS but never loaded, so every machine fell back to its system font. Now `app/static/vendor/inter/` holds the
+  variable font (SIL OFL, license file alongside) and `style.css` declares it, so no CDN is needed. A first version used an icon sidebar with a
+  collapsible rail; the user asked for something less traditional and chose the version below instead. `index.html` has a floating, translucent
+  pill (`.dock`) fixed at the top centre: the logo, all nine pages with icons (a divider after "Analyze a case"), and a "Jump to" button. It is 80
+  percent white with a blur behind it, so a page shows faintly through it while scrolling, and its text was picked to keep at least 4.5:1 contrast
+  even over a dark X-ray. There is no sidebar, so the pages use the whole width (content up to 1360 pixels, about 1290 at a 1366 pixel window,
+  against about 1040 before) and the old sidebar note ("Dashboard scores are validation results...") is a footer. The words show from 1200 pixels
+  wide and the product name from 1500; below 1200 the pill keeps its icons and `shell.js` gives each one a tooltip. On a phone the pill spans the
+  width, scrolls sideways with the active page centred, and scrolls away with the page instead of staying fixed (a fixed one costs every screen
+  about 70 pixels). `app/static/shell.js` (new) holds everything about the frame: one highlight that slides to the active link (it reads
+  `.active`, which the router sets), the icon tooltips, a Ctrl or Cmd plus K palette (pages and "Start a new case", arrow keys, Enter, Escape,
+  focus returns to the opener, opens instantly because it is a keyboard action), and the stagger that makes a page's blocks rise in once after
+  each navigation. In `style.css`: layered card shadows and a 14 pixel radius, a gradient accent KPI, buttons that press down (scale 0.97 on
+  :active), lift 1 pixel on hover only where hover exists, and have focus rings, input focus rings, table row hover, the prediction card washed
+  with its class colour, probability and contribution bars that grow from zero (transform only), the pill sliding in once on load, and a
+  prefers-reduced-motion block that turns the entrances and the highlight slide off. Stale copy fixed: the overview said "the planned
+  consistency checker". Ten browser tests in `tests/test_shell_ui.py` (43 browser tests in all). Of nine deliberate breakages in the sidebar
+  version one escaped, and it showed that the palette's "new case" branch was dead code (a hash change from `#/analyze/<id>` to `#/analyze`
+  already draws an empty form), so the branch was removed; all nine breakages of the pill version were caught. Not done on purpose: a dark theme
+  (the matplotlib figures and Chart.js colours would all need a second set), and a fixed phone pill.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -943,8 +978,8 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 412 tests, plus 43 slow-marked ones that are skipped by default: 26 browser tests
-  of the Analyze page, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 412 tests, plus 60 slow-marked ones that are skipped by default: 43 browser tests
+  of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services
   and never read the git-ignored real cases. `tests/__init__.py` must stay, because a stray

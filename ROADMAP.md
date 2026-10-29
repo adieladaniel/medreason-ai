@@ -309,6 +309,11 @@ What was done, in the order it was done:
 5. Demo preparation: nine validation cases chosen by fixed rules (including cases the system gets wrong), an example-case menu on the Analyze page,
    two built-in non-X-ray pictures, and a demo guide in the README.
 6. Write-up: `docs/RESULTS.md` and a README that leads with the result and its caveats.
+7. UI pass on the Analyze page (2026-10-29): the answer leads the page (the form folds into an inputs bar with "Edit and re-run" and "New case"), the
+   progress strip fits five across on a phone, explanations are drawn in the page as bars and shaded words, and the layout was checked in a real
+   browser at desktop and phone widths. A second pass gave the whole dashboard a new look in the same palette: a vendored Inter typeface, a floating
+   translucent navigation pill with a sliding highlight, full-width pages, a Ctrl+K jump palette, layered cards, buttons with a press response, short entrance
+   motion and a reduced-motion fallback. Details in `CLAUDE.md`.
 
 The plan below is kept as the record of what was intended. Items marked here as done are the ones above; the rest of Phase 8b (a full screen
 recording, PhysioNet credentials, rehearsing the cold start in front of an audience) are for the person presenting.

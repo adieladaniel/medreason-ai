@@ -102,6 +102,7 @@ def site(tmp_path_factory):
     mp.setattr(faithfulness, "entailment", lambda s, p: 0.9)
     state["scope"] = None                                 # a test sets this to what the (fake) scope check returns for the next case
     mp.setattr(scope_check, "assess", lambda *a, **k: state["scope"])
+    mp.setattr(scope_check, "available", lambda: True)    # no detector ships, so the real check is dormant; the page's reaction to one is still tested
 
     demo = tmp / "demo"
     (demo / "fake-case").mkdir(parents=True)
@@ -240,7 +241,10 @@ def test_a_case_is_followed_live_and_every_section_arrives(page, site):
     finish(page)
     assert page.locator("#r-status .stage.done").count() == 5
     assert all(page.eval_on_selector_all("#r-mods .mod img", "els => els.map(e => e.complete && e.naturalWidth > 0)"))
-    assert page.locator("#r-mods .mod img").count() >= 4                       # the X-ray and three explanation figures
+    assert page.locator("#r-mods .mod img").count() == 1                       # the heat map figure, which already holds the film
+    assert page.locator("#r-mods .ctb").count() >= 2                           # lab contributions are drawn in the page, not as a picture
+    assert page.locator("#r-mods .shaded mark").count() >= 1                   # the indication with its strongest words shaded
+    assert page.locator("#r-mods a.fig-link").count() == 3                     # the full matplotlib figure is one click away for each input
     evidence = page.inner_text("#r-evid").lower()
     assert "not proof" in evidence and page.locator("#r-evid .cite").count() >= 1
     assert page.locator('#r-evid a[href^="https://example.org"]').count() >= 1
@@ -375,3 +379,89 @@ def test_a_set_that_leaves_out_the_most_probable_class_says_why(page):
     run_with(page, even)
     assert page.locator("#r-pred .set-badges .badge").all_inner_texts() == ["Lung Cancer"]
     assert "most probable class is not in the set" in page.inner_text("#r-pred")
+
+
+# ------------------------------------------------------------------ the result leads the page
+def test_the_form_gives_way_to_the_result_and_edit_and_re_run_brings_the_inputs_back(page, site):
+    fill_example(page)
+    page.set_input_files("#f-image", str(site.film))
+    page.click("#f-go")
+    finish(page)
+    assert not page.locator("#case-form").is_visible()
+    bar = page.inner_text("#inputs-bar")
+    assert "X-ray" in bar and "Fever, productive cough" in bar and "16 lab values" in bar
+    first_id = page.url.split("/")[-1]
+    page.click("#edit-inputs")
+    page.wait_for_selector("#case-form", state="visible")                   # the page fills the form first and reveals it last
+    page.wait_for_function("!document.querySelector('#preview').hidden")
+    assert page.input_value("#f-ind") == EXAMPLE_TEXT and page.input_value('[data-lab="albumin"]') == "2.9"
+    assert page.evaluate("document.querySelector('#f-image').files.length") == 1
+    assert page.locator("#r-pred .pred-class").count() == 1                 # the earlier result stays until another case is sent
+    page.fill('[data-lab="albumin"]', "4.1")
+    page.click("#f-go")
+    page.wait_for_function("id => !location.hash.endsWith(id)", arg=first_id)
+    finish(page)
+    assert page.url.split("/")[-1] != first_id and not page.locator("#case-form").is_visible()
+
+
+def test_edit_and_re_run_on_a_case_without_an_x_ray_leaves_the_film_empty(page):
+    fill_example(page)
+    page.click("#f-go")
+    finish(page)
+    page.click("#edit-inputs")
+    page.wait_for_selector("#case-form", state="visible")
+    assert page.input_value("#f-ind") == EXAMPLE_TEXT
+    assert page.evaluate("document.querySelector('#f-image').files.length") == 0 and not page.locator("#preview").is_visible()
+
+
+def test_new_case_clears_the_result_and_shows_an_empty_form(page):
+    fill_example(page)
+    page.click("#f-go")
+    finish(page)
+    page.click("#new-case")
+    assert page.locator("#case-form").is_visible()
+    assert page.input_value("#f-ind") == "" and page.input_value('[data-lab="albumin"]') == ""
+    assert page.locator("#r-pred").count() == 0 and page.inner_text("#inputs-bar") == ""
+    assert page.url.endswith("#/analyze")
+
+
+def test_deleting_a_case_brings_the_form_back(page):
+    fill_example(page)
+    page.click("#f-go")
+    finish(page)
+    assert not page.locator("#case-form").is_visible()
+    page.once("dialog", lambda d: d.accept())
+    page.click("#del")
+    page.wait_for_selector("#case-form", state="visible")
+    assert page.inner_text("#inputs-bar") == ""
+
+
+def test_the_indication_is_shaded_in_the_page_and_its_text_never_runs_as_markup(page):
+    page.fill("#f-ind", 'Fever. Evaluate for pneumonia <img src=x onerror="window.__pwned=true"> <b id="pwn4">now</b>')
+    page.fill('[data-lab="wbc"]', "18")
+    page.click("#f-go")
+    finish(page)
+    assert any("pneumonia" in m for m in page.locator("#r-mods .shaded mark").all_inner_texts())
+    assert page.evaluate("window.__pwned") is None and page.locator("#pwn4").count() == 0
+    assert '<b id="pwn4">' in page.inner_text("#r-mods .shaded")           # shown as the characters the person typed
+
+
+def test_at_phone_width_the_progress_strip_is_one_row_and_the_answer_is_near_the_top(page):
+    page.set_viewport_size({"width": 390, "height": 800})
+    page.reload()
+    page.wait_for_selector("#case-form")
+    fill_example(page)
+    page.click("#f-go")
+    finish(page)
+    tops = page.eval_on_selector_all("#r-status .stage", "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
+    assert len(tops) == 5 and len(set(tops)) == 1                          # five boxes side by side, not wrapped
+    y = page.evaluate("document.querySelector('#r-pred .pred-class').getBoundingClientRect().top + window.scrollY")
+    assert y < 1000, y                                                      # the prediction sits within about a screen of the top
+
+
+def test_a_reason_from_the_server_is_shown_as_a_sentence(page):
+    page.fill('[data-lab="wbc"]', "-5")
+    page.click("#f-go")
+    page.wait_for_function("document.querySelector('[data-err=labs]').textContent.length > 0")
+    text = page.inner_text('[data-err="labs"]')
+    assert text[0].isupper(), text

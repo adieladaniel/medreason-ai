@@ -20,6 +20,7 @@
   Chart.defaults.font.size = 12;
   Chart.defaults.color = '#475569';
   Chart.defaults.borderColor = '#e5e8ef';
+  Chart.defaults.animation.duration = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
   Chart.defaults.plugins.legend.labels.usePointStyle = true;
   Chart.defaults.plugins.legend.labels.boxWidth = 8;
 
@@ -137,7 +138,7 @@
     const ag = D.predictions && D.predictions.agreement.levels;
     if (ag && ag.length >= 2) {
       const all = ag[0], last = ag[ag.length - 1];
-      finds.push(`When all three models agree (${pct(all.share)} of cases) fused accuracy is ${pct(all.fused_accuracy)}. When all three disagree it falls to ${pct(last.fused_accuracy)}. That gap is the signal the planned consistency checker will use.`);
+      finds.push(`When all three models agree (${pct(all.share)} of cases) fused accuracy is ${pct(all.fused_accuracy)}. When all three disagree it falls to ${pct(last.fused_accuracy)}. That gap is the signal the consistency checker uses.`);
     }
     if (finds.length) html += card('What the results say', `<ul class="findings">${finds.map((x) => `<li>${x}</li>`).join('')}</ul>`);
 
