@@ -851,6 +851,30 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   same run through `127.0.0.1` took 2.4 s. Limits: one process migrates at a time (two API containers starting together on one Postgres are
   not handled; a lock around the upgrade would be the fix), a pre-Alembic database is compared by column names only, not types, and
   `init_db` costs about 0.16 s on a fresh SQLite file, paid by every test that makes a database.
+- Engineering hardening, step 3c: a smoke test of the running stack, in CI (2026-10-30, `scripts/smoke_stack.py`, `scripts/ci_stack.sh`, the `stack` job
+  in `.github/workflows/tests.yml`, `tests/test_smoke_stack.py`). The unit tests and the image build never start a container, so a wrong environment
+  variable, a file missing from the image, a failing migration on Postgres or an unpublished port would pass both. `smoke_stack.py` (standard library
+  only) asks a running API what a person would: health, readiness (database and worker must be ok, Qdrant or Ollama missing is allowed unless
+  `--strict`), that the page, scripts and typeface are served, the form description, that an unknown lab and an empty submission are refused with 422
+  and not stored, and that a case is accepted, ends in the expected state with events, reveals no server path or traceback, and can be deleted.
+  `ci_stack.sh` is what CI runs and what runs here unchanged: it builds the runtime image, starts Postgres 16, makes a database the way the service did
+  before migrations (`create_all` and one case), starts the stack (the API migrates it), checks version 0001, the surviving case and jsonb columns, runs
+  the smoke test, restarts the API, and runs the smoke test and the checks again. It uses its own compose project (`medreasonci`), refuses to run as
+  `medreason`, and deletes only its own volumes. A runner has no trained models (derived from MIMIC, kept out of git), so the smoke test expects a
+  case to end `failed` at its first stage and checks that the failure is clean; accuracy with real models is `scripts/run_e2e.py`. Compose now reads
+  `MEDREASON_WARM_UP_MODELS` (default true), so CI turns warm-up off.
+  Writing the check turned up a real bug: `run_job` stored the exception type and text as the case error and event detail, and the API returns both,
+  so a missing model file would arrive as "No such file or directory" followed by the server path under /app/experiments, against the rule that server
+  paths never appear in a response (found by reading the code, and shown by a test that switches the fix off, but not seen in a real response).
+  `public_message` in `app/pipelines/runner.py` now replaces URLs and file paths with `<url>` and `<path>` and cuts the text at 300 characters, and the
+  full exception stays in the server log. Verified: the whole script passed on this machine against real Postgres 16, Qdrant and the real runtime
+  image (before and after the restart, the pre-migration case kept, version 0001); 31 new tests (461 normal in all), and 18 deliberate breakages were
+  each caught, after I added tests for six checks that had none (the first version of the suite would have let those through).
+  `docker build --target test .` from a clean context: 460 passed, 4 skipped, 23 deselected. A test that reads `.github/` skips inside the image build,
+  because `.github` is excluded from that context (caught by thinking about the build before running it). Limits: the `stack` job has not run on GitHub
+  yet (needs a push), the smoke test cannot show that the models or the language model work, the 120 s waits are guesses about a slower runner, and a
+  failed first stage is the expected state in CI, so a stack that fails for another reason before the models load would look the same to the status
+  check (the error text, the events and the readiness checks are what tell them apart).
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -1007,7 +1031,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 430 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 461 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

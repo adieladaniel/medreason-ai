@@ -16,7 +16,7 @@ x-app: &app
     MEDREASON_DATABASE_URL: postgresql+psycopg://medreason:${POSTGRES_PASSWORD}@postgres:5432/medreason
     MEDREASON_QDRANT_URL: http://qdrant:6333
     MEDREASON_OLLAMA_URL: http://host.docker.internal:11434
-    MEDREASON_WARM_UP_MODELS: "true"
+    MEDREASON_WARM_UP_MODELS: "${MEDREASON_WARM_UP_MODELS:-true}"   # CI sets false: it has no trained models to load
     MEDREASON_REBUILD_DASHBOARD: "false"
     HF_HUB_OFFLINE: "1"              # models come from the hf volume (python -m app.prefetch), never from the internet
   extra_hosts:

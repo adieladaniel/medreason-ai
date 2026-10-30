@@ -28,6 +28,7 @@ import torch  # noqa: F401  (Windows: torch before sklearn/shap, see CLAUDE.md s
 
 import logging
 import queue
+import re
 import threading
 import time
 from pathlib import Path
@@ -39,6 +40,23 @@ from app.observability import bind, configure_logging
 from app.pipelines.staged import default_plotters, default_stages, provided_inputs
 
 log = logging.getLogger("medreason.runner")
+
+# What a failed stage may tell a client. The API has no login and a case's error and events are returned as they are stored, so the
+# message must not carry a server file path, a URL or a host (a missing model file otherwise arrives as "No such file or directory:
+# '/app/experiments/...'"). The full exception, with all of that, goes to the log (log.exception in run_job).
+_REDACT = [
+    (re.compile(r"\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s'\"<>)]+"), "<url>"),
+    (re.compile(r"\b[A-Za-z]:[\\/][^\s'\"<>]*"), "<path>"),                  # C:\Users\... and C:/Users/...
+    (re.compile(r"(?<![\w<])/(?:[\w.\-~]+/)*[\w.\-~]+"), "<path>"),          # /app/experiments/x.joblib, but not "3/4" or "and/or"
+]
+MAX_ERROR_CHARS = 300
+
+
+def public_message(exc: BaseException) -> str:
+    text = str(exc)
+    for pattern, token in _REDACT:
+        text = pattern.sub(token, text)
+    return f"{type(exc).__name__}: {' '.join(text.split())[:MAX_ERROR_CHARS]}"
 
 
 def _make_recorder(case_id: str, url: str | None):
@@ -105,7 +123,7 @@ def _run_stages(case_id: str, url: str | None, stages, deps: dict | None, figure
             data = stage.fn(ctx)
         except Exception as exc:                               # noqa: BLE001  (any stage failure is recorded, not raised)
             seconds = time.perf_counter() - t0
-            message = f"{type(exc).__name__}: {exc}"
+            message = public_message(exc)
             log.exception("stage %s failed after %.1f s", stage.name, seconds,
                           extra={"stage": stage.name, "seconds": round(seconds, 2)})
             with session_scope(url) as s:

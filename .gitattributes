@@ -1,0 +1,2 @@
+# Shell scripts run on Linux (CI, containers). A Windows checkout with autocrlf would give them CRLF line endings, which bash rejects.
+*.sh text eol=lf

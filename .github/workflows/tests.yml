@@ -22,3 +22,29 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Starts the containers and checks them: the runtime image against a real Postgres 16 and a Qdrant server, a database made before
+  # migrations existed (it must be taken over without losing its row), a smoke test over HTTP, and a restart. A runner has no trained
+  # models (they derive from MIMIC and are not in git), so a case must end "failed" at its first stage and say so cleanly. The same
+  # script runs locally: bash scripts/ci_stack.sh   (header of that file).
+  stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the runtime image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: runtime
+          load: true
+          tags: medreason-api
+          cache-from: |
+            type=gha
+            type=gha,scope=stack
+          cache-to: type=gha,scope=stack,mode=max
+      - name: Start the stack and check it
+        run: bash scripts/ci_stack.sh
+        env:
+          SKIP_BUILD: "1"

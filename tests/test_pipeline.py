@@ -227,6 +227,37 @@ def test_a_failed_prediction_means_the_case_failed(url, tmp_path, evidence_stubs
     assert c.status == "failed" and "predicting failed" in c.error and c.prediction is None and c.explanations is None
 
 
+LEAKY = [
+    FileNotFoundError(2, "No such file or directory", "/app/experiments/blood_baseline/model.joblib"),
+    OSError("cannot open C:\\Users\\HP\\models\\text.joblib now"),
+    OSError("cannot open C:/Users/HP/models/text.joblib now"),
+    RuntimeError("HTTPConnectionPool: http://host.docker.internal:11434/api/chat failed"),
+    RuntimeError("could not connect to postgresql+psycopg://medreason:secret@postgres:5432/medreason"),
+]
+
+
+@pytest.mark.parametrize("exc", LEAKY, ids=["posix path", "windows path", "windows path, slashes", "url with host", "database url"])
+def test_a_failure_shown_to_a_client_carries_no_path_url_or_credential(url, tmp_path, evidence_stubs, exc, caplog):
+    predictors = fake_predictors()
+    predictors["blood"] = lambda inp: (_ for _ in ()).throw(exc)
+    cid = new_case(url)
+    with caplog.at_level("ERROR", logger="medreason.runner"):
+        assert runner.run_job(cid, url, deps=deps(tmp_path, predictors=predictors), figure_dir=tmp_path) == "failed"
+    c = read(url, cid)
+    shown = c.error + " ".join(str(e.detail) for e in c.events)
+    for secret in ("/app/", "experiments", "Users", "HP", "host.docker.internal", "11434", "secret", "postgres:5432", "model.joblib"):
+        assert secret not in shown, (secret, shown)
+    assert type(exc).__name__ in c.error                                   # still says what kind of failure it was
+    assert str(exc.args[-1])[:12] in caplog.text or str(exc)[:30] in caplog.text   # the log keeps the full text for whoever runs the service
+
+
+def test_an_ordinary_failure_message_is_kept_whole_and_a_long_one_is_cut():
+    assert runner.public_message(RuntimeError("SHAP ran out of memory")) == "RuntimeError: SHAP ran out of memory"
+    assert runner.public_message(ValueError("ratio 3/4 and/or 5/6, TCP/IP")) == "ValueError: ratio 3/4 and/or 5/6, TCP/IP"
+    cut = runner.public_message(RuntimeError("x" * 1000))
+    assert cut == "RuntimeError: " + "x" * runner.MAX_ERROR_CHARS
+
+
 def test_a_case_with_nothing_usable_fails_without_running_a_model(url, tmp_path):
     cid = new_case(url, indication="   ", labs=None, image_path=None)
     boom = {"predictors": {m: (lambda inp: pytest.fail("no model should run")) for m in PNEUMONIA}}

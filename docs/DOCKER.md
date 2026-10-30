@@ -57,6 +57,14 @@ change (tables, no version record) is checked against the baseline and marked, s
 message and the API does not start. To change a table, edit `app/database/models.py` and run `alembic revision --autogenerate -m "..."` from
 the repo root against any database; `tests/test_migrations.py` fails until the migration exists. One API container migrates at a time.
 
+**The running stack is checked in CI (added 2026-10-30).** `bash scripts/ci_stack.sh` builds the runtime image, starts Postgres 16 and Qdrant, makes a
+database the way the service did before migrations (one case in it), starts the API, and checks that the migrations took the database over (version
+0001, the case still there, jsonb columns). It then runs `scripts/smoke_stack.py` against the API, restarts the API and does it all again. The `stack` job
+in `.github/workflows/tests.yml` runs this same script. It uses its own compose project (`medreasonci`) and removes only that project's volumes, so
+your cases are safe, and it refuses to run as `medreason`. A runner has no trained models, so the check expects a case to end "failed" at its first
+stage and verifies that the message shows no path or URL. To check a full stack with the real models and Ollama use `python scripts/smoke_stack.py
+--strict --expect done`, which runs the same checks with the strictest expectations.
+
 **CPU-only torch.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image several gigabytes
 larger. The lock names `torch==2.11.0+cpu` and `torchvision==0.26.0+cpu`, which exist only on the PyTorch CPU index, so the Dockerfile
 adds that index next to PyPI and nothing from the CUDA stack is installed. The versions are the ones in `requirements.txt`, and
