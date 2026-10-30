@@ -899,6 +899,23 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   app and server; stop all three names afterwards (see section 8).
   Step 3 is complete: lock file (3a), migrations (3b), container smoke test in CI (3c), demo rehearsal (3d). The next planned work is the demo recording
   (step 4) and, as a labelled v2 with its own plan, a four-class model with an explicit other outcome.
+- Step 4, the demo recording plan (2026-10-30, `docs/DEMO_SCRIPT.md`, `scripts/prepare_public_demo.py`, `tests/test_prepare_public_demo.py`). The
+  user asked for a 60 to 90 second recording. Planning it turned up a data rule that now governs every demo: the nine validation cases show real MIMIC
+  films and MIMIC text, and the PhysioNet Credentialed Health Data License 1.5.0 says the licensee "will not share access to PhysioNet restricted data with
+  anyone else" (term 3) and uses it for "lawful use in scientific research and no other" (term 6). It does not mention demonstrations or recordings and
+  nobody has asked PhysioNet, so treat showing MIMIC films or text in anything public (a video, screenshot or post) as not allowed. The Explainability
+  page is a gallery of real validation cases and must stay off camera; the aggregate pages are fine. The public video therefore uses a public-domain chest
+  film (CDC Public Health Image Library image 17298, credit "CDC/ Dr. Jack Poland", converted to grayscale because the tinted JPEG is refused by the
+  non-X-ray guard, which `prepare_public_demo.py` does and checks) with typed inputs, and says so. The nine-case tour is for private use only.
+  `docs/DEMO_SCRIPT.md` has the rule, a 15 minute preparation (an empty database, `MEDREASON_DEMO_DIR` pointed at a missing folder so no MIMIC case can be loaded
+  by a stray click, the sample gallery folder renamed), an 80 second script of 188 words in five beats, what may and may not be claimed, the nine-case tour with
+  measured times, and recording notes. Observed with the real models and Ollama on this laptop: the routine typed case gave Normal 77 percent, all three agree,
+  prediction after 0.9 s and finished after 1.9 s; the first pneumonia-like phrasing gave Normal 56 percent with the blood model dissenting (reported in the
+  script, not hidden), and the stronger one gave Pneumonia 63 percent, two agree with the image the outlier, finished after 57 s with one cited sentence and two
+  removed. That case is an example chosen to show the evidence note and is not evidence of recognising pneumonia. A first draft of the narration was 267 words,
+  about 107 seconds, and was cut to 188 after counting. Limits: nobody has recorded or watched the video yet, the screen recorder was not tried (the script
+  says to check which one this machine has), the CDC film is a 700 by 485 pixel low-resolution copy from 1975 whose domain differs from MIMIC, and the Docker
+  clean-context build was not rerun for this step (CI will).
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -1055,7 +1072,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 482 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 485 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

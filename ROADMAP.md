@@ -320,7 +320,8 @@ What was done, in the order it was done:
    before migrations, and a test that fails when the models and migrations disagree). Step 3c (2026-10-30): a smoke test of the running containers in CI (Postgres 16, Qdrant, the runtime image, a database from
    before migrations taken over, a restart), and a fix it found: a failed stage no longer shows server paths or URLs in its error. Step 3d (2026-10-30): `scripts/rehearse_demo.py` runs the nine demo cases
    through a running stack with the real models and checks each against its frozen values (all nine matched on the first real run). Step 3 is done.
-   Next: the demo recording. Details in `CLAUDE.md`.
+   Step 4 (2026-10-30): the recording plan is written (`docs/DEMO_SCRIPT.md`: an 80 second public script using a public-domain film, because the MIMIC license
+   does not clearly allow showing its data in public). Still to do: the person presenting records it. Details in `CLAUDE.md`.
 
 The plan below is kept as the record of what was intended. Items marked here as done are the ones above; the rest of Phase 8b (a full screen
 recording, PhysioNet credentials, rehearsing the cold start in front of an audience) are for the person presenting.
