@@ -29,6 +29,9 @@ __pycache__
 .idea
 experiments/image_backbones/_chunks
 experiments/other_pathology/studies.csv
+experiments/v2_four_class/preds
+experiments/v2_four_class/_emb_chunks
+experiments/v2_four_class/*.log
 data/processed/excluded.csv
 experiments/test_evaluation/predictions.csv
 experiments/out_of_scope/_chunks

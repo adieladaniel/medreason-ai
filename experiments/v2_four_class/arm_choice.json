@@ -1,0 +1,16 @@
+{
+ "criterion": "AUROC of the fused 'other' score on the training out-of-fold predictions; a tie within 0.005 goes to T",
+ "auroc_J": 0.6498,
+ "auroc_J_by_modality": {
+  "blood": 0.5406,
+  "text": 0.6511,
+  "image": 0.5669
+ },
+ "auroc_T": 0.6565,
+ "auroc_T_by_modality": {
+  "blood": 0.5465,
+  "text": 0.6543,
+  "image": 0.5704
+ },
+ "chosen": "T"
+}

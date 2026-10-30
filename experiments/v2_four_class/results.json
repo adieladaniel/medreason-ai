@@ -1,0 +1,174 @@
+{
+ "arm": "T",
+ "operating_point": {
+  "flag_rate_of_in_scope_training": 0.1,
+  "tau": 0.5759955687666597,
+  "temperature": 0.55
+ },
+ "limits": {
+  "auroc": 0.75,
+  "auroc_lower": 0.7,
+  "flagged_heldout": 0.35,
+  "flagged_inscope": 0.13,
+  "macro_f1": 0.583,
+  "cancer_flagged": 0.2,
+  "ece": 0.05
+ },
+ "statistics": {
+  "auroc": {
+   "value": 0.6530519486151951,
+   "low": 0.626721836799048,
+   "high": 0.6797446726863519
+  },
+  "flagged_heldout": {
+   "value": 0.20794288264167782,
+   "low": 0.18443541046011253,
+   "high": 0.23161678114765308
+  },
+  "flagged_inscope": {
+   "value": 0.06911447084233262,
+   "low": 0.055232324029580795,
+   "high": 0.08394644216687967
+  },
+  "macro_f1": {
+   "value": 0.6132867324150444,
+   "low": 0.5676705170107669,
+   "high": 0.6497328176755965
+  },
+  "cancer_flagged": {
+   "value": 0.03418803418803419,
+   "low": 0.00670918707498111,
+   "high": 0.07207439398161046
+  },
+  "ece": {
+   "value": 0.0359180341733049,
+   "low": 0.025223846815298323,
+   "high": 0.05706545496049476
+  }
+ },
+ "conditions": {
+  "auroc": false,
+  "flag_rates": false,
+  "three_class_macro_f1": true,
+  "cancers_flagged": true,
+  "calibration": true
+ },
+ "adopted": false,
+ "information": {
+  "auroc_validation_excluded_as_positives": 0.6779158542519192,
+  "flag_rates": {
+   "0.05": {
+    "tau": 0.6109148689882011,
+    "flagged_inscope": 0.031965442764578834,
+    "flagged_heldout": 0.1111111111111111,
+    "flagged_validation_excluded": 0.11102106969205834
+   },
+   "0.2": {
+    "tau": 0.5329977759474597,
+    "flagged_inscope": 0.1473002159827214,
+    "flagged_heldout": 0.34181169120928157,
+    "flagged_validation_excluded": 0.3500810372771475
+   }
+  },
+  "existing_confidence_signal": {
+   "auroc": 0.6314980102796596,
+   "this_arm_minus_it": {
+    "value": 0.02143294304840633,
+    "low": -0.008433757270657533,
+    "high": 0.05171223402696846
+   }
+  },
+  "per_class_validation": {
+   "Normal": {
+    "this_arm": {
+     "precision": 0.5781865965834428,
+     "recall": 0.6626506024096386,
+     "f1": 0.6175438596491228
+    },
+    "version_1": {
+     "precision": 0.5781865965834428,
+     "recall": 0.6626506024096386,
+     "f1": 0.6175438596491228
+    },
+    "n": 664
+   },
+   "Pneumonia": {
+    "this_arm": {
+     "precision": 0.8361945636623748,
+     "recall": 0.7620599739243807,
+     "f1": 0.7974079126875853
+    },
+    "version_1": {
+     "precision": 0.8361945636623748,
+     "recall": 0.7620599739243807,
+     "f1": 0.7974079126875853
+    },
+    "n": 1534
+   },
+   "Lung Cancer": {
+    "this_arm": {
+     "precision": 0.3717948717948718,
+     "recall": 0.49572649572649574,
+     "f1": 0.4249084249084249
+    },
+    "version_1": {
+     "precision": 0.3717948717948718,
+     "recall": 0.49572649572649574,
+     "f1": 0.4249084249084249
+    },
+    "n": 117
+   }
+  },
+  "flag_rate_by_inputs": {
+   "all three inputs": {
+    "inscope_validation": {
+     "n": 2189,
+     "flagged": 0.0698949291914116
+    },
+    "heldout": {
+     "n": 2030,
+     "flagged": 0.22167487684729065
+    }
+   },
+   "no labs": {
+    "inscope_validation": {
+     "n": 57,
+     "flagged": 0.0
+    },
+    "heldout": {
+     "n": 126,
+     "flagged": 0.0
+    }
+   },
+   "no indication": {
+    "inscope_validation": {
+     "n": 72,
+     "flagged": 0.09722222222222222
+    },
+    "heldout": {
+     "n": 87,
+     "flagged": 0.1839080459770115
+    }
+   }
+  }
+ },
+ "image_seed_spread": {
+  "image_seed_spread_auroc_other": [
+   0.5663,
+   0.5675,
+   0.5668
+  ],
+  "image_seed_spread_macro_f1_in_scope": [
+   0.4877,
+   0.4822,
+   0.4892
+  ]
+ },
+ "sizes": {
+  "in_scope_validation": 2315,
+  "validation_patients": 720,
+  "heldout": 2241,
+  "heldout_patients": 1292,
+  "validation_excluded": 1234
+ }
+}

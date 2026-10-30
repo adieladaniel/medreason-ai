@@ -60,3 +60,7 @@ experiments/other_pathology/studies.csv
 experiments/test_evaluation/predictions.csv
 experiments/out_of_scope/_chunks/
 experiments/out_of_scope/feats_*.npz
+# version 2: per-study predictions and embeddings derived from MIMIC
+experiments/v2_four_class/preds/
+experiments/v2_four_class/_emb_chunks/
+experiments/v2_four_class/*.log

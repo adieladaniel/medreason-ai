@@ -796,6 +796,18 @@
       note: 'Intervals overlap for every pair of groups with enough cancer cases, so these results show no gap that is clearly more than sampling noise, and they are too thin to show that none exists. Race is the administrative field recorded in MIMIC-IV.',
     });
 
+    const S = D.scope;
+    if (S) {
+      html += sectionHead('Can it say "none of these"?', `Two pre-registered attempts to flag studies outside Normal, Pneumonia and Lung Cancer, scored on the same patients: ${num(S.in_scope)} in-scope validation studies against ${num(S.held_out)} Excluded studies of patients in no split.`);
+      html += card('', table(['Method', 'ROC AUC (95% interval)', 'Other studies flagged', 'In-scope studies flagged', 'Adopted'],
+        S.rows.map((r) => [esc(r.label), `${f2(r.auroc)} <span class="muted">(${f2(r.low)} to ${f2(r.high)})</span>`,
+          r.flagged_other == null ? 'n/a' : pct(r.flagged_other), r.flagged_in_scope == null ? 'n/a' : pct(r.flagged_in_scope),
+          r.adopted == null ? 'n/a' : (r.adopted ? 'yes' : 'no')]), { numCols: [1, 2, 3] }), {
+        sub: `The rule required an AUROC of at least ${f2(S.required_auroc)}, at least ${pct(S.required_flagged_other)} of other studies flagged, and no more than ${pct(S.allowed_flagged_in_scope)} of in-scope studies.`,
+        note: 'Training the models with an explicit other class did not get there. The version 2 score is not distinguishable from the confidence signal the system already has, so the system still cannot reliably say that a study is outside what it can assess, and the page does not claim it can.',
+      });
+    }
+
     const after = () => {
       mk('c-rc', {
         type: 'line',

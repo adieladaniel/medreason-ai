@@ -921,6 +921,28 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   file holds MIMIC rows, but docs and docstrings had named four real MIMIC-CXR study ids as command examples. They are now `<STUDY_ID>`, and
   `app/rag/eval_faithfulness.py` takes the two ids it needs on the command line instead of holding them. Earlier commits still contain the ids, which are
   identifiers only (no image, text or lab value). Do not put a real study id, subject id or admission id in a tracked file.
+- Version 2 plan written (2026-10-30, `experiments/v2_four_class/PLAN.md`, nothing run yet): train the three models with a fourth "other" class made of the
+  Excluded studies, in two arms (joint four-class retrain, or unchanged version 1 plus per-modality binary other models), chosen on training out-of-fold
+  predictions. Adoption rule fixed in advance (AUROC at least 0.75 with lower bound 0.70 on held-out patients, 35 percent of Excluded flagged at no more than
+  13 percent of in-scope, three-class macro F1 at least 0.583, at most 20 percent of cancers flagged, calibration error at most 0.05). Never opens the test split.
+  Step 0 done (2026-10-31, `scripts/v2_step0.py`, `experiments/v2_four_class/step0.json`): the cached image outputs are aligned and usable (no extraction
+  needed), the Excluded class is 99.9 percent reports with a finding other than pneumonia or cancer (the expected tuberculosis-coded normals are 0.1 percent), embedding
+  the Excluded indications on the CPU takes about 36 minutes (CPU kept; sort by length to cut it), and the 1,292 "no split" patients are by construction
+  patients with no in-scope study, unlike the training positives, so the plan reports validation and held-out Excluded studies side by side.
+  Step 1 done (2026-10-31, `scripts/v2_build_tables.py`, `data/processed/v2_{train,val,heldout}.csv`, counts in `experiments/v2_four_class/tables.json`): train 16,408
+  studies (Normal 2,953, Pneumonia 7,312, Lung Cancer 774, Other 5,369) on 3,362 patients with a patient-grouped fold, validation 3,549 (Other 1,234), held-out
+  2,241 Other studies of 1,292 patients. The build stops if a patient is in two roles or a study appears twice. The folds are a new partition (about 21 percent of
+  in-scope rows kept their version 1 fold number, which is chance), so version 1 scores are recomputed on them for the comparison. 7 deliberate breakages caught.
+- Version 2 result (2026-10-31, `experiments/v2_four_class/RESULTS.md`): NOT ADOPTED, version 1 stays and nothing in the app changed. Steps: `scripts/v2_embed_excluded.py`
+  (Excluded indications, 575 s on the CPU with length-sorted batches, no GPU or Kaggle needed), `scripts/v2_lib.py`, `scripts/v2_oof.py` (out-of-fold predictions for arm J, the
+  four-class retrain, and arm T, version 1 plus a binary other model per input; the saved version 1 models reproduce the stored validation predictions to 2e-7; arm T chosen on
+  training data, out-of-fold AUROC 0.657 against 0.650), `scripts/v2_evaluate.py` (`--rehearse`, `--freeze`, one `--score`; it refuses a second scoring and refuses if a
+  prediction file changed after the freeze). The one scoring, on in-scope validation against 2,241 held-out Excluded studies: AUROC 0.653 (0.627 to 0.680) against a required
+  0.75 with lower bound 0.70, other studies flagged 20.8 percent against 35 required (in-scope flagged 6.9 percent, within the 13 allowed), three-class macro F1 0.613,
+  cancers flagged 3.4 percent, calibration error 0.036. Failed two of five conditions. The existing confidence signal scores 0.632 on the same patients (difference +0.021,
+  interval -0.008 to +0.052), so the explicit other class bought nothing distinguishable. Arm J was never scored on validation, by design. The flag never fired when labs were
+  missing (0 of 183). Do not run `--score` again (results.json exists). A reliability-page card shows the three attempts side by side. Untried and listed in RESULTS.md: learning
+  features for this task, for example fine-tuning the image model on report-derived finding labels. 11 deliberate breakages of the scoring code and 7 of the table builder caught.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -1042,8 +1064,8 @@ Next:
    Keep the design rule: RAG explains, it never diagnoses, and it must not be able to change
    the predicted label. Open item carried to Phase 7: a faster checker (GPU or a smaller model).
 2. Phase 7, backend and API is done (all seven steps), and so is Phase 8 (section 2). What is left is future work, in the order that
-   matters: teach the models an "other" outcome (the largest honest gap; a gate on the existing outputs was tried and failed, see the
-   out-of-scope detector bullet in Phase 8), replace or fine-tune the image
+   matters: teach the models an "other" outcome (the largest honest gap; a gate on the existing outputs failed, and so did version 2, which trained the
+   models with an explicit other class on frozen features; see the version 2 bullet in Phase 8, so what is left is learning features for this task), replace or fine-tune the image
    model, test at a second site, and move the sentence checker to a GPU. All of it changes the models, so any new test number would be
    post-hoc now that the sealed split is spent. Original Phase 7 plan: wire `app/agent/orchestrator.run_case` into a FastAPI
    endpoint (upload an X-ray, type the indication, enter labs), add PostgreSQL for case
@@ -1077,7 +1099,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 485 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 529 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

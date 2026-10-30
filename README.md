@@ -195,13 +195,17 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   prefetch.py           one-time download of the pretrained models for the offline container
   xray_guard.py         refuses uploads that are clearly not a radiograph (fitted by scripts/build_xray_guard.py)
   api/examples.py       the Analyze page's example-case menu
-tests/                 485 tests (plus 66 slow ones: browser, Postgres, rehearsals), no models or services needed (python -m pytest)
+tests/                 529 tests (plus 66 slow ones: browser, Postgres, rehearsals), no models or services needed (python -m pytest)
 Dockerfile, docker-compose.yml, requirements-api.txt, .dockerignore, .github/workflows/tests.yml    container build, stack and CI
 requirements-api.lock, requirements-test.lock   every dependency pinned with file hashes, made by scripts/lock_dependencies.py
 alembic.ini, migrations/                       schema migrations, run at startup by app/database/migrate.py
 scripts/smoke_stack.py, scripts/ci_stack.sh   smoke test of a running stack, and the script CI runs to start and check it
 scripts/rehearse_demo.py                       run the nine demo cases through a running stack before presenting
 scripts/prepare_public_demo.py                 fetch the public-domain chest film for a public recording (docs/DEMO_SCRIPT.md)
+scripts/v2_embed_excluded.py                 embed the Excluded studies' indications (version 2, experiments/v2_four_class/)
+scripts/v2_build_tables.py                   the four-class tables and patient-grouped folds
+scripts/v2_oof.py                            out-of-fold predictions for both arms and the arm choice
+scripts/v2_evaluate.py                       rehearse, freeze, and the one scoring of the adoption rule
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

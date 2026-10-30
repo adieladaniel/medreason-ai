@@ -62,7 +62,10 @@ discipline worked. The alert trades false alarms for catches (four settings are 
   ([measurement](../experiments/other_pathology/RESULTS.md)). A gate trained to flag such studies from the system's own outputs was then
   tried and did not work (held-out AUROC 0.57, flagging 27 percent of ordinary studies; its cross-validated 0.74 came from a mismatch in how
   the training rows were built, and on clean rows it was 0.60; [experiment](../experiments/out_of_scope/RESULTS.md)). The information is not in
-  those outputs, so a real fix means teaching the models an "other" outcome, which is future work.
+  those outputs. Version 2 then trained the three models with an explicit fourth class built from those studies and also failed its rule fixed in
+  advance (held-out AUROC 0.65 against a required 0.75, 21 percent of other studies flagged against 35 required; not distinguishable from the
+  confidence signal already in the system, 0.63; [experiment](../experiments/v2_four_class/RESULTS.md)). A real fix needs features learned for this
+  task, which is future work.
 - **The labels are noisy.** They come from admission-level billing codes and report mentions, so a film may show nothing of the diagnosis it
   is labelled with. Scores measure agreement with those labels.
 - **One hospital system.** Same linking rule and labeller for training and test. This is not external validation.
@@ -91,8 +94,9 @@ sentence checker on the CPU (about 3.4 seconds per drafted sentence) ([run](../e
 
 ## What would come next
 
-1. Teach the models an "other" outcome and measure it on held-out other-pathology studies; this is the largest honest gap, and a gate on
-   the existing outputs has been shown not to be enough.
+1. Learn features for an "other" outcome (for example by fine-tuning the image model on finding labels taken from the reports) and measure it on
+   held-out other-pathology studies; this is the largest honest gap, and neither a gate on the existing outputs nor retraining the three models on
+   frozen features has been enough.
 2. Fine-tune or replace the image model with one trained on this task; the frozen-output approach has probably reached its limit.
 3. Test at a second site, or on a public set such as NIH ChestX-ray14, for external validity.
 4. Move the sentence checker to a GPU and enlarge the labelled set that validates it.
@@ -101,6 +105,7 @@ sentence checker on the CPU (about 3.4 seconds per drafted sentence) ([run](../e
 
 The test split was sealed until one final run; the plan, the frozen system and what would be reported were written down first
 ([plan](../experiments/test_evaluation/PLAN.md)); experiments were pre-registered with a fixed adoption rule
-([image backbones](../experiments/image_backbones/PLAN.md), [other pathology](../experiments/other_pathology/PLAN.md)); every behaviour
+([image backbones](../experiments/image_backbones/PLAN.md), [other pathology](../experiments/other_pathology/PLAN.md),
+[version 2](../experiments/v2_four_class/PLAN.md)); every behaviour
 change has a test that was shown to fail when the code was broken on purpose (over 400 tests; the last count is in
 [CLAUDE.md](../CLAUDE.md)); and results that came out worse than hoped are reported next to the ones that came out well.

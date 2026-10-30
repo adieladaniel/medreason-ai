@@ -1,0 +1,30 @@
+{
+ "chosen_arm": "T",
+ "arm_choice": {
+  "criterion": "AUROC of the fused 'other' score on the training out-of-fold predictions; a tie within 0.005 goes to T",
+  "auroc_J": 0.6498,
+  "auroc_J_by_modality": {
+   "blood": 0.5406,
+   "text": 0.6511,
+   "image": 0.5669
+  },
+  "auroc_T": 0.6565,
+  "auroc_T_by_modality": {
+   "blood": 0.5465,
+   "text": 0.6543,
+   "image": 0.5704
+  },
+  "chosen": "T"
+ },
+ "prediction_files": {
+  "J_blood.npz": "1e7d3bcec441d912d0c9641ca8e23b947ed397ea2d131f2fb4e8fb93f77522ae",
+  "J_image.npz": "06b8d384f65ba5a4081bfad58e7705b27106ad23111040d1769c7613d968379d",
+  "J_text.npz": "e101230efc34c03f12dbe7c5a38ece33e6bc2fa4d1b0b5f73a4fff10e251c9dd",
+  "T3_blood.npz": "cff8178095284502cdf8741c6b8849d4dc573707dfdc793860514440a0c199c8",
+  "T3_image.npz": "e4f9604322f855c934ba0f2d3c94f726341a04fc61570e09f6e1c23abbec06e3",
+  "T3_text.npz": "27b89c9aefdb5f4a1a2f7b6650926f2143115b4630515589d0e2966a187c20c3",
+  "TB_blood.npz": "46f708ce29e181dfe67445b646c1428858196510bcdf8c993f01f448df7be5f9",
+  "TB_image.npz": "0c36e46905fb692bac12ae511dd1b5dbfd8b18fb50d2c97a33947607f52ed2d4",
+  "TB_text.npz": "e9a41158237792d68a2af041699f2ba1fccfa8713fda5e7a8def3665ca5795ba"
+ }
+}

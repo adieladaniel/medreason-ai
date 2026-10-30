@@ -107,6 +107,8 @@ WATCHED = [
     "experiments/fusion/logreg_stack_coef.csv",
     "kaggle_upload/baseline_kernel/output/*.log",
     "experiments/rag_retrieval/*.json",
+    "experiments/out_of_scope/results.json",
+    "experiments/v2_four_class/results.json",
 ]
 
 FUSION_MLP_LABELS = {"image": "Image", "blood": "Blood", "text": "Text"}
@@ -503,6 +505,29 @@ def _uncertainty():
     return _json("experiments/uncertainty/metrics.json")
 
 
+# ---------------------------------------------------------------- can the system say "none of these"?
+def _scope():
+    """Two attempts to flag studies outside Normal, Pneumonia and Lung Cancer, scored on the same patients: in-scope validation studies against the
+    Excluded studies of patients in no split. Aggregates only. Both were pre-registered and neither met its adoption rule."""
+    gate = _json("experiments/out_of_scope/results.json")["final_held_out_patients"]
+    v2 = _json("experiments/v2_four_class/results.json")
+    s = v2["statistics"]
+    rows = [
+        {"label": "Existing confidence signal (1 minus the top probability)", "auroc": gate["point"]["auroc_existing_confidence"],
+         "low": gate["interval"]["auroc_existing_confidence"][0], "high": gate["interval"]["auroc_existing_confidence"][1],
+         "flagged_other": None, "flagged_in_scope": None, "adopted": None},
+        {"label": "Gate on the models' outputs and the image backbone's 18 outputs", "auroc": gate["point"]["auroc"],
+         "low": gate["interval"]["auroc"][0], "high": gate["interval"]["auroc"][1], "flagged_other": gate["point"]["catch_rate"],
+         "flagged_in_scope": gate["point"]["false_flag_rate"], "adopted": False},
+        {"label": "Version 2: a binary other-versus-in-scope model per input, trained on the Excluded studies", "auroc": s["auroc"]["value"],
+         "low": s["auroc"]["low"], "high": s["auroc"]["high"], "flagged_other": s["flagged_heldout"]["value"],
+         "flagged_in_scope": s["flagged_inscope"]["value"], "adopted": bool(v2["adopted"])},
+    ]
+    return {"rows": rows, "required_auroc": v2["limits"]["auroc"], "required_flagged_other": v2["limits"]["flagged_heldout"],
+            "allowed_flagged_in_scope": v2["limits"]["flagged_inscope"], "held_out": v2["sizes"]["heldout"],
+            "in_scope": v2["sizes"]["in_scope_validation"], "conditions": v2["conditions"]}
+
+
 # ---------------------------------------------------------------- assemble
 def build() -> dict:
     data = _safe(_data)
@@ -512,6 +537,7 @@ def build() -> dict:
     preds = _safe(_predictions_section)
     rag = _safe(_rag)
     unc = _safe(_uncertainty)
+    scope = _safe(_scope)
 
     head = {}
     if models and models["blood"]:
@@ -538,6 +564,7 @@ def build() -> dict:
         "predictions": preds,
         "rag": rag,
         "uncertainty": unc,
+        "scope": scope,
         "remaining": REMAINING,
     }
 

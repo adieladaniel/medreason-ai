@@ -1,0 +1,69 @@
+{
+ "train": {
+  "studies": 16408,
+  "patients": 3362,
+  "by_class": {
+   "Normal": 2953,
+   "Pneumonia": 7312,
+   "Lung Cancer": 774,
+   "Other": 5369
+  }
+ },
+ "val": {
+  "studies": 3549,
+  "patients": 720,
+  "by_class": {
+   "Normal": 664,
+   "Pneumonia": 1534,
+   "Lung Cancer": 117,
+   "Other": 1234
+  }
+ },
+ "heldout": {
+  "studies": 2241,
+  "patients": 1292,
+  "by_class": {
+   "Normal": 0,
+   "Pneumonia": 0,
+   "Lung Cancer": 0,
+   "Other": 2241
+  }
+ },
+ "train_folds": {
+  "0": {
+   "Normal": 596,
+   "Pneumonia": 1568,
+   "Lung Cancer": 210,
+   "Other": 1236
+  },
+  "1": {
+   "Normal": 650,
+   "Pneumonia": 1352,
+   "Lung Cancer": 149,
+   "Other": 1225
+  },
+  "2": {
+   "Normal": 559,
+   "Pneumonia": 1517,
+   "Lung Cancer": 149,
+   "Other": 906
+  },
+  "3": {
+   "Normal": 582,
+   "Pneumonia": 1299,
+   "Lung Cancer": 145,
+   "Other": 1083
+  },
+  "4": {
+   "Normal": 566,
+   "Pneumonia": 1576,
+   "Lung Cancer": 121,
+   "Other": 919
+  }
+ },
+ "fold_agreement_with_version_1": {
+  "in_scope_rows": 11039,
+  "share_with_the_same_fold": 0.214,
+  "note": "fold numbers are arbitrary labels, so a low share does not by itself mean a different partition of patients"
+ }
+}

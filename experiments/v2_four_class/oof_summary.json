@@ -1,0 +1,42 @@
+{
+ "seconds": {
+  "J_blood": 25.9,
+  "J_text": 192.8,
+  "J_image": 38.1,
+  "TB_blood": 9.8,
+  "TB_text": 13.6,
+  "TB_image": 12.8,
+  "T3_blood": 4.7,
+  "T3_text": 22.0,
+  "T3_image": 8.0
+ },
+ "agreement_with_stored_version_1_validation": {
+  "blood": 0.0,
+  "text": 0.0,
+  "image": 2e-07
+ },
+ "oof_information": {
+  "blood": {
+   "macro_f1_version_1_recomputed": 0.4318,
+   "macro_f1_arm_J_first_three": 0.4364
+  },
+  "text": {
+   "macro_f1_version_1_recomputed": 0.5389,
+   "macro_f1_arm_J_first_three": 0.5407
+  },
+  "image": {
+   "macro_f1_version_1_recomputed": 0.4882,
+   "macro_f1_arm_J_first_three": 0.4885
+  },
+  "image_seed_spread_auroc_other": [
+   0.5663,
+   0.5675,
+   0.5668
+  ],
+  "image_seed_spread_macro_f1_in_scope": [
+   0.4877,
+   0.4822,
+   0.4892
+  ]
+ }
+}

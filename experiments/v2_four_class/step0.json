@@ -1,0 +1,129 @@
+{
+ "image_features": {
+  "train": {
+   "rows": 11039,
+   "cached_shape": [
+    11039,
+    18
+   ],
+   "rows_match": true,
+   "recomputed": 6,
+   "largest_difference": 3.5762786865234375e-07
+  },
+  "val": {
+   "rows": 2315,
+   "cached_shape": [
+    2315,
+    18
+   ],
+   "rows_match": true,
+   "recomputed": 6,
+   "largest_difference": 1.0728836059570312e-06
+  },
+  "excluded_train": {
+   "rows": 5369,
+   "cached_shape": [
+    5369,
+    18
+   ],
+   "study_ids_in_order": true,
+   "has_blood_share": 0.989,
+   "has_text_share": 0.961
+  },
+  "excluded_val": {
+   "rows": 1234,
+   "cached_shape": [
+    1234,
+    18
+   ],
+   "study_ids_in_order": true,
+   "has_blood_share": 0.985,
+   "has_text_share": 0.966
+  },
+  "excluded_none": {
+   "rows": 2241,
+   "cached_shape": [
+    2241,
+    18
+   ],
+   "study_ids_in_order": true,
+   "has_blood_share": 0.944,
+   "has_text_share": 0.961
+  }
+ },
+ "excluded_composition": {
+  "train": {
+   "studies": 5369,
+   "patients": 1408,
+   "report_says_no_finding": 0.001,
+   "tb_icd_code": 0.004,
+   "no_finding_and_tb_code": 0.001,
+   "has_findings_other_than_the_two": 0.999,
+   "pneumonia_or_cancer_icd_but_excluded": 0
+  },
+  "val": {
+   "studies": 1234,
+   "patients": 336,
+   "report_says_no_finding": 0.001,
+   "tb_icd_code": 0.002,
+   "no_finding_and_tb_code": 0.001,
+   "has_findings_other_than_the_two": 0.999,
+   "pneumonia_or_cancer_icd_but_excluded": 0
+  },
+  "none": {
+   "studies": 2241,
+   "patients": 1292,
+   "report_says_no_finding": 0.0,
+   "tb_icd_code": 0.0,
+   "no_finding_and_tb_code": 0.0,
+   "has_findings_other_than_the_two": 1.0,
+   "pneumonia_or_cancer_icd_but_excluded": 0
+  }
+ },
+ "text_embedding_timing": {
+  "timed": 128,
+  "seconds": 31.1,
+  "seconds_per_text": 0.2432,
+  "excluded_total": 8844,
+  "estimated_minutes_for_all": 35.8,
+  "embedding_dim": 768,
+  "empty_indications_in_timed": 6,
+  "median_words": 8.0,
+  "threads": 10,
+  "cuda": false
+ },
+ "hashes": {
+  "version1_system": {
+   "git_head": "f60f40f99af05932106028977b95c442430faf47",
+   "files": {
+    "experiments/blood_baseline/hgb_model.joblib": "707cace7b3f7aec65e7be0147b74265b2cf43ef3280bb16947b5e742df95e814",
+    "experiments/text_baseline/logreg_indication.joblib": "428405259ef08fa22a3cd8e5e775518d0e0c9ce2c417d81042041b8eb4e31a73",
+    "experiments/image_baseline/image_head_final.pth": "acbae75432c296ab67c17c68e9b9bed6c2901f8e00e604be2c94d28bc44d9de0",
+    "app/data/decision_rules.json": "ebca08cd30fe689b53ee6e9783684a92e0fe75695f3e6f297557a71ca23dddd1",
+    "explain/image.py": "08c168c116aec01c9f75f41d5ae8f46b5919fb10a1c861f31a40a6479f2f1e27",
+    "explain/blood.py": "7d6f464d93c826427309f28a96fd728ce5eb58066101b6b59ba68c427328ad1e",
+    "explain/text.py": "2627b0f83a4b09c05c683de2c102de590cf17b824865a8ce2105f9f2f3b665cc",
+    "app/agent/belief.py": "5380cf094a585e2509098d776364abc3d8ea75181113e9d07c883f2d80201ff1",
+    "app/agent/reasoning.py": "e0a46e46c3fe5d30fd07f04d995a7323db973340214e5556a2f42efbce8d0ca2",
+    "app/agent/decision.py": "d7ae0a46cd449fe5b2391fa93794948131fea688627af1e19998cd6f96f0a300",
+    "app/agent/consistency.py": "10c8fae51ff8a9624aabcab8d5be0b4fcd1fc845ca3caf2cf4d5e64d93b34169",
+    "app/pipelines/staged.py": "7a0578537a955a4ec7f63d725547d2bad63d5f76fd3de332397526bb90f02899"
+   },
+   "backbone_weights": "23b13a04459684ffa41247d068207a7657b4e1b4dec2b02431f5026bd75b1189"
+  },
+  "data": {
+   "data/processed/train.csv": "52feab0552cacad3a74d63fc7febd1d381e17aa4ba836c3ecfb909d4693d1980",
+   "data/processed/val.csv": "349576e8f0fcabddf80a0dfe96238c3328b11695e13565bd359caf4ddf6ac2d4",
+   "data/processed/excluded_train.csv": "6264e1032d6d3daa78c5aca0384dbe815751a5831e42b43a663ac0bcc6a19e2f",
+   "data/processed/excluded_val.csv": "e072f1ff30c1dbea41d447667b5b566d83677fbbd4a6dc240dac080c8c7e07d9",
+   "data/processed/excluded_none.csv": "f9b642c1e17a481029aeff4216d3f52c8c3a5e4b68d6e1875e1f91874455ffe6",
+   "data/interim/final_study_labels.csv": "8b281d996b7071b2aea7262b60e3882c98271c2c06e032d62b731255d663339c",
+   "experiments/image_baseline/feats_train.npy": "1c15bf11b43d1af59aa484e8a8e65825bca04b838a9e2c4a147b4b7aee885b1a",
+   "experiments/image_baseline/feats_val.npy": "77743b5f8e7a47d652f7295275c924e7aa364a8d18ffe196ef537681e33aa582",
+   "experiments/out_of_scope/feats_train.npz": "0eb6ece667961f8baf7c364e16656872f89502a84038e63d7389b24fcb256fb6",
+   "experiments/out_of_scope/feats_val.npz": "5d76b483f127a39dd4cd7408c6e60f2b1cf39a0ca44830ef3e2433792c1fc995",
+   "experiments/out_of_scope/feats_none.npz": "a436bd7ba7e2e1accddf2b3e706bd62b6af1cf0cb3c210b1bba70b7aae196491",
+   "experiments/fusion/val_predictions.csv": "2ef33d6fed136068873ccee1753d94a00704735b737c283a30aa7720ece258d9"
+  }
+ }
+}
