@@ -154,9 +154,9 @@ To look at a real case without typing 13 lab values, send a validation case to t
 prints. Everything comes from the same study, which is what the models were built for:
 
 ```bash
-python scripts/submit_case.py --study-id 53383543     # a pneumonia case
-python scripts/submit_case.py --study-id 57386788     # a normal case (this one has no lab values on record)
-python scripts/submit_case.py --study-id 50262066     # a lung cancer case the models get wrong, flagged as a conflict
+python scripts/submit_case.py --study-id <STUDY_ID>     # a pneumonia case
+python scripts/submit_case.py --study-id <STUDY_ID>     # a normal case (this one has no lab values on record)
+python scripts/submit_case.py --study-id <STUDY_ID>     # a lung cancer case the models get wrong, flagged as a conflict
 ```
 
 Mixing one patient's X-ray with another's typed values makes the text and blood models outvote the image, so every case comes out
@@ -248,6 +248,6 @@ Run one case through the agent and the evidence chain (the text explanation step
 indication and up to about 15 seconds for a very long one, and the writer needs Ollama running with `llama3.2`):
 
 ```bash
-python -m app.agent.orchestrator --study-id 53383543
-python -m app.rag.explain_case --study-id 53383543
+python -m app.agent.orchestrator --study-id <STUDY_ID>
+python -m app.rag.explain_case --study-id <STUDY_ID>
 ```

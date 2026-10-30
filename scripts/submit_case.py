@@ -11,10 +11,10 @@ Only the validation and training splits are allowed. The test split stays sealed
 (CLAUDE.md section 6), so asking for it is an error, not a warning.
 
 Run from the repo root, with the server and Ollama already running:
-    python scripts/submit_case.py --study-id 53383543                 # a pneumonia case, all three inputs
-    python scripts/submit_case.py --study-id 57386788                 # a normal case
-    python scripts/submit_case.py --study-id 50262066                 # a lung cancer case the models get wrong
-    python scripts/submit_case.py --study-id 53383543 --drop image    # same case without the X-ray
+    python scripts/submit_case.py --study-id <STUDY_ID>                 # a pneumonia case, all three inputs
+    python scripts/submit_case.py --study-id <STUDY_ID>                 # a normal case
+    python scripts/submit_case.py --study-id <STUDY_ID>                 # a lung cancer case the models get wrong
+    python scripts/submit_case.py --study-id <STUDY_ID> --drop image    # same case without the X-ray
 It prints the address to open. The case is also listed under "Recent cases" on the page.
 """
 import argparse

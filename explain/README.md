@@ -31,9 +31,9 @@ and the Phase 5 agent can both read.
 ## Entrypoint
 
 ```bash
-python -m explain.run --study-id 53383543 --save experiments/explain_samples/
-python -m explain.run --study-id 53383543 --only blood,text
-python -m explain.blood --study-id 53383543 --plot out.png     # single modality
+python -m explain.run --study-id <STUDY_ID> --save experiments/explain_samples/
+python -m explain.run --study-id <STUDY_ID> --only blood,text
+python -m explain.blood --study-id <STUDY_ID> --plot out.png     # single modality
 python -m explain.text  --text "65M smoker, chronic cough, weight loss"
 ```
 

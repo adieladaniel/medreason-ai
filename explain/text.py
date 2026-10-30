@@ -14,7 +14,7 @@ hand; training code is intentionally not imported).
 
 First run downloads Bio_ClinicalBERT (~430 MB) and is slow; then ~a few seconds/case on CPU.
 
-CLI:  python -m explain.text --study-id 50296395
+CLI:  python -m explain.text --study-id <STUDY_ID>
       python -m explain.text --text "65M smoker, chronic cough and weight loss"
 """
 from __future__ import annotations

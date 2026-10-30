@@ -20,7 +20,7 @@ database holds the state, so this could be swapped for a real queue later withou
 does not survive a restart; repository.interrupted_to_failed marks such cases failed at startup.
 
 CLI, to run one real validation case through the whole thing and print what was stored:
-    python -m app.pipelines.runner --study-id 53383543 [--drop image|blood|text] [--db sqlite:///x.db]
+    python -m app.pipelines.runner --study-id <STUDY_ID> [--drop image|blood|text] [--db sqlite:///x.db]
 """
 from __future__ import annotations
 

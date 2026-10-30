@@ -916,6 +916,11 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   about 107 seconds, and was cut to 188 after counting. Limits: nobody has recorded or watched the video yet, the screen recorder was not tried (the script
   says to check which one this machine has), the CDC film is a 700 by 485 pixel low-resolution copy from 1975 whose domain differs from MIMIC, and the Docker
   clean-context build was not rerun for this step (CI will).
+- Decision (2026-10-30): the user chose not to record the demo video. `docs/DEMO_SCRIPT.md` and `scripts/prepare_public_demo.py` stay as a ready plan, and the
+  data rule in them still applies to any screenshot or screen share. The repository was made public the same day. Its `data/` folder is git-ignored and no tracked
+  file holds MIMIC rows, but docs and docstrings had named four real MIMIC-CXR study ids as command examples. They are now `<STUDY_ID>`, and
+  `app/rag/eval_faithfulness.py` takes the two ids it needs on the command line instead of holding them. Earlier commits still contain the ids, which are
+  identifiers only (no image, text or lab value). Do not put a real study id, subject id or admission id in a tracked file.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -1147,7 +1152,7 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   confidence is low, lists what cannot be ruled out, and shows the alert as a banner (worded as the models' signal, not a
   diagnosis, with its measured recall and false-alarm cost) when it fires under a different headline. A class-conditional set
   can leave out the most probable class (near-even probabilities give only Lung Cancer, because the rare class is judged
-  more leniently); the page says so. Honest result on the case that prompted this (study 50262066, true Lung Cancer, fused
+  more leniently); the page says so. Honest result on the case that prompted this (a validation study, true Lung Cancer, fused
   Pneumonia 40 percent): it is headlined Uncertain with all three classes in the set, but its fused cancer probability is
   0.22, so the default alert (0.30) does not fire; only the 80 percent level (0.19, 33 alerts per 100 cases) does. Tested with
   real models through the page, 8 deliberate breakages caught, 17 browser tests.
@@ -1160,7 +1165,7 @@ Full notes: [docs/ENVIRONMENT_AND_HANDOFF.md](docs/ENVIRONMENT_AND_HANDOFF.md). 
   Cancer 62 percent, blood Normal 93 percent). Use `scripts/submit_case.py --study-id ID` to send such a case to the
   running server. UI to do later: the single example button is misleading next to an uploaded X-ray (offer normal-like and
   cancer-like examples, or load a validation case), and the Phase 8b example-case loader covers it.
-- A validation case with no labs on record (for example study 57386788) is sent without a blood input, so the blood
+- A validation case with no labs on record (for example one of the demo cases) is sent without a blood input, so the blood
   model takes no part; the offline evaluations fed the blood model all-missing values in that situation (it said
   Normal 66 percent), which is a small difference between the evaluation setup and the app.
 - Memory of the app, measured 2026-10-25 (`psutil`, one real validation case): Python with torch 0.5 GB, 1.2 GB after

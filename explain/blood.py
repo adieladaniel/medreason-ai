@@ -12,7 +12,7 @@ The 19 model features = the 17 raw labs + NLR + PLR (neutrophil/lymphocyte and
 platelet/lymphocyte ratios). Feature construction mirrors scripts/train_blood_baseline.py
 and is kept in sync by hand -- training code is intentionally not imported here.
 
-CLI:  python -m explain.blood --study-id 50296395   (pulls that row's labs from val.csv)
+CLI:  python -m explain.blood --study-id <STUDY_ID>   (pulls that row's labs from val.csv)
 """
 from __future__ import annotations
 

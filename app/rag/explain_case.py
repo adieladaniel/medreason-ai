@@ -9,7 +9,7 @@ and nothing in this chain can change it: the planner and retriever only produce 
 passages, the writer's case sentences are built by code, and the checker only removes sentences.
 
 CLI (runs the agent first, then this):
-    python -m app.rag.explain_case --study-id 53383543 [--drop image|blood|text]
+    python -m app.rag.explain_case --study-id <STUDY_ID> [--drop image|blood|text]
 """
 from __future__ import annotations
 

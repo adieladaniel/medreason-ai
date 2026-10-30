@@ -4,9 +4,9 @@ and print/save a combined view. This is what the Phase 5 agent layer will call a
 models produce a prediction.
 
 CLI:
-  python -m explain.run --study-id 50262066            # pull image/labs/indication from val.csv
-  python -m explain.run --study-id 50262066 --split val --save experiments/explain_samples/
-  python -m explain.run --study-id 50262066 --only blood,text
+  python -m explain.run --study-id <STUDY_ID>            # pull image/labs/indication from val.csv
+  python -m explain.run --study-id <STUDY_ID> --split val --save experiments/explain_samples/
+  python -m explain.run --study-id <STUDY_ID> --only blood,text
 """
 from __future__ import annotations
 

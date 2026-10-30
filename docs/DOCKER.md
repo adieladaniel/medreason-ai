@@ -28,7 +28,7 @@ docker compose up -d api
 
 Then open http://localhost:8000/#/analyze, and http://localhost:8000/api/ready to see whether every dependency is up. Later
 starts are `docker compose up -d` and later stops are `docker compose down` (the volumes, and so the models and the index,
-are kept; `docker compose down -v` deletes them). Send a real validation case with `python scripts/submit_case.py --study-id 53383543`.
+are kept; `docker compose down -v` deletes them). Send a real validation case with `python scripts/submit_case.py --study-id <STUDY_ID>`.
 
 ## Choices and their reasons
 

@@ -8,9 +8,9 @@ through the exact rule validated in Phase 3.
 
 CLI (mirrors explain/run.py, for testing against real validation cases and for building
 the Phase 8b demo-case set):
-    python -m app.agent.orchestrator --study-id 53383543
-    python -m app.agent.orchestrator --study-id 53383543 --drop blood
-    python -m app.agent.orchestrator --study-id 53383543 --drop blood --drop image
+    python -m app.agent.orchestrator --study-id <STUDY_ID>
+    python -m app.agent.orchestrator --study-id <STUDY_ID> --drop blood
+    python -m app.agent.orchestrator --study-id <STUDY_ID> --drop blood --drop image
 """
 from __future__ import annotations
 

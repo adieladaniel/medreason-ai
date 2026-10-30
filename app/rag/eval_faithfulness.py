@@ -13,7 +13,8 @@ unfaithful ones are the kinds of error the author thought of. Treat the rates as
 check on the checker, not as a measured error rate for real writer output.
 
 Run:  python -m app.rag.eval_faithfulness   (needs experiments/rag_retrieval/faithfulness_passages.json,
-      written by the first run from the saved real cases; see build_passages)
+      written by the first run from the saved real cases; see build_passages, which takes the saved
+      cases file and the study ids of the pneumonia and the cancer case: main(src, pneumonia_study, cancer_study))
 """
 from __future__ import annotations
 
@@ -67,19 +68,22 @@ SET = [
     ("adeno", "Smoking is the main cause of invasive mucinous adenocarcinoma.", False, "unsupported claim"),
 ]
 
-KEYS = {"lymph": ("53383543", 2), "albumin": ("53383543", 3), "predictors": ("53383543", 4),
-        "nlr_intro": ("53383543", 1), "adeno": ("50262066", 1)}
+# Which saved case and passage number each key came from. The cases are named by role, not by study id, because study ids come from MIMIC
+# and stay out of the repository; build_passages is told the two ids on the command line.
+KEYS = {"lymph": ("pneumonia", 2), "albumin": ("pneumonia", 3), "predictors": ("pneumonia", 4),
+        "nlr_intro": ("pneumonia", 1), "adeno": ("cancer", 1)}
 
 
-def build_passages(src: Path) -> dict:
+def build_passages(src: Path, cases: dict) -> dict:
     data = json.loads(src.read_text(encoding="utf-8"))
-    out = {k: next(p["text"] for p in data[sid]["passages"] if p["n"] == n) for k, (sid, n) in KEYS.items()}
+    out = {k: next(p["text"] for p in data[cases[role]]["passages"] if p["n"] == n) for k, (role, n) in KEYS.items()}
     PASSAGES.write_text(json.dumps(out, indent=1), encoding="utf-8")
     return out
 
 
-def main(src: str | None = None) -> None:
-    passages = json.loads(PASSAGES.read_text(encoding="utf-8")) if PASSAGES.exists() else build_passages(Path(src))
+def main(src: str | None = None, pneumonia_study: str | None = None, cancer_study: str | None = None) -> None:
+    passages = (json.loads(PASSAGES.read_text(encoding="utf-8")) if PASSAGES.exists()
+                else build_passages(Path(src), {"pneumonia": pneumonia_study, "cancer": cancer_study}))
     rows = []
     for key, sent, ok, kind in SET:
         ent = faithfulness.entailment(sent, passages[key])

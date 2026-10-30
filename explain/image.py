@@ -22,7 +22,7 @@ Preprocessing mirrors the training kernels exactly (grayscale, xrv.normalize to
 
 Runs on CPU. First use downloads the backbone weights (~a few hundred MB) once.
 
-CLI:  python -m explain.image --study-id 50262066 --out experiments/explain_samples/
+CLI:  python -m explain.image --study-id <STUDY_ID> --out experiments/explain_samples/
 """
 from __future__ import annotations
 
