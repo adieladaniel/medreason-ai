@@ -318,8 +318,9 @@ What was done, in the order it was done:
    `scripts/lock_dependencies.py`), the CPU-only torch wheel is part of the lock, and the image build installs it with `--require-hashes`.
    Step 3b (2026-10-30): the database schema is created and changed by Alembic migrations (a baseline, takeover of databases made
    before migrations, and a test that fails when the models and migrations disagree). Step 3c (2026-10-30): a smoke test of the running containers in CI (Postgres 16, Qdrant, the runtime image, a database from
-   before migrations taken over, a restart), and a fix it found: a failed stage no longer shows server paths or URLs in its error. Still to do:
-   a script that runs the nine demo cases through the real stack with the real models. Details in `CLAUDE.md`.
+   before migrations taken over, a restart), and a fix it found: a failed stage no longer shows server paths or URLs in its error. Step 3d (2026-10-30): `scripts/rehearse_demo.py` runs the nine demo cases
+   through a running stack with the real models and checks each against its frozen values (all nine matched on the first real run). Step 3 is done.
+   Next: the demo recording. Details in `CLAUDE.md`.
 
 The plan below is kept as the record of what was intended. Items marked here as done are the ones above; the rest of Phase 8b (a full screen
 recording, PhysioNet credentials, rehearsing the cold start in front of an audience) are for the person presenting.

@@ -875,6 +875,30 @@ Public summary of everything below, written to be quoted from: `docs/RESULTS.md`
   yet (needs a push), the smoke test cannot show that the models or the language model work, the 120 s waits are guesses about a slower runner, and a
   failed first stage is the expected state in CI, so a stack that fails for another reason before the models load would look the same to the status
   check (the error text, the events and the readiness checks are what tell them apart).
+- Engineering hardening, step 3d: a rehearsal of the demo against a running stack (2026-10-30, `scripts/rehearse_demo.py`,
+  `tests/test_rehearse_demo.py`). `tests/test_demo_cases.py` reproduces the frozen demo predictions in-process, at the prediction stage only. The
+  rehearsal does what a presenter does, over HTTP: it loads each of the nine examples through the example menu endpoints, submits it the way the form
+  does (film, indication, labs), waits for the whole pipeline, and compares the stored case with the manifest's frozen values (class, consistency
+  verdict, inputs used, low-confidence flag, prediction set, cancer alert, all equal; pooled confidence within 0.01) and requires the case to end
+  `done`. It also checks that the two built-in non-X-ray pictures are refused with 422 and not stored. Readiness is strict by default (Ollama and the
+  evidence index must be ok, `--allow-degraded` relaxes it), because a demo without evidence is not the demo. Verified sentence counts and seconds per
+  case are printed and never compared, since the writer is not reproducible. It shares its HTTP helpers with `smoke_stack.py`, whose multipart helper
+  now carries a file. Run it with `python scripts/rehearse_demo.py --url http://127.0.0.1:8000` before presenting.
+  Real run (2026-10-30, native server on a scratch database, real models with warm-up still loading, Ollama llama3.2): all nine cases matched and both
+  pictures were refused. Seconds per case: clear-normal 48.2 (first case, models loading), clear-pneumonia 100.2 (first evidence note: Ollama and the
+  entailment checker loading), clear-lung-cancer 9.2, models-disagree-resolved 4.1, low-confidence 4.1, no-labs 11.2, wrong-but-flagged 7.1,
+  missed-cancer-alert-fires 17.2, wrong-and-confident 14.2. What a presenter should know: only 2 of the 9 cases show a cited background sentence
+  (clear-pneumonia 1 verified and 2 dropped, missed-cancer-alert-fires 1 verified). Six predict Normal, which asks for no evidence by design, and
+  clear-lung-cancer says "The evidence library has no passage for: indication words: mass, biopsy" (the known corpus gap, reported honestly and not
+  covered up). Tests: 21 new (482 normal in all); 17 deliberate breakages, and the first round let one through (the check that a refused picture is not
+  stored), now covered. Two test-quality fixes from this work: the fake stage used to report the inputs it was told, not the ones it received, so a
+  script that forgot to upload the film would have passed; and the earlier smoke tests silently assumed Ollama was not running, which failed on this
+  machine while Ollama was up (the test servers now point Ollama at a closed port). Limits: one run on one machine, the frozen values come from the
+  stored validation predictions and the confidence tolerance of 0.01 was chosen before the run and not tuned, and the rehearsal does not read the
+  evidence text (a sentence can pass the verifier and still be a poor demo). Starting the Ollama app by running `ollama list` also started its tray
+  app and server; stop all three names afterwards (see section 8).
+  Step 3 is complete: lock file (3a), migrations (3b), container smoke test in CI (3c), demo rehearsal (3d). The next planned work is the demo recording
+  (step 4) and, as a labelled v2 with its own plan, a four-class model with an explicit other outcome.
 - Mistakes worth remembering: a selection rule that uses each study once in profile order starves later profiles in tests unless the test
   records are isolated (hit three times); `frozen_system()` hashed files that a clean CI checkout lacks, caught only by thinking about the
   container build; and "uniform vector is neutral in the pool" is true for the winning class but not the probabilities (geometric mean over
@@ -1031,7 +1055,7 @@ One component at a time, not big upfront builds.
 - Training code targets Kaggle's environment (pinned torch install, dynamic path
   resolution). It is not expected to run locally.
 - The test split was sealed until the one final evaluation, which is done (2026-10-29). It must not be scored again (see Phase 8).
-- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 461 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
+- Tests: `python -m pytest` from the repo root (30 to 70 s depending on load, 482 tests, plus 66 slow-marked ones that are skipped by default: 43 browser tests
   of the Analyze page and the page frame, 12 Postgres runs of the storage tests, the decision-rules rebuild check and three rehearsals against the real models, which need Playwright, a throwaway
   database URL or the training predictions). They use synthetic agent
   results and stub the retriever, Ollama and the NLI model, so they need no models or services

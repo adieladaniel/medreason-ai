@@ -195,11 +195,12 @@ app/                   FastAPI app, progress dashboard, agent, evidence retrieva
   prefetch.py           one-time download of the pretrained models for the offline container
   xray_guard.py         refuses uploads that are clearly not a radiograph (fitted by scripts/build_xray_guard.py)
   api/examples.py       the Analyze page's example-case menu
-tests/                 461 tests (plus 66 slow ones: browser, Postgres, rehearsals), no models or services needed (python -m pytest)
+tests/                 482 tests (plus 66 slow ones: browser, Postgres, rehearsals), no models or services needed (python -m pytest)
 Dockerfile, docker-compose.yml, requirements-api.txt, .dockerignore, .github/workflows/tests.yml    container build, stack and CI
 requirements-api.lock, requirements-test.lock   every dependency pinned with file hashes, made by scripts/lock_dependencies.py
 alembic.ini, migrations/                       schema migrations, run at startup by app/database/migrate.py
 scripts/smoke_stack.py, scripts/ci_stack.sh   smoke test of a running stack, and the script CI runs to start and check it
+scripts/rehearse_demo.py                       run the nine demo cases through a running stack before presenting
 docs/                  Phase 7 design, machine and environment notes
 kaggle_upload/         image-model training, runs on Kaggle free GPU, not locally
 experiments/           baseline results (RESULTS.md, metrics.json). Weights and per-study preds git-ignored

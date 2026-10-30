@@ -41,7 +41,8 @@ def serve(tmp_path):
     servers = []
 
     def start(stages, **settings):
-        url = f"sqlite:///{(tmp_path / f's{len(servers)}.db').as_posix()}"
+        settings.setdefault("ollama_url", "http://127.0.0.1:9")      # nothing listens there, so a test never depends on Ollama running
+        url =f"sqlite:///{(tmp_path / f's{len(servers)}.db').as_posix()}"
         cfg = Settings(database_url=url, upload_dir=tmp_path / "uploads", run_worker=stages is not None, **settings)
         runner = JobRunner(url, stages=stages, deps={"no_figures": True}, figure_dir=cfg.upload_dir) if stages is not None else None
         app = create_app(cfg, runner, build_dashboard=False)

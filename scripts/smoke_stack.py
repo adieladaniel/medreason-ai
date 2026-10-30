@@ -53,10 +53,14 @@ def call(base: str, method: str, path: str, body: bytes | None = None, content_t
         raise Failed(f"{method} {path}: {getattr(err, 'reason', err)}") from err
 
 
-def form(fields: dict[str, str]) -> tuple[bytes, str]:
+def form(fields: dict[str, str], files: dict[str, tuple[str, bytes, str]] | None = None) -> tuple[bytes, str]:
+    """A multipart/form-data body: text fields, and optionally files as {field: (file name, bytes, content type)}."""
     boundary = uuid.uuid4().hex
-    parts = [f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n' for k, v in fields.items()]
-    return ("".join(parts) + f"--{boundary}--\r\n").encode(), f"multipart/form-data; boundary={boundary}"
+    body = b"".join(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode() for k, v in fields.items())
+    for name, (filename, data, ctype) in (files or {}).items():
+        body += (f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'
+                 f"Content-Type: {ctype}\r\n\r\n").encode() + data + b"\r\n"
+    return body + f"--{boundary}--\r\n".encode(), f"multipart/form-data; boundary={boundary}"
 
 
 def get_json(base: str, path: str) -> tuple[int, dict]:

@@ -64,6 +64,9 @@ in `.github/workflows/tests.yml` runs this same script. It uses its own compose 
 your cases are safe, and it refuses to run as `medreason`. A runner has no trained models, so the check expects a case to end "failed" at its first
 stage and verifies that the message shows no path or URL. To check a full stack with the real models and Ollama use `python scripts/smoke_stack.py
 --strict --expect done`, which runs the same checks with the strictest expectations.
+Before presenting, `python scripts/rehearse_demo.py --url http://127.0.0.1:8000` sends the nine demo cases through the running stack (with the
+real models and Ollama) and checks each against the values frozen in `demo/cases/manifest.json`; the `demo/cases` folder is git-ignored and mounted
+read-only by compose, so run it on the machine that has it.
 
 **CPU-only torch.** The default PyPI wheel carries CUDA libraries the container cannot use and makes the image several gigabytes
 larger. The lock names `torch==2.11.0+cpu` and `torchvision==0.26.0+cpu`, which exist only on the PyTorch CPU index, so the Dockerfile
