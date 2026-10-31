@@ -11,7 +11,7 @@ data, and judge the adoption rule on the validation studies and the held-out pat
 The fused "other" score is the pooled fourth probability for arm J and the pooled binary score for arm T. The in-scope class is the best of the
 three in-scope classes, so a flag never changes it. The scoring code itself is not frozen, so a flaw found afterwards can be fixed and shown both ways.
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import hashlib

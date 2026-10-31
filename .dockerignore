@@ -20,6 +20,7 @@ docs
 README.md
 CLAUDE.md
 ROADMAP.md
+docs/ENVIRONMENT_AND_HANDOFF.md
 .venv
 venv
 __pycache__

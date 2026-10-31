@@ -37,7 +37,7 @@ cached embeddings from scripts/train_text_baseline.py and the image OOF kernel):
 from __future__ import annotations
 
 # Windows: sklearn before torch can break torch's DLL init (WinError 1114). Import torch
-# first (see CLAUDE.md section 4, gotcha 7).
+# first (torch must be imported before sklearn on Windows).
 import torch
 import torch.nn as nn
 

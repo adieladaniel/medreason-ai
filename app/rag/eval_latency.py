@@ -29,7 +29,7 @@ where a quieter one gave 3.9 s), so close other programs first and read the firs
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  (Windows: torch before sklearn/shap, see CLAUDE.md section 4)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import json

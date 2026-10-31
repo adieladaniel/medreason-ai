@@ -197,7 +197,7 @@ def run(base: str, expect: str = "any", strict: bool = False, wait: float = 120,
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--url", default="http://127.0.0.1:8000", help="address of the API (use 127.0.0.1, not localhost: see CLAUDE.md)")
+    ap.add_argument("--url", default="http://127.0.0.1:8000", help="address of the API (use 127.0.0.1, not localhost: localhost costs about 2 s per call on the development laptop)")
     ap.add_argument("--expect", default="any", choices=["any", *TERMINAL], help="the state a case must end in (CI has no models: failed)")
     ap.add_argument("--strict", action="store_true", help="fail unless every dependency (Qdrant, Ollama) is ok too")
     ap.add_argument("--wait", type=float, default=120, help="seconds to wait for the API to come up and for the case to finish")

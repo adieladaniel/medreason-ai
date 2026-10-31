@@ -12,7 +12,7 @@ Run from the repo root, after scripts/build_final_dataset.py --excluded --role <
     python scripts/extract_scope_features.py --roles train val none
 Output: experiments/out_of_scope/feats_<role>.npz (git-ignored: derived from MIMIC).
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import sys

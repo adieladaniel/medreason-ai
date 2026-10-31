@@ -8,7 +8,7 @@ the image every time, which shows the fusion working and teaches nothing about t
 from the same study, as the models were built for.
 
 Only the validation and training splits are allowed. The test split stays sealed until the final evaluation
-(CLAUDE.md section 6), so asking for it is an error, not a warning.
+(experiments/test_evaluation/PLAN.md), so asking for it is an error, not a warning.
 
 Run from the repo root, with the server and Ollama already running:
     python scripts/submit_case.py --study-id <STUDY_ID>                 # a pneumonia case, all three inputs

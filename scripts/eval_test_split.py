@@ -13,7 +13,7 @@ The same `evaluate` function scores the validation split from its stored predict
 identical code. Two ways of forming the fused answer are reported, because the deployed app pools only the inputs a case has, while
 the validation figure in the notes always pooled all three (see PLAN.md).
 """
-import torch  # noqa: F401  (Windows: torch before sklearn and shap, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import hashlib

@@ -16,7 +16,7 @@ Resumable: each chunk of images is saved as it finishes and skipped on the next 
 Output: experiments/image_backbones/feats_<name>_<split>.npy (git-ignored: derived from MIMIC images), in the row order of
 data/processed/<split>.csv.
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import time

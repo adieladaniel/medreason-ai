@@ -1,4 +1,4 @@
-# Retrieval pipeline comparison (stage 2: 27 papers, 474 passages)
+# Retrieval pipeline comparison (44 papers, 811 passages)
 
 54 answerable queries split by topic group into dev and test, plus 16 off-corpus queries. Passage relevance is a keyword proxy (see eval_queries.py), audited by hand in experiments/rag_retrieval/AUDIT.md. One query is about 4 points on a half, so gaps of one or two queries are noise. Random ranking would score p@1 0.051, p@3 0.142, p@5 0.22.
 

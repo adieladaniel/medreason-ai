@@ -18,7 +18,7 @@ Run from the repo root, after scripts/extract_image_backbone_features.py:
 Writes experiments/image_backbones/results.json (aggregates) and, per arm, oof_train_predictions.csv and val_predictions.csv
 (per study, git-ignored like the other prediction files).
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import sys

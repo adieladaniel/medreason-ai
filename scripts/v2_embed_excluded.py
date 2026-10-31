@@ -9,7 +9,7 @@ embeddings are cached before it starts. Chunked and resumable. Only the three ro
 Output: experiments/v2_four_class/emb_indication_excluded_<role>.npy, rows in the order of data/processed/excluded_<role>.csv (git-ignored).
 Run from the repo root:  python scripts/v2_embed_excluded.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import sys
 import time

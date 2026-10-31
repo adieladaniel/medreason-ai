@@ -115,9 +115,9 @@ are in the image). Without a `demo/cases/` folder the menu still offers the two 
 
 ## Limits to know
 
-- The workflow runs on every push and pull request. All four runs so far passed, and the log of the latest shows pytest inside the image
-  build with 412 passed, 2 skipped and 17 deselected, the same as `docker build --target test .` locally. A run takes about 2 minutes with
-  the layer cache. Check one with `gh run list` and `gh run view <id> --log`.
+- The workflow runs on every push and pull request, in two jobs: `tests` (pytest inside the image build, the same as `docker build --target
+  test .` locally) and `stack` (the containers started and smoke-tested). Every run so far has passed, and each job takes about 3 minutes.
+  Check one with `gh run list` and `gh run view <id> --log`.
 - With `jsonb`, PostgreSQL does not keep the order of keys, so `timings` in a case comes back as `writing, verifying, explaining,
   predicting, retrieving` and not in stage order. The Analyze page looks stages up by name, so it is unaffected; a client that
   iterates the object should use its own stage order.

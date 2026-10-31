@@ -5,7 +5,7 @@ Everything is read from the real result files, not typed in by hand, so the dash
 updates when a new experiment is added: experiments/*/metrics.json and *.csv, the val
 prediction files (for ROC, precision-recall, calibration, and modality-agreement
 analysis), the Kaggle training log (for the image training curve), the pipeline logs
-in scripts/, the split CSVs, and ROADMAP.md (for phase status).
+in scripts/, the split CSVs, and app/data/phases.json (for phase status).
 
 A small number of figures exist only in the docs, not in a machine-readable file: image
 baselines v1 and v2 (no run logs were kept). Those are listed in IMAGE_VERSIONS below with
@@ -41,44 +41,38 @@ CLASSES = ["Normal", "Pneumonia", "Lung Cancer"]
 CLS = ["normal", "pneumonia", "lung_cancer"]
 LABEL_TO_IDX = {c: i for i, c in enumerate(CLASSES)}
 
-# Image baselines v1 and v2 have no saved logs. Numbers are from ROADMAP.md (Phase 2).
+# Image baselines v1 and v2 have no saved logs. The numbers were written down when those runs finished (Phase 2).
 # v3 is the Kaggle run whose log is parsed below.
 IMAGE_VERSIONS = [
     {
         "key": "v1", "label": "v1",
         "desc": "Frozen ImageNet DenseNet121, linear head, 8 epochs",
         "macro_f1": 0.45, "f1": {"Normal": 0.49, "Pneumonia": 0.73, "Lung Cancer": 0.12},
-        "source": "ROADMAP.md, Phase 2",
+        "source": "Phase 2 notes (no run log was kept)",
     },
     {
         "key": "v2", "label": "v2",
         "desc": "Last dense block unfrozen, discriminative learning rate, 20 epochs",
         "macro_f1": 0.46, "f1": {"Normal": 0.52, "Pneumonia": 0.71, "Lung Cancer": 0.14},
-        "source": "ROADMAP.md, Phase 2",
+        "source": "Phase 2 notes (no run log was kept)",
     },
     {
         "key": "v3", "label": "v3",
         "desc": "Frozen MIMIC-CXR DenseNet121 (torchxrayvision), 18 pathology outputs (11 trained), MLP head, 15 epochs",
         "macro_f1": 0.50, "f1": {"Normal": 0.56, "Pneumonia": 0.77, "Lung Cancer": 0.17},
-        "source": "Kaggle run log and ROADMAP.md, Phase 2",
+        "source": "Kaggle run log",
     },
 ]
 
-PHASE_BLURBS = {
-    0: "3-class scope, TB and COVID dropped",
-    1: "Linked, labeled, and split dataset",
-    2: "Image, blood, and text baselines",
-    3: "Late fusion of the three models",
-    4: "Grad-CAM, SHAP, word attribution",
-    5: "Orchestrator, belief state, consistency checks",
-    6: "Evidence retrieval and a local LLM",
-    7: "FastAPI, PostgreSQL, Qdrant, Docker",
-    8: "Test-set evaluation, demo, writeup",
-}
+PHASES_FILE = "app/data/phases.json"
 
+# Work that is not done. Every item changes the models or needs data or compute that this project did not have, and the sealed test
+# split is spent, so any new test number would be post-hoc.
 REMAINING = [
-    {"phase": "7. Backend and UI", "work": "FastAPI pipeline endpoint, PostgreSQL, Docker compose, the Analyze page with example cases", "effort": "5 to 7 days"},
-    {"phase": "8. Integration and writeup", "work": "Sealed test-set evaluation, edge-case demo cases, input guard, rehearsal and recording, thesis writeup", "effort": "5 to 8 days"},
+    {"phase": "An explicit \"other\" outcome", "work": "Learn features for studies outside the three classes, for example by fine-tuning the image model on finding labels taken from the reports. A gate on the existing outputs and a retrain on frozen features both failed their pre-registered rules.", "effort": "GPU training"},
+    {"phase": "A stronger image model", "work": "Replace or fine-tune the frozen image backbone; the image adds almost nothing to the fused result on the sealed test split.", "effort": "GPU training"},
+    {"phase": "External validation", "work": "Test at a second site or on a public set such as NIH ChestX-ray14.", "effort": "another dataset"},
+    {"phase": "Faster sentence checker", "work": "Run the entailment checker on a GPU or replace it with a smaller model; it is the largest part of the wait for a cited note.", "effort": "CUDA build or a smaller model"},
 ]
 
 FUSION_LABELS = {
@@ -100,7 +94,7 @@ BLOOD_TIERS = {
 }
 
 WATCHED = [
-    "ROADMAP.md",
+    "app/data/phases.json",
     "experiments/*/metrics.json",
     "experiments/*/val_predictions.csv",
     "experiments/*/feature_importance.csv",
@@ -138,39 +132,8 @@ def _safe(fn):
 
 # ---------------------------------------------------------------- phases
 def _phases():
-    text = _text("ROADMAP.md")
-    if text is None:
-        return None
-    lines = text.splitlines()
-    out = []
-    for i, line in enumerate(lines):
-        m = re.match(r"^## Phase (\d+), (.+?)\s*$", line)
-        if not m:
-            continue
-        status = ""
-        for j in range(i + 1, min(i + 6, len(lines))):
-            if lines[j].startswith("Status:"):
-                status = lines[j][len("Status:"):].strip()
-                break
-        low = status.lower()
-        if low.startswith("not started"):
-            state = "todo"
-        elif low.startswith("core done") or "in progress" in low:
-            state = "partial"
-        elif low.startswith("done"):
-            state = "done"
-        else:
-            state = "todo"
-        num = int(m.group(1))
-        title = m.group(2)
-        out.append({
-            "num": num,
-            "title": title[0].upper() + title[1:],
-            "state": state,
-            "status": status,
-            "blurb": PHASE_BLURBS.get(num, ""),
-        })
-    return out
+    """Phase status is data, kept in a small tracked file, so the dashboard does not depend on any document."""
+    return _json(PHASES_FILE)
 
 
 # ---------------------------------------------------------------- data
@@ -588,6 +551,18 @@ def is_stale() -> bool:
     return False
 
 
+def keep_existing(payload: dict) -> dict:
+    """A section whose source files are absent (a fresh clone has no data/ and no per-study predictions) comes back None. Keep the
+    committed section instead of replacing it with nothing, so the dashboard of a clone shows what the repository ships."""
+    if not OUT_PATH.exists():
+        return payload
+    try:
+        old = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except ValueError:
+        return payload
+    return {k: (old[k] if v is None and old.get(k) is not None else v) for k, v in payload.items()}
+
+
 def ensure_built() -> None:
     """Rebuild if the output is missing or a source is newer. Keep the old file if the
     sources are unavailable (for example on a fresh clone without the experiments)."""
@@ -599,7 +574,7 @@ def ensure_built() -> None:
         return
     if payload.get("models") or payload.get("fusion") or not OUT_PATH.exists():
         OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        OUT_PATH.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False),
+        OUT_PATH.write_text(json.dumps(keep_existing(payload), separators=(",", ":"), ensure_ascii=False),
                             encoding="utf-8")
 
 

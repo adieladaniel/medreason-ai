@@ -12,7 +12,7 @@ model, rule or threshold depends on it. It is reported as post-hoc, next to the 
 Run from the repo root, after --score:   python scripts/eval_test_posthoc.py
 Writes experiments/test_evaluation/posthoc.json.
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import sys

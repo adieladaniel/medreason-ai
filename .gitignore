@@ -64,3 +64,8 @@ experiments/out_of_scope/feats_*.npz
 experiments/v2_four_class/preds/
 experiments/v2_four_class/_emb_chunks/
 experiments/v2_four_class/*.log
+
+# private working notes (instructions for the assistant, personal planning, machine details); kept on disk, not published
+/CLAUDE.md
+/ROADMAP.md
+/docs/ENVIRONMENT_AND_HANDOFF.md

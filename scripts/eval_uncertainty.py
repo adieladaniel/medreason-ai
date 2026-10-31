@@ -30,7 +30,7 @@ administrative field in MIMIC-IV, used only to check performance gaps.
 
 Run from repo root:  python scripts/eval_uncertainty.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import sys

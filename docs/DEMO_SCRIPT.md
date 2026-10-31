@@ -2,7 +2,7 @@
 
 This file is for whoever presents the project, and it assumes you run the recording yourself. It has the rule about what may appear on screen,
 the preparation, a script of about 80 seconds for a public video, and a longer tour for showing the project in person. Every number and every
-phrase quoted from the page was observed on 2026-10-30 with the real models and Ollama (llama3.2), on the laptop described in `CLAUDE.md`.
+phrase quoted from the page was observed on 2026-10-30 with the real models and Ollama (llama3.2), on the development laptop (RTX 3050 with 4 GB, 16 GB of RAM, Windows 11).
 
 ## 1. What may appear on screen
 
@@ -26,7 +26,7 @@ The rule that follows:
 ## 2. Preparation, about 15 minutes
 
 Close Chrome, WhatsApp and anything else heavy first. Docker's WSL machine can hold up to 8 GB of the 16 GB, so stop Docker Desktop too. On this
-laptop a case takes a few seconds when it is quiet and several times longer when memory is tight (`CLAUDE.md`, the latency notes).
+laptop a case takes a few seconds when it is quiet and several times longer when memory is tight (see the latency notes in experiments/e2e/RESULTS.md).
 
 1. Get the public film, once. It needs the network:
 

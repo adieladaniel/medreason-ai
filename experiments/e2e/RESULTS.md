@@ -82,7 +82,7 @@ Where the time goes:
 - The decision layer's output on the five true cancers in the set (the two found by fusion, the two it missed, and one study with
   no labs on record that fusion found): the alert fired on four, including one of the two that fusion missed, which also showed
   Lung Cancer in its prediction set. It stayed quiet on the other missed cancer, which was headlined Pneumonia with a single-class
-  set. Five cases cannot say how often that happens; the validation-wide numbers are in section 8 of CLAUDE.md.
+  set. Five cases cannot say how often that happens; the validation-wide numbers are in experiments/test_evaluation/RESULTS.md.
 - The 11 of 16 cases whose prediction agrees with the true label is not an accuracy. The set was stratified on purpose (ten were
   chosen because fusion gets them right, four because it gets them wrong, and so on).
 
@@ -94,6 +94,6 @@ Where the time goes:
   second independent cold measurement. A start after a reboot will be slower than the cold pass here (the OS file cache was warm).
 - The language model and the NLI checker run on the CPU in the container; Ollama uses the GPU on the host. Moving the checker to
   a GPU build or a smaller model is the obvious speed-up for the verifying stage and has not been tried.
-- Nothing here measures how good the written notes are. The checker's error rates are in the Phase 6 section of CLAUDE.md.
+- Nothing here measures how good the written notes are. The checker's error rates are in experiments/rag_retrieval/checker_eval.json and docs/RESULTS.md.
 - The offline twins use the stored probabilities, so a match shows the deployed models and pooling reproduce the evaluation,
   not that the evaluation itself is right.

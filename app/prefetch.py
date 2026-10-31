@@ -14,7 +14,7 @@ It needs the trained models mounted (experiments/), because the image loader rea
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  (before sklearn and shap on Windows, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import time
 

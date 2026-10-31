@@ -178,7 +178,7 @@ def run(base: str, manifest: Path = MANIFEST, allow_degraded: bool = False, wait
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--url", default="http://127.0.0.1:8000", help="address of the API (127.0.0.1, not localhost: see CLAUDE.md)")
+    ap.add_argument("--url", default="http://127.0.0.1:8000", help="address of the API (127.0.0.1, not localhost: localhost costs about 2 s per call on the development laptop)")
     ap.add_argument("--allow-degraded", action="store_true", help="do not require Ollama and Qdrant (the evidence note will be empty)")
     ap.add_argument("--keep", action="store_true", help="leave the cases in the database (default: delete them afterwards)")
     ap.add_argument("--wait", type=float, default=300, help="seconds to wait for each case")

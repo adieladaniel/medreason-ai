@@ -1,0 +1,56 @@
+[
+ {
+  "num": 0,
+  "title": "Vision and scope",
+  "state": "done",
+  "blurb": "3-class scope, tuberculosis and COVID dropped after checking the data"
+ },
+ {
+  "num": 1,
+  "title": "Data foundation",
+  "state": "done",
+  "blurb": "15,453 linked, labelled studies with a patient-level 70/15/15 split"
+ },
+ {
+  "num": 2,
+  "title": "Unimodal baselines",
+  "state": "done",
+  "blurb": "Image, blood and text baselines: validation macro F1 0.50, 0.46, 0.51"
+ },
+ {
+  "num": 3,
+  "title": "Multimodal fusion",
+  "state": "done",
+  "blurb": "Late fusion by geometric mean: validation macro F1 0.61"
+ },
+ {
+  "num": 4,
+  "title": "Explainability",
+  "state": "done",
+  "blurb": "Grad-CAM, SHAP and word attribution for each input"
+ },
+ {
+  "num": 5,
+  "title": "Agentic layer",
+  "state": "done",
+  "blurb": "Belief state, consistency check, missing-information planner"
+ },
+ {
+  "num": 6,
+  "title": "Evidence retrieval (RAG)",
+  "state": "done",
+  "blurb": "44-paper library, hybrid search with a reranker, constrained writer, sentence checker"
+ },
+ {
+  "num": 7,
+  "title": "Backend and API",
+  "state": "done",
+  "blurb": "FastAPI, PostgreSQL, Qdrant, Docker, observability, end-to-end run"
+ },
+ {
+  "num": 8,
+  "title": "Integration, testing, documentation",
+  "state": "done",
+  "blurb": "Sealed test split scored once (macro F1 0.609), safeguards, write-up"
+ }
+]

@@ -12,7 +12,7 @@ Step 0 of the version 2 plan (experiments/v2_four_class/PLAN.md): checks that co
 Reads no label of any in-scope test study and no test table. Writes experiments/v2_four_class/step0.json (aggregates and hashes only, no ids).
 Run from the repo root:  python scripts/v2_step0.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import hashlib
 import json

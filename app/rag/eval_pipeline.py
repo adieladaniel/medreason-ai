@@ -111,7 +111,7 @@ def run(R: Retriever, kw: dict) -> dict:
 def write_report(results: dict) -> None:
     """Markdown summary computed from the saved metrics, so it cannot disagree with them."""
     rnd = results["random"]
-    lines = ["# Retrieval pipeline comparison (stage 2: 27 papers, 474 passages)", "",
+    lines = ["# Retrieval pipeline comparison (44 papers, 811 passages)", "",
              f"{len(QUERIES)} answerable queries split by topic group into dev and test, plus {len(OFF_CORPUS)} off-corpus "
              "queries. Passage relevance is a keyword proxy (see eval_queries.py), audited by hand in "
              "experiments/rag_retrieval/AUDIT.md. One query is about 4 points on a half, so gaps of one or two "

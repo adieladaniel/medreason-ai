@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 RULES_PATH = ROOT / "app" / "data" / "out_of_scope_rules.json"
 MODEL_PATH = ROOT / "experiments" / "out_of_scope" / "detector.joblib"
 
-# The backbone has 18 outputs; seven are untrained slots that return a constant 0.5 for the weights in use (CLAUDE.md, image baseline), so
+# The backbone has 18 outputs; seven are untrained slots that return a constant 0.5 for the weights in use (see docs/RESULTS.md), so
 # only these eleven carry information: Atelectasis, Consolidation, Pneumothorax, Edema, Effusion, Pneumonia, Cardiomegaly, Lung Lesion,
 # Fracture, Lung Opacity, Enlarged Cardiomediastinum.
 INFORMATIVE18 = [0, 1, 3, 4, 7, 8, 10, 14, 15, 16, 17]

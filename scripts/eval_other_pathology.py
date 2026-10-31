@@ -14,7 +14,7 @@ Run from the repo root, after:  python scripts/build_final_dataset.py --excluded
     python scripts/eval_other_pathology.py [--n 1500]
 Writes experiments/other_pathology/results.json (aggregates) and studies.csv (per study, git-ignored: patient identifiers).
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import json

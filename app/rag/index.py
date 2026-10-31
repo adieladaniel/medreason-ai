@@ -16,7 +16,7 @@ since the explanation writer has to be able to say where each claim came from.
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  (import before sklearn/shap-adjacent code on Windows, see CLAUDE.md section 4)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import atexit
 

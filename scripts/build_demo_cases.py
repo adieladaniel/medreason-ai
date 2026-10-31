@@ -11,7 +11,7 @@ not part of any image; the API serves it only when it exists (app/api/examples.p
 
 Run from the repo root:  python scripts/build_demo_cases.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn and shap, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import shutil

@@ -1,7 +1,7 @@
 # Phase 7 design: backend and API
 
 Written 2026-10-14, before building. Each choice has its reason next to it so the writeup can
-reuse them. The status of each step is in ROADMAP.md.
+reuse them. All seven steps are done; the results are in docs/DOCKER.md and experiments/e2e/RESULTS.md.
 
 ## What the backend has to do
 

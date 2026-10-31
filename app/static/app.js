@@ -729,12 +729,12 @@
   /* ------------------------------------------------------------ roadmap */
   function roadmapPage() {
     const phases = D.phases || [];
-    let html = pageHead('Roadmap', 'Where each phase stands, read from ROADMAP.md, and what is left.');
+    let html = pageHead('Roadmap', 'Where each phase stands, and what is left.');
     html += card('Phases', table(['Phase', 'Title', 'State', 'Scope'],
       phases.map((p) => [String(p.num), esc(p.title), pill(p.state), esc(p.blurb)])));
-    html += card('Remaining work', table(['Phase', 'What it involves', 'Rough effort'],
+    html += card('Remaining work', table(['Item', 'What it involves', 'Needs'],
       (D.remaining || []).map((r) => [`<b>${esc(r.phase)}</b>`, esc(r.work), esc(r.effort)])), {
-      note: 'Effort is a rough estimate in focused working days, not a commitment.',
+      note: 'All of it changes the models. The sealed test split is spent, so any new test number would be post-hoc.',
     });
     html += card('Analyze a case',
       `<p>Built. Upload a chest X-ray, type the clinical indication, and enter any blood labs (all optional). The page shows the combined prediction, how each model's output moved it, whether the models agree, a per-model explanation, and cited evidence passages, filling in live as each stage finishes.</p>

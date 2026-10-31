@@ -11,7 +11,7 @@ nothing the app reads changes, and the result is reported as a negative one.
 
 Run from the repo root, after scripts/extract_scope_features.py:   python scripts/train_out_of_scope.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import re

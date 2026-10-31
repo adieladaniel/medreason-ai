@@ -13,7 +13,7 @@ CLI (runs the agent first, then this):
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  (Windows: torch before sklearn/shap, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import json

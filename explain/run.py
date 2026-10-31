@@ -10,7 +10,7 @@ CLI:
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  -- import before sklearn/shap on Windows (see CLAUDE.md §4)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import json

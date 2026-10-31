@@ -14,7 +14,7 @@ os.environ.setdefault("MEDREASON_DATABASE_URL", "sqlite:///" + os.path.join(_SCR
 os.environ.setdefault("MEDREASON_UPLOAD_DIR", os.path.join(_SCRATCH, "uploads"))
 os.environ.setdefault("MEDREASON_XRAY_GUARD", "false")      # the suite uploads plain synthetic pictures; guard tests switch it on
 
-import torch  # noqa: F401  (Windows: torch before sklearn/shap, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import pytest
 

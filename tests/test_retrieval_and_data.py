@@ -31,7 +31,7 @@ def test_tokenizer_stems_so_inflections_match():
 
 
 def test_committed_dashboard_data_holds_aggregates_only():
-    """CLAUDE.md rule: the committed JSON has no study, subject or admission identifiers."""
+    """Project rule: the committed JSON has no study, subject or admission identifiers."""
     p = ROOT / "app" / "data" / "dashboard.json"
     if not p.exists():
         pytest.skip("dashboard.json not built")

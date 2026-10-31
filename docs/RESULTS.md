@@ -79,6 +79,30 @@ discipline worked. The alert trades false alarms for catches (four settings are 
   film is a chest or frontal view, and it passes about half of grayscale photographs ([measurement](../experiments/xray_guard/results.json)).
 - **No login, no TLS, one worker.** A local demonstration with no real patient data.
 
+## Evidence retrieval
+
+The library is 44 open-access papers (144,541 words, 811 passages). It was evaluated on 54 answerable queries, split into dev (26) and test (28) by
+topic group, plus 16 off-corpus queries (several deliberately near the corpus: tuberculosis, COPD, pulmonary embolism). A passage counts as
+relevant if its topic is allowed and it contains the query's key terms; a hand reading of 18 top results found the proxy never called an irrelevant
+passage relevant but passes weak ones ([audit](../experiments/rag_retrieval/AUDIT.md)). Hit@k means a relevant passage is among the top k.
+
+| Pipeline | Hit@1 dev / test | MRR dev / test | nDCG@5 dev / test |
+|---|---|---|---|
+| semantic search only | 0.73 / 0.57 | 0.85 / 0.71 | 0.71 / 0.63 |
+| keyword search only (BM25) | 0.77 / 0.71 | 0.87 / 0.82 | 0.76 / 0.71 |
+| hybrid (dense plus BM25) | 0.96 / 0.71 | 0.98 / 0.85 | 0.91 / 0.76 |
+| **hybrid plus MedCPT reranker on the top 5 (adopted)** | **1.00 / 0.89** | **1.00 / 0.94** | **0.97 / 0.87** |
+
+Over all 54 queries the adopted pipeline has hit@1 0.944, hit@3 0.981, MRR 0.968 and nDCG@5 0.921. Random ranking scores hit@1 0.05
+([table](../experiments/rag_retrieval/PIPELINE.md)). The reranker score also decides when to answer "no evidence": it separates answerable from
+off-corpus queries with ROC AUC 0.997 (0.966 for the first-stage score), refused 16 of 16 off-corpus queries at the chosen threshold and kept 53 of 54
+answerable ones. The choice of reranker (MedCPT over the smaller MiniLM) rested on that abstention score, since both rank about equally. One query is
+about 4 points on a half, so differences of one or two queries are noise.
+
+For the generated sentences, the entailment checker was validated on 35 hand-made sentences (every unfaithful one scored 0.19 or lower, every
+faithful one 0.48 or higher) and on 39 real sentences from the writer, where it wrongly dropped 7 of 36 faithful sentences and caught 2 of 3
+unfaithful ones. Of 41 sentences the 3B writer produced, 73 percent passed (a second 3B model passed 63 percent).
+
 ## Speed
 
 On a laptop in ordinary use, the prediction is on screen in about half a second. A full note with verified citations takes about 15 to 20
@@ -107,5 +131,4 @@ The test split was sealed until one final run; the plan, the frozen system and w
 ([plan](../experiments/test_evaluation/PLAN.md)); experiments were pre-registered with a fixed adoption rule
 ([image backbones](../experiments/image_backbones/PLAN.md), [other pathology](../experiments/other_pathology/PLAN.md),
 [version 2](../experiments/v2_four_class/PLAN.md)); every behaviour
-change has a test that was shown to fail when the code was broken on purpose (over 400 tests; the last count is in
-[CLAUDE.md](../CLAUDE.md)); and results that came out worse than hoped are reported next to the ones that came out well.
+change has a test that was checked by breaking the code on purpose (over 500 tests; the count is in the README); and results that came out worse than hoped are reported next to the ones that came out well.

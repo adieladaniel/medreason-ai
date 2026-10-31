@@ -7,7 +7,7 @@ class-balanced logistic regression on the cached Bio_ClinicalBERT indication emb
 loss, Adam 1e-3, cosine schedule, 15 epochs (kaggle_upload/image_oof_kernel/image_oof.py). The image head is trained with three seeds and the
 probabilities are averaged, because retraining that recipe moved the image macro F1 by about 0.03.
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import sys
 from pathlib import Path

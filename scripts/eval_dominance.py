@@ -20,7 +20,7 @@ make every cancer number wide; part 6 is one run and a design option, not a resu
 
 Run from the repo root:  python scripts/eval_dominance.py
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import sys
 from pathlib import Path

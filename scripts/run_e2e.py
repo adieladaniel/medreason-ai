@@ -8,7 +8,7 @@ so it works against `uvicorn` and against the docker compose stack alike.
 
 The cases are chosen by rule, with a fixed seed, so the run can be repeated and nobody can say they were picked to look good:
 cases the models get right, cases they get wrong (including the cancers they miss), a case with no labs on record, and
-cases with one input taken away. Only the validation split is used. The test split stays sealed (CLAUDE.md section 6).
+cases with one input taken away. Only the validation split is used. The test split stays sealed (experiments/test_evaluation/PLAN.md).
 
 Each case is checked against its offline twin: the stored per-modality probabilities (experiments/*_baseline/val_predictions.csv)
 pooled with the app's own rule for the inputs that were actually sent. A difference means the deployed pipeline is not
@@ -24,7 +24,7 @@ Every case is deleted from the server after it is read, because it holds a real 
 """
 from __future__ import annotations
 
-import torch  # noqa: F401  (before sklearn and shap on Windows, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import argparse
 import json

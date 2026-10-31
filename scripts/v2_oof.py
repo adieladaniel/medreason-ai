@@ -15,7 +15,7 @@ a tie within 0.005 goes to T (PLAN.md). Resumable: a finished model's file is no
 Run from the repo root, after scripts/v2_embed_excluded.py:  python scripts/v2_oof.py
 Output: experiments/v2_four_class/preds/<arm>_<modality>.npz (git-ignored), arm_choice.json, oof_summary.json.
 """
-import torch  # noqa: F401  (Windows: torch before sklearn, see CLAUDE.md gotcha 7)
+import torch  # noqa: F401  (Windows: import torch before sklearn and shap, or torch's DLL init can fail)
 
 import json
 import sys
